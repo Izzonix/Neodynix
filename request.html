@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+ 
+  <title>Request Website Setup</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/request page.css" />
+</head>
+<body>
+  <header class="top-header">
+    <span class="logo">Neodynix Technologies</span>
+    <button class="hamburger" id="hamburger">☰</button>
+    <nav id="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="templates.html">Templates</a>
+      <a href="request.html">Request Setup</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="request-section">
+      <h1>Request Your Website</h1>
+      <p>Fill in your details to request your website. An email will be sent to your inbox 
+        with a link to submit further details to customise your website.
+      </p>
+
+      <form id="website-request-form" class="request-form">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" required />
+
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" required />
+<label for="category">Template Category</label>
+<input type="text" id="category" name="category" readonly />
+
+<label for="template">Template Name</label>
+<input type="text" id="template" name="template" readonly />
+        <label for="details">Additional Details</label>
+        <textarea id="details" name="details" rows="5"></textarea>
+
+        <button type="submit" class="btn">Submit</button>
+      </form>
+    </section>
+  </main> 
+
+  <footer>
+    <p>&copy; 2025 Neodynix Technologies. All rights reserved.</p>
+  </footer>
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script src="/storage/emulated/0/Web projects/Neodynix technologies/scripts /request.js"></script>
+  <script src="/storage/emulated/0/Web projects/Neodynix technologies/scripts /java.js"></script>
+</body>
+</html>

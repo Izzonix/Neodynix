@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Contact - Neodynix Technologies</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/contact.css" />
+</head>
+<body>
+
+  <header class="top-header">
+    <span class="logo">Neodynix Technologies</span>
+    <button class="hamburger" id="hamburger">☰</button>
+    <nav id="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="templates.html">Templates</a>
+      <a href="request.html">Request Setup</a>
+      <a href="contact.html" class="active">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="contact-section">
+      <h1>Get in Touch</h1>
+      <p class="intro-text">Have questions or want to collaborate? Reach us through WhatsApp, Telegram, or email below.</p>
+
+      <div class="contact-buttons">
+        <a href="https://wa.me/256700000000" target="_blank" class="contact-btn whatsapp" aria-label="WhatsApp">
+          <img src="images/WhatsApp icon.jpg" alt="WhatsApp Icon" />
+          Message on WhatsApp
+        </a>
+        <a href="https://t.me/yourusername" target="_blank" class="contact-btn telegram" aria-label="Telegram">
+          <img src="images/telegram icon.jpg" alt="Telegram Icon" />
+          Chat on Telegram
+        </a>
+        <a href="mailto:support@neodynix.com" class="contact-btn email" aria-label="Email">
+          <img src="images/email icon.jpg" alt="Email Icon" />
+          Send Email
+        </a>
+      </div>
+
+      <div class="divider">or</div>
+
+      <form class="contact-form" id="contactForm" novalidate>
+        <label for="name">Your Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter your name" required autocomplete="name" />
+
+        <label for="email">Your Email</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="email" />
+
+        <label for="message">Your Message</label>
+        <textarea id="message" name="message" rows="6" placeholder="Write your message here..." required></textarea>
+
+        <button type="submit" class="btn">Send Message</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Neodynix Technologies. All rights reserved.</p>
+  </footer>
+  <script src="/storage/emulated/0/Web projects/Neodynix technologies/scripts /java.js"></script>
+  <script src="/storage/emulated/0/Web projects/Neodynix technologies/scripts /contact.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+h1,p{
+  text-align: center;
+}
+/* Search Bar */
+.search-bar {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#search-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 12px;
+  font-size: 1rem;
+  border: 2px solid #4fc3f7;
+  border-radius: 5px;
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+#search-input:focus {
+  outline: none;
+  border-color: #03a9f4;
+}
+
+/* Category Buttons */
+.category-buttons {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.category-buttons button {
+  margin: 5px;
+  padding: 12px 24px;
+  background-color: #4fc3f7;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.category-buttons button:hover {
+  background-color: #03a9f4;
+}
+
+/* Template Cards */
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.template-card {
+  background-color: #222;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.template-card img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.template-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.template-card .btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #4fc3f7;
+  color: #000;
+  border-radius: 6px;
+  font-weight: bold;
+  text-decoration: none;
+  border: none;
+  transition: background-color 0.3s;
+}
+
+.template-card .btn:hover {
+  background-color: #03a9f4;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .template-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .template-card h3 {
+    font-size: 1rem;
+  }
+
+  .template-card {
+    padding: 15px;
+  }
+
+  #search-input {
+    max-width: 90%;
+  }
+}

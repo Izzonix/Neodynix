@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Complete Payment - Neodynix</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/request page .css" />
+</head>
+<body>
+  <header class="top-header">
+    <span class="logo">Neodynix Technologies</span>
+    <button class="hamburger" id="hamburger">☰</button>
+    <nav id="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="templates.html">Templates</a>
+      <a href="request.html">Request Setup</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="payment-section">
+      <h1>Complete Your Payment</h1>
+      <p>Thank you! Please click the button below to pay and complete your order.</p>
+
+      <!-- Flutterwave Example -->
+      <button class="btn" onclick="makePayment()">Pay Now (via Flutterwave)</button>
+
+      <!-- Optional link to skip if testing -->
+      <p style="margin-top: 20px;"><a href="thank-you.html">Skip Payment (for test)</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Neodynix Technologies. All rights reserved.</p>
+  </footer>
+
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+  <script>
+    function makePayment() {
+      FlutterwaveCheckout({
+        public_key: "YOUR_PUBLIC_KEY", // Replace with your Flutterwave public key
+        tx_ref: "neodynix-" + Date.now(),
+        amount: 50, // USD or UGX etc.
+        currency: "USD",
+        payment_options: "card, mobilemoney, ussd",
+        customer: {
+          email: "customer@example.com", // Optional
+        },
+        callback: function (data) {
+          window.location.href = "thank-you.html";
+        },
+        customizations: {
+          title: "Neodynix Technologies",
+          description: "Website Template Setup",
+          logo: "your-logo-url.png"
+        }
+      });
+    }
+  </script>
+
+  <script src="script.js"></script>
+</body>
+</html>

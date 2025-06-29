@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>All Templates - Neodynix</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/template.css" />
+</head>
+<body>
+
+  <header class="top-header">
+    <span class="logo">Neodynix Technologies</span>
+    <button class="hamburger" id="hamburger">☰</button>
+    <nav id="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="templates.html">Templates</a>
+      <a href="request.html">Request Setup</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+    <section class="templates-gallery">
+      <h1>Choose a Category</h1>
+      <p>Tap on the template image to preview the website</p>
+      <!-- Search Bar -->
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search Templates..." onkeyup="filterTemplates()" />
+      </div>
+
+      <div class="category-buttons">
+        <button onclick="showCategory('Business')">Business</button>
+        <button onclick="showCategory('Portfolio')">Portfolio</button>
+        <button onclick="showCategory('school')">School</button>
+        <button onclick="showCategory('All')">All</button>
+      </div>
+
+      <div class="template-grid" id="template-container">
+        <!-- Business Templates -->
+        <div class="template-card" data-category="Business">
+          <img src="templates/business1.png" alt="Business Classic" />
+          <h3>Business Classic</h3>
+          <a href="request.html?category=Business&template=Business%20Classic" class="btn">Choose Template</a>
+        </div>
+
+        <div class="template-card" data-category="Business">
+          <img src="templates/business2.png" alt="Startup Suite" />
+          <h3>Startup Suite</h3>
+          <a href="request.html?category=Business&template=Startup%20Suite" class="btn">Choose Template</a>
+        </div>
+
+        <!-- Portfolio Templates -->
+        <div class="template-card" data-category="Portfolio">
+          <img src="templates/portfolio1.png" alt="Creative Portfolio" />
+          <h3>Creative Portfolio</h3>
+          <a href="request.html?category=Portfolio&template=Creative%20Portfolio" class="btn">Choose Template</a>
+        </div>
+
+        <div class="template-card" data-category="Portfolio">
+          <img src="templates/portfolio2.png" alt="Artist Showcase" />
+          <h3>Artist Showcase</h3>
+          <a href="request.html?category=Portfolio&template=Artist%20Showcase" class="btn">Choose Template</a>
+        </div>
+
+        <!-- School Templates -->
+        <div class="template-card" data-category="school">
+          <img src="/storage/emulated/0/Pictures/Screenshots/Screenshot_20250624-123929~2.png" alt="Creative Portfolio" />
+          <h3>High School</h3>
+          <a href="request.html?category=school&template=High%20School" class="btn">Choose Template</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <footer>
+    <p>&copy; 2025 Neodynix Technologies. All rights reserved.</p>
+  </footer>
+
+  <script src="/storage/emulated/0/Web projects/Neodynix technologies/scripts /java.js"></script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #121212;
+  color: #fff;
+  padding: 30px;
+}
+
+.form-section {
+  background: #1e1e1e;
+  padding: 30px 25px;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 0 15px rgba(0,0,0,0.7);
+}
+
+h1 {
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 2rem;
+  color: #4fc3f7;
+  text-align: center;
+}
+
+label {
+  display: block;
+  margin: 15px 0 5px;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 1rem;
+  background-color: #292929;
+  color: #eee;
+  box-sizing: border-box;
+}
+
+/* Modern Range Slider Style */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right, #4fc3f7, #1e1e1e);
+  outline: none;
+  margin: 10px 0;
+  transition: background 0.3s ease;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  background: #4fc3f7;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: -7px; /* Align thumb vertically */
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: #4fc3f7;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.range-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.range-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.range-group span {
+  float: right;
+  font-weight: normal;
+  color: #aaaaaa;
+}
+
+/* Price Box */
+.price-box {
+  background: #2c2c2c;
+  padding: 15px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1.3rem;
+  text-align: center;
+  margin-top: 10px;
+  color: #4fc3f7;
+  letter-spacing: 1px;
+}
+
+/* Button */
+.btn {
+  background: #4fc3f7;
+  color: black;
+  padding: 14px 28px;
+  font-weight: bold;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: block;
+  margin: 25px auto 0;
+  width: 100%;
+  max-width: 320px;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background: #03a9f4;
+}
+
+/* Custom File Upload */
+.file-upload {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.file-upload label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.custom-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #1e1e1e;
+  border: 1px solid #444;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.custom-upload input[type="file"] {
+  display: none;
+}
+
+.custom-upload button {
+  background-color: #4fc3f7;
+  color: #000;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.custom-upload button:hover {
+  background-color: #03a9f4;
+}
+
+.file-name {
+  color: #ccc;
+  font-size: 0.95rem;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.theme-choice label {
+  margin-right: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+}
