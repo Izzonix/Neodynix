@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 
     // Send email using EmailJS
-    emailjs.send("service_de9bs4a", "template_tj0u6yu", templateParams)
+    emailjs.send("service_1k3ysnw", "template_tj0u6yu", templateParams)
       .then(function (response) {
         console.log("SUCCESS!", response.status, response.text);
         document.querySelector(".request-section").innerHTML = `
