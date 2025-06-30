@@ -1,40 +1,40 @@
-// Initialize EmailJS (put your own User/Public Key here)
-emailjs.init("CQLyFEifsrwv5oLQz");
+// Initialize EmailJS after DOM is ready
+document.addEventListener("DOMContentLoaded", function () {
+  emailjs.init("CQLyFEifsrwv5oLQz");
 
-document.getElementById("website-request-form").addEventListener("submit", function(event) {
-  event.preventDefault();
+  const form = document.getElementById("website-request-form");
 
-  // Collect form data
-  const name = this.name.value.trim();
-  const email = this.email.value.trim();
-  const category = this.category.value.trim();
-  const template = this.template.value.trim();
-  const details = this.details.value.trim();
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
 
-  // Prepare EmailJS template parameters
-  const templateParams = {
-    name: name,
-    email: email,
-    category: category,
-    template: template,
-    details: details,
-    // Link to your follow-up form page, pass email as query param
-    followup_link: `https://yourdomain.com/followup.html?email=${encodeURIComponent(email)}`
-  };
+    // Get user input
+    const name = form.name.value.trim();
+    const email = form.email.value.trim();
+    const category = form.category.value.trim();
+    const template = form.template.value.trim();
+    const details = form.details.value.trim();
 
-  // Send email via EmailJS
-  emailjs.send("service_de9bs4a", "template_tj0u6yu", templateParams)
-    .then(function(response) {
-      console.log("SUCCESS!", response.status, response.text);
-      // Show thank you message or redirect
-      alert("Thank you! An email has been sent to you with the next steps.");
-      // Optionally redirect to a thank you page:
-      // window.location.href = "thankyou.html";
-      // Or clear the form:
-      document.getElementById("website-request-form").reset();
-    }, function(error) {
-      console.error("FAILED...", error);
-      alert("Oops! Something went wrong. Please try again.");
-    });
+    // Prepare email parameters
+    const templateParams = {
+      name: name,
+      email: email,
+      category: category,
+      template: template,
+      details: details,
+      followup_link: `https://izzonix.github.io/neodynix/followup.html?email=${encodeURIComponent(email)}`
+    };
+
+    // Send email using EmailJS
+    emailjs.send("service_de9bs4a", "template_tj0u6yu", templateParams)
+      .then(function (response) {
+        console.log("SUCCESS!", response.status, response.text);
+        document.querySelector(".request-section").innerHTML = `
+          <h2>Request Sent!</h2>
+          <p>We've emailed you a follow-up link. Please check your inbox.</p>
+        `;
+      }, function (error) {
+        console.error("FAILED...", error);
+        alert("Something went wrong. Please try again.");
+      });
+  });
 });
-
