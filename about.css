@@ -1,0 +1,109 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #0d1117;
+  color: #ffffff;
+}
+
+.top-header {
+  background: #1e1e1e;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4fc3f7;
+}
+
+nav a {
+  color: #ccc;
+  margin: 0 10px;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: #4fc3f7;
+}
+
+.hero {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: #161616;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  color: #4fc3f7;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  color: #cbd5e1;
+}
+
+.about-us {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 40px 20px;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-text {
+  max-width: 500px;
+}
+
+.about-image img {
+  max-width: 300px;
+  border-radius: 12px;
+}
+
+.mission, .values, .team {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.mission h2, .values h2, .team h2 {
+  color: #4fc3f7;
+  margin-bottom: 10px;
+}
+
+.values ul {
+  list-style: none;
+  padding: 0;
+}
+
+.values li {
+  margin: 10px 0;
+  font-size: 1.1rem;
+  color: #cbd5e1;
+}
+
+.founder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.founder img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  border: 3px solid #4fc3f7;
+}
+
+footer {
+  background: #161b22;
+  text-align: center;
+  padding: 15px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
