@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
       category: category,
       template: template,
       details: details,
-      followup_link: `https://izzonix.github.io/neodynix/followup.html?email=${encodeURIComponent(email)}`
+      followup_link: `https://izzonix.github.io/Neodynix/request.html?email=${encodeURIComponent(email)}`
     };
 
     // Send email using EmailJS
