@@ -1,5 +1,5 @@
 // Initialize EmailJS (put your own User/Public Key here)
-emailjs.init("YOUR_PUBLIC_KEY_HERE");
+emailjs.init("CQLyFEifsrwv5oLQz");
 
 document.getElementById("website-request-form").addEventListener("submit", function(event) {
   event.preventDefault();
@@ -23,7 +23,7 @@ document.getElementById("website-request-form").addEventListener("submit", funct
   };
 
   // Send email via EmailJS
-  emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
+  emailjs.send("service_de9bs4a", "template_tj0u6yu", templateParams)
     .then(function(response) {
       console.log("SUCCESS!", response.status, response.text);
       // Show thank you message or redirect
