@@ -22,12 +22,12 @@
   <main>
     <section class="request-section">
       <h1>Request Your Website</h1>
-      <p>Fill in your details to request your website. An email will be sent to your inbox 
+      <p>
+        Fill in your details to request your website. An email will be sent to your inbox
         with a link to submit further details to customise your website.
       </p>
 
-      <!-- ✅ Replace the Getform endpoint below -->
-      <form id="website-request-form" class="request-form" method="POST" action="https://getform.io/f/YOUR-FORM-ENDPOINT">
+      <form id="website-request-form" class="request-form">
         <label for="name">Full Name</label>
         <input type="text" id="name" name="name" required />
 
@@ -43,19 +43,18 @@
         <label for="details">Additional Details</label>
         <textarea id="details" name="details" rows="5"></textarea>
 
-        <!-- Hidden field for the follow-up link -->
-        <input type="hidden" name="followup_link" id="followup-link" />
-
         <button type="submit" class="btn">Submit</button>
       </form>
     </section>
-  </main> 
+  </main>
 
   <footer>
     <p>&copy; 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
 
+  <!-- Backendless SDK -->
+  <script src="https://cdn.backendless.com/sdk/js/latest/backendless.min.js"></script>
   <script src="scripts/java.js"></script>
   <script src="scripts/request.js"></script>
 </body>
-  </html>
+</html>
