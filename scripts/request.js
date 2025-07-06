@@ -1,5 +1,5 @@
 // Initialize Google Apps Script handler after DOM is ready
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbXBMOn33tm0P/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbXBM5ZorkBLXVW2-1RKqqA80IlLp_mxd69RzYW8T8i92UipFKPQ-WL852On33tm0P/exec";
 
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("website-request-form");
