@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Request Website Setup</title>
-  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/request page.css" />
 </head>
 <body>
@@ -26,7 +26,8 @@
         with a link to submit further details to customise your website.
       </p>
 
-      <form id="website-request-form" class="request-form">
+      <!-- Replace the action URL below with your Getform endpoint -->
+      <form id="website-request-form" class="request-form" method="POST" action="https://getform.io/f/YOUR-FORM-ENDPOINT">
         <label for="name">Full Name</label>
         <input type="text" id="name" name="name" required />
 
@@ -42,6 +43,9 @@
         <label for="details">Additional Details</label>
         <textarea id="details" name="details" rows="5"></textarea>
 
+        <!-- Hidden field for follow-up link -->
+        <input type="hidden" name="followup_link" id="followup-link" />
+
         <button type="submit" class="btn">Submit</button>
       </form>
     </section>
@@ -50,8 +54,7 @@
   <footer>
     <p>&copy; 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
-  
+<script src="scripts/java.js"></script>
   <script src="scripts/request.js"></script>
-  <script src="scripts/java.js"></script>
 </body>
-  </html>
+      </html>
