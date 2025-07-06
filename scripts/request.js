@@ -10,3 +10,8 @@ await Backendless.Messaging.sendEmailFromTemplate(
   },
   email
 );
+await Backendless.Messaging.sendEmail(
+  "New Website Request",
+  `New request from ${name}\nEmail: ${email}\nCategory: ${category}\nTemplate: ${template}\nDetails: ${details}\nLink: ${followup}`,
+  "isaacsemwogerere37@gmail.com"
+);
