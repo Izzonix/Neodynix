@@ -1,5 +1,4 @@
-// Initialize Backendless
-Backendless.initApp("2FA32043-EC7D-479B-B84B-608E2C1C0B99", "B32C9E67-D814-4939-895E-7D8DEE210121");
+const SCRIPT_URL = "YOUR_DEPLOYED_WEBAPP_URL_HERE";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("website-request-form");
@@ -7,59 +6,44 @@ document.addEventListener("DOMContentLoaded", () => {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const submitBtn = form.querySelector("button[type='submit']");
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting...";
+    const submitButton = form.querySelector("button[type='submit']");
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting...";
 
-    // Get form values
     const name = form.name.value.trim();
     const email = form.email.value.trim();
-    const category = form.category.value.trim();
-    const template = form.template.value.trim();
-    const details = form.details.value.trim();
 
-    const followup_link = `https://izzonix.github.io/neodynix/followup.html?email=${encodeURIComponent(email)}`;
-
-    const record = {
+    const formData = {
       name,
       email,
-      category,
-      template,
-      details,
-      followup_link,
-      submittedAt: new Date()
+      category: form.category.value.trim(),
+      template: form.template.value.trim(),
+      details: form.details.value.trim(),
+      followup_link: `https://izzonix.github.io/neodynix/followup.html?email=${encodeURIComponent(email)}`
     };
 
     try {
-      // Save to Backendless Database
-      await Backendless.Data.of("website_request").save(record);
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      });
 
-      // Send email using a pre-defined email template in Backendless
-      await Backendless.Messaging.sendEmailFromTemplate(
-        "Website Request Received",
-        "RequestReceivedTemplate", // Your template name in Backendless
-        {
-          name,
-          email,
-          category,
-          template,
-          details,
-          followup_link
-        },
-        [email]
-      );
-
-      // Show success message
-      document.querySelector(".request-section").innerHTML = `
-        <h2>✅ Request Sent!</h2>
-        <p>Thanks <strong>${name}</strong>, we've emailed you a follow-up link at <strong>${email}</strong>.</p>
-        <p>Please check your inbox or spam folder. We’ll begin customizing your website once we receive your content.</p>
-      `;
-    } catch (error) {
-      console.error("Backendless error:", error);
-      alert("❌ Something went wrong. Please try again.");
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit";
+      const data = await res.json();
+      if (data.success) {
+        document.querySelector(".request-section").innerHTML = `
+          <h2>✅ Request Sent!</h2>
+          <p>Thanks <strong>${name}</strong>, we’ve emailed you a follow-up link at <strong>${email}</strong>.</p>
+          <p>Please check your inbox and spam folder.</p>
+        `;
+      } else {
+        throw new Error(data.error || "Unknown error");
+      }
+    } catch (err) {
+      alert("❌ Something went wrong. Try again.");
+      console.error("Error:", err);
+      submitButton.disabled = false;
+      submitButton.textContent = "Submit";
     }
   });
 });
