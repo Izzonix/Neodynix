@@ -1,4 +1,4 @@
-const SCRIPT_URL = "YOUR_DEPLOYED_WEBAPP_URL_HERE";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsD9qx5N2QZ06p4wJ-H3tRpH4fnR2fuK2hDGwkyE3Ou7P2vaAXcDxEDNeMEIVRkPCQ/exec";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("website-request-form");
