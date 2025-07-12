@@ -1,4 +1,4 @@
-const SCRIPT_URL = "https://your-backend-url.onrender.com/send-email";
+const SCRIPT_URL = "https://a68abc6c-3dfa-437e-b7ed-948853cc9716-00-2psgdbnpe98f6.worf.replit.dev/submit";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("website-request-form");
@@ -47,4 +47,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-        
