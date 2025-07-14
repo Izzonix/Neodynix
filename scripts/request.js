@@ -12,7 +12,7 @@ document.getElementById('website-request-form').addEventListener('submit', async
   };
 
   try {
-    const response = await fetch('https://neodynix-backend.your-username.replit.app/submit-request', {
+    const response = await fetch('https://a68abc6c-3dfa-437e-b7ed-948853cc9716-00-2psgdbnpe98f6.worf.replit.dev/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
