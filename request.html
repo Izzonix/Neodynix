@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Request Website Setup</title>
   <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/request page.css" />
+  <link rel="stylesheet" href="styles/request.css" />
 </head>
 <body>
   <header class="top-header">
     <span class="logo">Neodynix Technologies</span>
-    <button class="hamburger" id="hamburger">☰</button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
     <nav id="nav-menu">
       <a href="index.html">Home</a>
       <a href="templates.html">Templates</a>
@@ -23,36 +23,37 @@
     <section class="request-section">
       <h1>Request Your Website</h1>
       <p>
-        Fill in your details to request your website. An email will be sent to your inbox
-        with a link to submit further details to customise your website.
+        Fill in your details to request your website. We’ll send an email with a link to submit further customization details.
       </p>
 
       <form id="website-request-form" class="request-form">
         <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" required />
+        <input type="text" id="name" name="name" required aria-required="true" />
 
         <label for="email">Email Address</label>
-        <input type="email" id="email" name="email" required />
+        <input type="email" id="email" name="email" required aria-required="true" />
 
         <label for="category">Template Category</label>
-        <input type="text" id="category" name="category" placeholder="e.g. School" required />
+        <input type="text" id="category" name="category" placeholder="e.g. Business" required aria-required="true" />
 
         <label for="template">Template Name</label>
-        <input type="text" id="template" name="template" placeholder="e.g. modern_school" required />
+        <input type="text" id="template" name="template" placeholder="e.g. Business Classic" required aria-required="true" />
 
         <label for="details">Additional Details</label>
-        <textarea id="details" name="details" rows="5"></textarea>
+        <textarea id="details" name="details" rows="5" aria-describedby="details-hint"></textarea>
+        <p id="details-hint" class="form-hint">Optional: Share any specific customization requests.</p>
 
-        <button type="submit" class="btn">Submit</button>
+        <button type="submit" class="btn">Submit Request</button>
       </form>
     </section>
   </main>
 
   <footer>
-    <p>&copy; 2025 Neodynix Technologies. All rights reserved.</p>
+    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
-  
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="scripts/java.js"></script>
   <script src="scripts/request.js"></script>
 </body>
-</html>
+  </html>
