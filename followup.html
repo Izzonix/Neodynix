@@ -11,24 +11,40 @@
     <section class="form-section">  
       <h1>Customize Your Website</h1>  
       <form id="customForm" enctype="multipart/form-data">  
-  
         <label for="category">Select Category</label>  
         <select id="category" name="category" required>  
           <option value="">-- Select Category --</option>  
           <option value="school">School</option>  
           <option value="business">Business</option>  
           <option value="portfolio">Portfolio</option>  
+          <option value="church">Church</option>  
+          <option value="other">Other</option>  
         </select>  
-  
+
         <label for="template">Type Template Name</label>  
         <input type="text" id="template" name="template" placeholder="Type template name here" required autocomplete="off" />  
-  
+
         <label for="domain">Domain Name (e.g. www.yoursite.com)</label>  
         <input type="text" id="domain" name="domain" placeholder="Optional but recommended" />  
-  
+
         <label for="socialMedia">Social Media Links (comma separated)</label>  
         <textarea id="socialMedia" name="socialMedia" placeholder="e.g. https://facebook.com/yourpage, https://twitter.com/yourhandle" rows="3"></textarea>  
-  
+
+        <label for="phone">Contact Phone Number</label>  
+        <input type="tel" id="phone" name="phone" placeholder="e.g. +256 123 456 789" />  
+
+        <label for="contactMethod">Preferred Contact Method</label>  
+        <select id="contactMethod" name="contactMethod">  
+          <option value="email">Email</option>  
+          <option value="phone">Phone</option>  
+        </select>  
+
+        <label for="purpose">Website Purpose</label>  
+        <textarea id="purpose" name="purpose" placeholder="e.g. Education, E-commerce, Portfolio" rows="3"></textarea>  
+
+        <label for="targetAudience">Target Audience</label>  
+        <input type="text" id="targetAudience" name="targetAudience" placeholder="e.g. Students, Professionals" />  
+
         <label for="country">Your Country</label>  
         <select id="country" name="country" required>  
           <option value="">-- Select Your Country --</option>  
@@ -41,60 +57,65 @@
           <option value="GB">🇬🇧 United Kingdom</option>  
           <option value="OTHER">🌐 Other</option>  
         </select>  
-  
+
         <div class="range-group">  
-          <label for="duration">  
-            Hosting Duration (months):  
-            <span id="duration-value">12</span>  
-          </label>  
+          <label for="duration">Hosting Duration (months): <span id="duration-value">12</span></label>  
           <input type="range" id="duration" name="duration" min="1" max="60" value="12" />  
         </div>  
-  
+
         <div class="range-group">  
-          <label for="pages">  
-            Number of Web Pages:  
-            <span id="pages-value">5</span>  
-          </label>  
+          <label for="pages">Number of Web Pages: <span id="pages-value">5</span></label>  
           <input type="range" id="pages" name="pages" min="1" max="20" value="5" />  
         </div>  
-  
+
         <div id="extraPagesContainer" style="display:none;">  
           <label for="extraPages">Specify Extra Pages (if more than 5)</label>  
           <textarea id="extraPages" name="extraPages" placeholder="List page names separated by commas" rows="3"></textarea>  
         </div>  
-  
-        <!-- Category-specific fields -->  
+
         <div class="category-fields school-fields" style="display:none;">  
           <label for="schoolName">School Name</label>  
           <input type="text" id="schoolName" name="schoolName" />  
-  
           <label for="numStudents">Number of Students</label>  
           <input type="number" id="numStudents" name="numStudents" />  
         </div>  
-  
+
         <div class="category-fields business-fields" style="display:none;">  
           <label for="businessName">Business Name</label>  
           <input type="text" id="businessName" name="businessName" />  
-  
           <label for="services">Services Offered</label>  
           <textarea id="services" name="services"></textarea>  
-  
           <label for="contactPersonBusiness">Contact Person</label>  
           <input type="text" id="contactPersonBusiness" name="contactPersonBusiness" />  
         </div>  
-  
+
         <div class="category-fields portfolio-fields" style="display:none;">  
           <label for="portfolioUrl">Portfolio URL</label>  
           <input type="url" id="portfolioUrl" name="portfolioUrl" />  
-  
           <label for="projects">Projects</label>  
           <textarea id="projects" name="projects"></textarea>  
-  
           <label for="contactPersonPortfolio">Contact Person</label>  
           <input type="text" id="contactPersonPortfolio" name="contactPersonPortfolio" />  
         </div>  
-  
-        <!-- File uploads -->  
+
+        <div class="category-fields church-fields" style="display:none;">  
+          <label for="churchName">Church Name</label>  
+          <input type="text" id="churchName" name="churchName" />  
+          <label for="services">Services/Events</label>  
+          <textarea id="services" name="services"></textarea>  
+          <label for="contactPersonChurch">Contact Person</label>  
+          <input type="text" id="contactPersonChurch" name="contactPersonChurch" />  
+        </div>  
+
+        <div class="category-fields other-fields" style="display:none;">  
+          <label for="otherName">Organization Name</label>  
+          <input type="text" id="otherName" name="otherName" />  
+          <label for="services">Services/Products</label>  
+          <textarea id="services" name="services"></textarea>  
+          <label for="contactPersonOther">Contact Person</label>  
+          <input type="text" id="contactPersonOther" name="contactPersonOther" />  
+        </div>  
+
         <div class="file-upload">  
           <label for="logo">Upload Logo</label>  
           <div class="custom-upload">  
@@ -103,7 +124,7 @@
             <button type="button" onclick="document.getElementById('logo').click()">Choose File</button>  
           </div>  
         </div>  
-  
+
         <div class="file-upload">  
           <label for="media">Upload Photos or Videos</label>  
           <div class="custom-upload">  
@@ -112,7 +133,7 @@
             <button type="button" onclick="document.getElementById('media').click()">Choose Files</button>  
           </div>  
         </div>  
-  
+
         <div class="file-upload">  
           <label for="others">Other Files (PDF or docs)</label>  
           <div class="custom-upload">  
@@ -121,28 +142,28 @@
             <button type="button" onclick="document.getElementById('others').click()">Choose Files</button>  
           </div>  
         </div>  
-  
-        <!-- Theme color picker options -->  
+
         <label>Keep default theme colors?</label>  
         <div class="theme-choice">  
           <label><input type="radio" name="themeChoice" value="default" checked /> Yes, keep default</label>  
           <label><input type="radio" name="themeChoice" value="custom" /> No, I want to pick a color</label>  
         </div>  
-  
+
         <div id="colorPickerContainer" style="display:none; margin-top:10px;">  
           <label for="customColor">Choose your theme color:</label>  
           <input type="color" id="customColor" name="customColor" value="#4fc3f7" />  
         </div>  
-  
+
         <div class="price-box">  
           Estimated Price: <span id="price">0</span> <span id="currency"></span>  
         </div>  
-  
+
         <button type="submit" class="btn">Submit Details</button>  
       </form>  
     </section>  
   </main>  
-  
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>  
   <script src="scripts /followup.js"></script>  
 </body>  
 </html>
