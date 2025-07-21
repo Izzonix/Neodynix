@@ -8,10 +8,9 @@
   <link rel="stylesheet" href="styles/template.css" />
 </head>
 <body>
-
   <header class="top-header">
     <span class="logo">Neodynix Technologies</span>
-    <button class="hamburger" id="hamburger">☰</button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
     <nav id="nav-menu">
       <a href="index.html">Home</a>
       <a href="templates.html">Templates</a>
@@ -20,63 +19,150 @@
     </nav>
   </header>
 
+  <main>
     <section class="templates-gallery">
-      <h1>Choose a Category</h1>
-      <p>Tap on the template image to preview the website</p>
+      <h1>Explore Our Templates</h1>
+      <p>Tap on a template image to preview or select to get started.</p>
       <!-- Search Bar -->
       <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search Templates..." onkeyup="filterTemplates()" />
+        <input type="text" id="search-input" placeholder="Search Templates..." onkeyup="filterTemplates()" aria-label="Search Templates" />
       </div>
 
       <div class="category-buttons">
+        <button onclick="showCategory('All')" class="active">All</button>
         <button onclick="showCategory('Business')">Business</button>
         <button onclick="showCategory('Portfolio')">Portfolio</button>
-        <button onclick="showCategory('school')">School</button>
-        <button onclick="showCategory('All')">All</button>
+        <button onclick="showCategory('School')">School</button>
+        <button onclick="showCategory('Church')">Church</button>
+        <button onclick="showCategory('Other')">Other</button>
       </div>
 
       <div class="template-grid" id="template-container">
         <!-- Business Templates -->
         <div class="template-card" data-category="Business">
-          <img src="templates/business1.png" alt="Business Classic" />
+          <img src="templates/business1.png" alt="Business Classic Template" />
           <h3>Business Classic</h3>
+          <p>Timeless design for professional businesses.</p>
           <a href="request.html?category=Business&template=Business%20Classic" class="btn">Choose Template</a>
         </div>
-
         <div class="template-card" data-category="Business">
-          <img src="templates/business2.png" alt="Startup Suite" />
+          <img src="templates/business2.png" alt="Startup Suite Template" />
           <h3>Startup Suite</h3>
+          <p>Modern layout for dynamic startups.</p>
           <a href="request.html?category=Business&template=Startup%20Suite" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="Business">
+          <img src="templates/business3.png" alt="Corporate Pro Template" />
+          <h3>Corporate Pro</h3>
+          <p>Sleek, scalable design for enterprises.</p>
+          <a href="request.html?category=Business&template=Corporate%20Pro" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="Business">
+          <img src="templates/business4.png" alt="Small Business Hub Template" />
+          <h3>Small Business Hub</h3>
+          <p>Compact, vibrant design for local businesses.</p>
+          <a href="request.html?category=Business&template=Small%20Business%20Hub" class="btn">Choose Template</a>
         </div>
 
         <!-- Portfolio Templates -->
         <div class="template-card" data-category="Portfolio">
-          <img src="templates/portfolio1.png" alt="Creative Portfolio" />
+          <img src="templates/portfolio1.png" alt="Creative Portfolio Template" />
           <h3>Creative Portfolio</h3>
+          <p>Showcase your work with bold visuals.</p>
           <a href="request.html?category=Portfolio&template=Creative%20Portfolio" class="btn">Choose Template</a>
         </div>
-
         <div class="template-card" data-category="Portfolio">
-          <img src="templates/portfolio2.png" alt="Artist Showcase" />
+          <img src="templates/portfolio2.png" alt="Artist Showcase Template" />
           <h3>Artist Showcase</h3>
+          <p>Elegant design for artists and creatives.</p>
           <a href="request.html?category=Portfolio&template=Artist%20Showcase" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="Portfolio">
+          <img src="templates/portfolio3.png" alt="Minimalist Portfolio Template" />
+          <h3>Minimalist Portfolio</h3>
+          <p>Clean, distraction-free design for professionals.</p>
+          <a href="request.html?category=Portfolio&template=Minimalist%20Portfolio" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="Portfolio">
+          <img src="templates/portfolio4.png" alt="Freelancer Focus Template" />
+          <h3>Freelancer Focus</h3>
+          <p>Highlight your skills with a modern layout.</p>
+          <a href="request.html?category=Portfolio&template=Freelancer%20Focus" class="btn">Choose Template</a>
         </div>
 
         <!-- School Templates -->
-        <div class="template-card" data-category="school">
-          <img src="/storage/emulated/0/Pictures/Screenshots/Screenshot_20250624-123929~2.png" alt="Creative Portfolio" />
+        <div class="template-card" data-category="School">
+          <img src="templates/school1.png" alt="High School Template" />
           <h3>High School</h3>
-          <a href="request.html?category=school&template=High%20School" class="btn">Choose Template</a>
+          <p>Engaging design for educational institutions.</p>
+          <a href="request.html?category=School&template=High%20School" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="School">
+          <img src="templates/school2.png" alt="Elementary Connect Template" />
+          <h3>Elementary Connect</h3>
+          <p>Welcoming layout for younger students.</p>
+          <a href="request.html?category=School&template=Elementary%20Connect" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="School">
+          <img src="templates/school3.png" alt="University Hub Template" />
+          <h3>University Hub</h3>
+          <p>Professional design for higher education.</p>
+          <a href="request.html?category=School&template=University%20Hub" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="School">
+          <img src="templates/school4.png" alt="Learning Academy Template" />
+          <h3>Learning Academy</h3>
+          <p>Modern, accessible design for academies.</p>
+          <a href="request.html?category=School&template=Learning%20Academy" class="btn">Choose Template</a>
+        </div>
+
+        <!-- Church Templates -->
+        <div class="template-card" data-category="Church">
+          <img src="templates/church1.png" alt="Community Worship Template" />
+          <h3>Community Worship</h3>
+          <p>Warm, inviting design for church communities.</p>
+          <a href="request.html?category=Church&template=Community%20Worship" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="Church">
+          <img src="templates/church2.png" alt="Faith Hub Template" />
+          <h3>Faith Hub</h3>
+          <p>Modern layout for church events and sermons.</p>
+          <a href="request.html?category=Church&template=Faith%20Hub" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="Church">
+          <img src="templates/church3.png" alt="Sacred Space Template" />
+          <h3>Sacred Space</h3>
+          <p>Elegant design for spiritual engagement.</p>
+          <a href="request.html?category=Church&template=Sacred%20Space" class="btn">Choose Template</a>
+        </div>
+
+        <!-- Other Templates -->
+        <div class="template-card" data-category="Other">
+          <img src="templates/other1.png" alt="Nonprofit Impact Template" />
+          <h3>Nonprofit Impact</h3>
+          <p>Inspiring design for charitable organizations.</p>
+          <a href="request.html?category=Other&template=Nonprofit%20Impact" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="Other">
+          <img src="templates/other2.png" alt="Event Spotlight Template" />
+          <h3>Event Spotlight</h3>
+          <p>Vibrant layout for conferences and events.</p>
+          <a href="request.html?category=Other&template=Event%20Spotlight" class="btn">Choose Template</a>
+        </div>
+        <div class="template-card" data-category="Other">
+          <img src="templates/other3.png" alt="E-commerce Store Template" />
+          <h3>E-commerce Store</h3>
+          <p>Sleek design for online retail.</p>
+          <a href="request.html?category=Other&template=E-commerce%20Store" class="btn">Choose Template</a>
         </div>
       </div>
     </section>
   </main>
 
-
   <footer>
-    <p>&copy; 2025 Neodynix Technologies. All rights reserved.</p>
+    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
 
   <script src="scripts/java.js"></script>
 </body>
-</html>
+  </html>
