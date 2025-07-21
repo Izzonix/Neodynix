@@ -1,5 +1,6 @@
-// Hamburger menu
-document.addEventListener('DOMContentLoaded', () => {
+
+</body>  
+</html>document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.getElementById('hamburger');  
   const navMenu = document.getElementById('nav-menu');  
   if (hamburger && navMenu) {  
@@ -7,7 +8,26 @@ document.addEventListener('DOMContentLoaded', () => {
       navMenu.classList.toggle('show');  
     });  
   }
+
+  // Scroll-based header hide/show
+  let lastScrollTop = 0;
+  const header = document.querySelector('.top-header');
+  window.addEventListener('scroll', () => {
+    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+    if (currentScroll > lastScrollTop) {
+      // Scrolling down
+      header.style.transform = 'translateY(-100%)';
+      header.style.opacity = '0';
+      navMenu.classList.remove('show'); // Close mobile menu when scrolling down
+    } else {
+      // Scrolling up
+      header.style.transform = 'translateY(0)';
+      header.style.opacity = '1';
+    }
+    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+  });
 });
+
 // Filter template cards based on category
 function showCategory(category) {
   const cards = document.querySelectorAll('.template-card');
@@ -48,4 +68,4 @@ if (window.location.pathname.includes('request.html')) {
   if (template && document.getElementById('template')) {
     document.getElementById('template').value = template;
   }
-}
+    }
