@@ -24,6 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
   });
+
+  // Set active category button
+  const categoryButtons = document.querySelectorAll('.category-buttons button');
+  categoryButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      categoryButtons.forEach(btn => btn.classList.remove('active'));
+      button.classList.add('active');
+    });
+  });
 });
 
 // Filter template cards based on category
@@ -66,4 +75,4 @@ if (window.location.pathname.includes('request.html')) {
   if (template && document.getElementById('template')) {
     document.getElementById('template').value = template;
   }
-        }
+}
