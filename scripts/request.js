@@ -1,34 +1,36 @@
-document.getElementById('website-request-form').addEventListener('submit', async function(event) {
-       event.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+  // Autofill additional details textarea
+  const detailsTextarea = document.getElementById('details');
+  if (detailsTextarea) {
+    detailsTextarea.value = 'Hello Neodynix, customize the above template';
+  }
 
-       const formData = new FormData(this);
-       const data = {
-         name: formData.get('name'),
-         email: formData.get('email'),
-         category: formData.get('category'),
-         template: formData.get('template'),
-         details: formData.get('details'),
-         followup_link: `https://izzonix.github.io/Neodynix/additional-details.html` // Base URL for follow-up
-       };
+  // Initialize EmailJS
+  emailjs.init('YOUR_PUBLIC_KEY'); // Replace with your EmailJS public key
 
-       try {
-         const response = await fetch('https://a68abc6c-3dfa-437e-b7ed-948853cc9716-00-2psgdbnpe98f6.worf.replit.dev/submit-request', {
-           method: 'POST',
-           headers: {
-             'Content-Type': 'application/json'
-           },
-           body: JSON.stringify(data)
-         });
+  // Form submission with EmailJS
+  document.getElementById('website-request-form').addEventListener('submit', function(event) {
+    event.preventDefault();
 
-         const result = await response.json();
-         if (response.ok) {
-           alert('Request submitted successfully! Check your email for further instructions.');
-           this.reset();
-         } else {
-           alert('Error submitting request: ' + result.error);
-         }
-       } catch (error) {
-         console.error('Error:', error);
-         alert('An error occurred while submitting the request.');
-       }
-     });
+    const formData = new FormData(this);
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      category: formData.get('category'),
+      template: formData.get('template'),
+      details: formData.get('details') || 'Hello Neodynix, customize the above template',
+      followup_link: 'https://izzonix.github.io/Neodynix/additional-details.html'
+    };
+
+    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', data)
+      .then(() => {
+        alert('Request submitted successfully! Check your email for further instructions.');
+        this.reset();
+        detailsTextarea.value = 'Hello Neodynix, customize the above template'; // Reset textarea
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while submitting the request.');
+      });
+  });
+});
