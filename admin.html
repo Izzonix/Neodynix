@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - Send Customization Email</title>
+  <link rel="stylesheet" href="styles/admin.css" />
+</head>
+<body>
+  <main>
+    <section class="admin-section">
+      <h1>Send Customization Email</h1>
+      <form id="adminForm">
+        <label for="customerEmail">Customer Email:</label>
+        <input type="email" id="customerEmail" name="customerEmail" required placeholder="Enter customer email" />
+
+        <label for="customLink">Customized Website Link:</label>
+        <input type="url" id="customLink" name="customLink" required placeholder="Enter customized link" />
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="price" required placeholder="Enter price" />
+
+        <label for="currency">Currency:</label>
+        <input type="text" id="currency" name="currency" required placeholder="Enter currency (e.g., USD)" />
+
+        <button type="submit" class="btn">Send Email</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="scripts/admin.js"></script>
+</body>
+</html>
