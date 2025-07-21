@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initialize EmailJS
-  emailjs.init('YOUR_PUBLIC_KEY'); // Replace with your EmailJS public key
+  emailjs.init('CQLyFEifsrwv5oLQz'); // Replace with your EmailJS public key
 
   // Form submission with EmailJS
   document.getElementById('website-request-form').addEventListener('submit', function(event) {
