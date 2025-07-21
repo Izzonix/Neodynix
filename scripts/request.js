@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
       followup_link: 'https://izzonix.github.io/Neodynix/additional-details.html'
     };
 
-    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', data)
+    emailjs.send('service_1k3ysnw', 'template_tj0u6yu', data)
       .then(() => {
         alert('Request submitted successfully! Check your email for further instructions.');
         this.reset();
