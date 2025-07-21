@@ -1,115 +1,124 @@
 /* General Section Style */
 main {
-  padding: 60px 20px;
+  padding: 50px 15px;
+  background: #161616;
+  min-height: 100vh;
   color: #f0f0f0;
 }
 
-section {
-  max-width: 600px;
+.request-section {
+  max-width: 700px;
   margin: 0 auto;
   text-align: center;
+  background: #1e1e1e;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* Section Titles */
-section h1 {
-  font-size: 2rem;
-  margin-bottom: 10px;
+.request-section h1 {
+  font-size: clamp(1.8rem, 6vw, 2.5rem);
+  color: #4fc3f7;
+  margin-bottom: 15px;
+  font-weight: 700;
+  text-shadow: 0 0 5px rgba(79, 195, 247, 0.3);
 }
 
-section p {
-  color: #bbbbbb;
+.request-section p {
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  color: #cccccc;
   margin-bottom: 30px;
 }
 
-/* Forms (used in request.html) */
-.request-form,
-.contact-form {
+/* Form Styling */
+.request-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
   text-align: left;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.request-form label,
-.contact-form label {
-  font-weight: bold;
+.request-form label {
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-weight: 600;
+  color: #ffffff;
 }
 
 .request-form input,
-.contact-form input,
-.request-form textarea,
-.contact-form textarea {
+.request-form textarea {
   background-color: #1e1e1e;
-  border: 1px solid #444;
+  color:#ffffff;
+  border: 2px solid #4fcangas: 0 0 0 / 0% 0% 0% / 0% 0% 0%, 0% 0% 
+
   color: #f0f0f0;
-  padding: 10px;
-  border-radius: 5px;
+  padding: 12px;
+  border-radius: 6px;
   font-size: 1rem;
-  
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .request-form input:focus,
-.contact-form input:focus,
-.request-form textarea:focus,
-.contact-form textarea:focus {
+.request-form textarea:focus {
   outline: none;
   border-color: #4fc3f7;
+  box-shadow: 0 0 8px rgba(79, 195, 247, 0.3);
 }
 
-/* Button (shared globally) */
+.request-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-hint {
+  font-size: 0.85rem;
+  color: #aaaaaa;
+  margin-top: 5px;
+}
+
+/* Button */
 .btn {
   display: inline-block;
   background-color: #4fc3f7;
   color: #000;
-  padding: 12px 24px;
+  padding: 14px 28px;
   border-radius: 6px;
   font-weight: bold;
   text-decoration: none;
   border: none;
   cursor: pointer;
-  transition: background-color 0.3s;
-  outline: none;
-  box-shadow:
-    0 0 8px #4fc3f7,
-    inset 0 0 8px rgba(79,195,247,0.7);
-
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 0 8px rgba(79, 195, 247, 0.7);
 }
 
 .btn:hover {
   background-color: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(3, 169, 244, 0.8);
 }
 
-/* Thank You Message */
-.thank-you {
-  text-align: center;
-  padding: 80px 20px;
-  max-width: 600px;
-  margin: 0 auto;
-}
+/* Responsive Tweaks */
+@media (max-width: 600px) {
+  main {
+    padding: 30px 10px;
+  }
 
-.thank-you h1 {
-  font-size: 2.2rem;
-  margin-bottom: 20px;
-}
+  .request-section {
+    padding: 20px;
+  }
 
-.thank-you p {
-  font-size: 1.1rem;
-  color: #aaaaaa;
-}
+  .request-form {
+    gap: 15px;
+  }
 
-/* Payment Page */
-.payment-section {
-  padding: 60px 20px;
-  text-align: center;
-}
+  .request-form input,
+  .request-form textarea {
+    padding: 10px;
+  }
 
-.payment-section h1 {
-  font-size: 2rem;
-  margin-bottom: 15px;
-}
-
-.payment-section p {
-  color: #bbbbbb;
-  margin-bottom: 30px;
-}
-
+  .btn {
+    padding: 12px 24px;
+  }
+  }
