@@ -1,6 +1,4 @@
-
-</body>  
-</html>document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.getElementById('hamburger');  
   const navMenu = document.getElementById('nav-menu');  
   if (hamburger && navMenu) {  
@@ -68,4 +66,4 @@ if (window.location.pathname.includes('request.html')) {
   if (template && document.getElementById('template')) {
     document.getElementById('template').value = template;
   }
-    }
+        }
