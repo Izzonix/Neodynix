@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       try {
-        const response = await fetch('https://<your-replit-username>.repl.co/api/templates', {
+        const response = await fetch('https://a68abc6c-3dfa-437e-b7ed-948853cc9716-00-2psgdbnpe98f6.worf.replit.dev/api/templates', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(template)
