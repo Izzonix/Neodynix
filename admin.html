@@ -3,14 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin - Send Customization Email</title>
+  <title>Admin Dashboard - Neodynix</title>
+  <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/admin.css" />
 </head>
 <body>
-  <main>
-    <section class="admin-section">
-      <h1>Send Customization Email</h1>
-      <form id="adminForm">
+  <header class="top-header">
+    <div class="logo">Neodynix Admin</div>
+    <nav id="nav-menu">
+      <a href="templates.html">Templates</a>
+      <a href="admin.html" class="active">Admin</a>
+    </nav>
+    <button id="hamburger" class="hamburger">☰</button>
+  </header>
+
+  <main class="container admin-container">
+    <div class="page-title">
+      <h2>Admin Dashboard</h2>
+      <div>
+        <button id="btnTemplates" class="btn admin-toggle-btn active">Manage Templates</button>
+        <button id="btnSendEmail" class="btn admin-toggle-btn">Send Customization Email</button>
+      </div>
+    </div>
+
+    <!-- Manage Templates Section -->
+    <section id="sectionTemplates" class="admin-section active">
+      <form id="uploadForm" class="admin-form">
+        <label for="admin-pass">Admin Password (required)</label>
+        <input id="admin-pass" type="password" placeholder="Enter admin password" required />
+
+        <label>Template Name</label>
+        <input name="name" type="text" required placeholder="Template name" />
+
+        <div class="row">
+          <div class="file-input-wrapper">
+  <input id="imageFile" name="image" type="file" accept="image/*" required />
+  <label for="imageFile">Choose File</label>
+</div>
+          <div>
+            <label>Category</label>
+            <select name="category" required>
+              <option value="Business">Business</option>
+              <option value="School">School</option>
+              <option value="Portfolio">Portfolio</option>
+              <option value="Church">Church</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <label>Template Link</label>
+        <input name="link" type="url" required placeholder="https://example.com/template" />
+
+        <div class="preview" id="imagePreview" style="margin-bottom:12px"></div>
+
+        <button id="uploadBtn" class="btn" type="submit">Upload Template</button>
+      </form>
+    </section>
+
+    <!-- Send Email Section -->
+    <section id="sectionSendEmail" class="admin-section" style="display:none;">
+      <form id="emailForm" class="admin-form">
         <label for="customerEmail">Customer Email:</label>
         <input type="email" id="customerEmail" name="customerEmail" required placeholder="Enter customer email" />
 
@@ -28,7 +81,11 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <footer>
+    <p>Admin panel — Neodynix</p>
+  </footer>
+
+  <script src="scripts/java.js"></script>
   <script src="scripts/admin.js"></script>
 </body>
-</html>
+                                          </html>
