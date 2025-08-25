@@ -33,38 +33,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Load dynamic templates from Replit backend
+  // Update template images and preview links from backend
   const templateContainer = document.getElementById('template-container');
-  const refreshTemplates = document.getElementById('refreshTemplates');
-  if (templateContainer && refreshTemplates) {
-    function loadTemplates() {
-      templateContainer.innerHTML = ''; // Clear existing content
+  if (templateContainer) {
+    function updateTemplateCards() {
       fetch('https://a68abc6c-3dfa-437e-b7ed-948853cc9716-00-2psgdbnpe98f6.worf.replit.dev/api/templates')
         .then(response => response.json())
         .then(templates => {
-          templates.forEach(template => {
-            const card = document.createElement('div');
-            card.className = 'template-card';
-            card.dataset.category = template.category;
-            card.innerHTML = `
-              <a href="${template.link}" target="_blank">
-                <img src="${template.image}" alt="${template.name} Template" />
-              </a>
-              <h3>${template.name}</h3>
-              <p>A new design for your needs.</p>
-              <a href="request.html?category=${template.category}&template=${encodeURIComponent(template.name)}" class="btn">Choose Template</a>
-            `;
-            templateContainer.appendChild(card);
+          const cards = document.querySelectorAll('.template-card');
+          cards.forEach(card => {
+            const title = card.querySelector('h3').textContent;
+            const template = templates.find(t => t.name === title);
+            if (template) {
+              const img = card.querySelector('img');
+              const link = card.querySelector('a[href*=".github.io"]') || card.querySelector('img').parentElement;
+              if (img && template.image) {
+                img.src = template.image;
+                img.alt = `${template.name} Template`;
+              }
+              if (link && template.link) {
+                link.href = template.link;
+              }
+            }
           });
+          // Apply current category filter after updating
+          const activeButton = document.querySelector('.category-buttons button.active');
+          if (activeButton) {
+            showCategory(activeButton.textContent);
+          }
         })
-        .catch(error => console.error('Error fetching templates:', error));
+        .catch(error => console.error('Error fetching template updates:', error));
     }
 
-    // Initial load
-    loadTemplates();
-
-    // Refresh button
-    refreshTemplates.addEventListener('click', loadTemplates);
+    // Initial update
+    updateTemplateCards();
   }
 
   // Filter template cards based on category
@@ -78,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.style.display = 'none';
       }
     });
-  }
+  };
 
   // Search templates by name
   window.filterTemplates = function() {
@@ -93,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.style.display = 'none';
       }
     });
-  }
+  };
 
   // Auto-fill request form
   if (window.location.pathname.includes('request.html')) {
