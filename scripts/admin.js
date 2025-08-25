@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSendEmail.classList.remove('active');
     sectionTemplates.style.display = 'block';
     sectionSendEmail.style.display = 'none';
+    fetchTemplates();
   });
 
   btnSendEmail.addEventListener('click', () => {
@@ -75,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
           alert('Template uploaded successfully!');
           uploadForm.reset();
           preview.innerHTML = '';
+          fetchTemplates(); // Refresh template list
         } else {
           alert(result.error || 'Upload failed');
         }
@@ -85,6 +87,59 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     reader.readAsDataURL(file);
   });
+
+  // Fetch and display templates for deletion
+  async function fetchTemplates() {
+    try {
+      const response = await fetch('https://a68abc6c-3dfa-437e-b7ed-948853cc9716-00-2psgdbnpe98f6.worf.replit.dev/api/templates');
+      const templates = await response.json();
+      const templateList = document.getElementById('templateList');
+      templateList.innerHTML = '';
+
+      templates.forEach(template => {
+        const templateItem = document.createElement('div');
+        templateItem.className = 'template-item';
+        templateItem.innerHTML = `
+          <img src="${template.image}" alt="${template.name}" />
+          <p><strong>${template.name}</strong></p>
+          <p>Category: ${template.category}</p>
+          <p><a href="${template.link}" target="_blank">Preview</a></p>
+          <button onclick="deleteTemplate('${template.id}')">Delete</button>
+        `;
+        templateList.appendChild(templateItem);
+      });
+    } catch (err) {
+      console.error('Fetch templates error', err);
+      alert('Failed to load templates. Check console for details.');
+    }
+  }
+
+  // Delete template
+  window.deleteTemplate = async (id) => {
+    const pass = prompt('Enter admin password to delete:');
+    if (!pass) {
+      alert('Password required to delete.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://a68abc6c-3dfa-437e-b7ed-948853cc9716-00-2psgdbnpe98f6.worf.replit.dev/api/templates/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pass })
+      });
+      if (response.ok) {
+        alert('Template deleted successfully!');
+        fetchTemplates(); // Refresh template list
+      } else {
+        const result = await response.json();
+        alert(result.error || 'Deletion failed');
+      }
+    } catch (err) {
+      console.error('Delete error', err);
+      alert('Failed to delete. Check console for details.');
+    }
+  };
 
   // Send email form logic
   const emailForm = document.getElementById('emailForm');
@@ -109,4 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Failed to send email. Check console for details.');
     }
   });
+
+  // Load templates on page load
+  fetchTemplates();
 });
