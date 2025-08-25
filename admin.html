@@ -3,89 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Dashboard - Neodynix</title>
+  <title>Admin Panel - Neodynix</title>
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/admin.css" />
 </head>
 <body>
   <header class="top-header">
-    <div class="logo">Neodynix Admin</div>
+    <span class="logo">Neodynix Technologies - Admin</span>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
     <nav id="nav-menu">
+      <a href="index.html">Home</a>
       <a href="templates.html">Templates</a>
-      <a href="admin.html" class="active">Admin</a>
+      <a href="About.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="admin.html">Admin</a>
     </nav>
-    <button id="hamburger" class="hamburger">☰</button>
   </header>
 
-  <main class="container admin-container">
-    <div class="page-title">
-      <h2>Admin Dashboard</h2>
-      <div>
-        <button id="btnTemplates" class="btn admin-toggle-btn active">Manage Templates</button>
-        <button id="btnSendEmail" class="btn admin-toggle-btn">Send Customization Email</button>
+  <main>
+    <section class="admin-container">
+      <div class="admin-tabs">
+        <button id="btnTemplates" class="tab-button active">Manage Templates</button>
+        <button id="btnSendEmail" class="tab-button">Send Email</button>
       </div>
-    </div>
 
-    <!-- Manage Templates Section -->
-    <section id="sectionTemplates" class="admin-section active">
-      <form id="uploadForm" class="admin-form">
-        <label for="admin-pass">Admin Password (required)</label>
-        <input id="admin-pass" type="password" placeholder="Enter admin password" required />
-
-        <label>Template Name</label>
-        <input name="name" type="text" required placeholder="Template name" />
-
-        <div class="row">
-          <div class="file-input-wrapper">
-  <input id="imageFile" name="image" type="file" accept="image/*" required />
-  <label for="imageFile">Choose File</label>
-</div>
-          <div>
-            <label>Category</label>
-            <select name="category" required>
+      <!-- Template Management Section -->
+      <div id="sectionTemplates" class="admin-section">
+        <h2>Manage Templates</h2>
+        <div class="template-upload">
+          <h3>Add New Template</h3>
+          <form id="uploadForm">
+            <input type="text" name="name" placeholder="Template Name" required aria-label="Template Name" />
+            <select name="category" required aria-label="Template Category">
+              <option value="" disabled selected>Select Category</option>
               <option value="Business">Business</option>
-              <option value="School">School</option>
               <option value="Portfolio">Portfolio</option>
+              <option value="School">School</option>
               <option value="Church">Church</option>
               <option value="Other">Other</option>
             </select>
-          </div>
+            <input type="text" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
+            <input type="file" id="imageFile" name="image" accept="image/*" required aria-label="Template Image" />
+            <div id="imagePreview"></div>
+            <input type="password" id="admin-pass" name="password" placeholder="Admin Password" required aria-label="Admin Password" />
+            <button type="submit" class="btn">Upload Template</button>
+          </form>
         </div>
+        <div class="template-list">
+          <h3>Existing Templates</h3>
+          <div id="templateList" class="template-grid"></div>
+        </div>
+      </div>
 
-        <label>Template Link</label>
-        <input name="link" type="url" required placeholder="https://example.com/template" />
-
-        <div class="preview" id="imagePreview" style="margin-bottom:12px"></div>
-
-        <button id="uploadBtn" class="btn" type="submit">Upload Template</button>
-      </form>
-    </section>
-
-    <!-- Send Email Section -->
-    <section id="sectionSendEmail" class="admin-section" style="display:none;">
-      <form id="emailForm" class="admin-form">
-        <label for="customerEmail">Customer Email:</label>
-        <input type="email" id="customerEmail" name="customerEmail" required placeholder="Enter customer email" />
-
-        <label for="customLink">Customized Website Link:</label>
-        <input type="url" id="customLink" name="customLink" required placeholder="Enter customized link" />
-
-        <label for="price">Price:</label>
-        <input type="number" id="price" name="price" required placeholder="Enter price" />
-
-        <label for="currency">Currency:</label>
-        <input type="text" id="currency" name="currency" required placeholder="Enter currency (e.g., USD)" />
-
-        <button type="submit" class="btn">Send Email</button>
-      </form>
+      <!-- Email Sending Section -->
+      <div id="sectionSendEmail" class="admin-section" style="display: none;">
+        <h2>Send Custom Email</h2>
+        <form id="emailForm">
+          <input type="email" name="customerEmail" placeholder="Customer Email" required aria-label="Customer Email" />
+          <input type="text" name="customLink" placeholder="Custom Link" required aria-label="Custom Link" />
+          <input type="number" name="price" placeholder="Price" required aria-label="Price" />
+          <select name="currency" required aria-label="Currency">
+            <option value="" disabled selected>Select Currency</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+          <button type="submit" class="btn">Send Email</button>
+        </form>
+      </div>
     </section>
   </main>
 
   <footer>
-    <p>Admin panel — Neodynix</p>
+    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
 
-  <script src="scripts/java.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
   <script src="scripts/admin.js"></script>
 </body>
-                                          </html>
+  </html>
