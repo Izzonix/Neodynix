@@ -1,3 +1,6 @@
+import { db } from './firebase-config.js';
+import { collection, getDocs } from 'firebase/firestore';
+
 document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.getElementById('hamburger');
   const navMenu = document.getElementById('nav-menu');
@@ -33,40 +36,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Update template images and preview links from backend
+  // Fetch and render templates from Firestore
   const templateContainer = document.getElementById('template-container');
   if (templateContainer) {
-    function updateTemplateCards() {
-      fetch('https://a68abc6c-3dfa-437e-b7ed-948853cc9716-00-2psgdbnpe98f6.worf.replit.dev/api/templates')
-        .then(response => response.json())
-        .then(templates => {
-          const cards = document.querySelectorAll('.template-card');
-          cards.forEach(card => {
-            const title = card.querySelector('h3').textContent;
-            const template = templates.find(t => t.name === title);
-            if (template) {
-              const img = card.querySelector('img');
-              const link = card.querySelector('a[href*=".github.io"]') || card.querySelector('img').parentElement;
-              if (img && template.image) {
-                img.src = template.image;
-                img.alt = `${template.name} Template`;
-              }
-              if (link && template.link) {
-                link.href = template.link;
-              }
-            }
-          });
-          // Apply current category filter after updating
-          const activeButton = document.querySelector('.category-buttons button.active');
-          if (activeButton) {
-            showCategory(activeButton.textContent);
-          }
-        })
-        .catch(error => console.error('Error fetching template updates:', error));
+    async function fetchTemplates() {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'templates'));
+        templateContainer.innerHTML = '';
+        querySnapshot.forEach(doc => {
+          const template = doc.data();
+          const card = document.createElement('div');
+          card.className = 'template-card';
+          card.setAttribute('data-category', template.category);
+          card.innerHTML = `
+            <a href="${template.link}"><img src="${template.image}" alt="${template.name} Template" /></a>
+            <h3>${template.name}</h3>
+            <p>${template.description}</p>
+            <a href="request.html?category=${encodeURIComponent(template.category)}&template=${encodeURIComponent(template.name)}" class="btn">Choose Template</a>
+          `;
+          templateContainer.appendChild(card);
+        });
+        // Apply current category filter after rendering
+        const activeButton = document.querySelector('.category-buttons button.active');
+        if (activeButton) {
+          showCategory(activeButton.textContent);
+        }
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+      }
     }
 
-    // Initial update
-    updateTemplateCards();
+    // Initial fetch
+    fetchTemplates();
   }
 
   // Filter template cards based on category
