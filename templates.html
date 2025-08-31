@@ -18,7 +18,6 @@
       <a href="contact.html">Contact</a>
     </nav>
   </header>
-
   <main>
     <section class="templates-gallery">
       <h1>Explore Our Templates</h1>
@@ -27,7 +26,6 @@
       <div class="search-bar">
         <input type="text" id="search-input" placeholder="Search Templates..." onkeyup="filterTemplates()" aria-label="Search Templates" />
       </div>
-
       <div class="category-buttons">
         <button onclick="showCategory('All')" class="active">All</button>
         <button onclick="showCategory('Business')">Business</button>
@@ -36,18 +34,15 @@
         <button onclick="showCategory('Church')">Church</button>
         <button onclick="showCategory('Other')">Other</button>
       </div>
-
       <div class="template-grid" id="template-container">
         <!-- Templates will be populated dynamically -->
       </div>
     </section>
   </main>
-
   <footer>
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
-
-  <script type="module" src="scripts/firebase-config.js"></script>
+  <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/java.js"></script>
 </body>
-  </html>
+</html>
