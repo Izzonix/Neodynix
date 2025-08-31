@@ -1,4 +1,4 @@
-import { supabase } from './supabase-config.js';
+import { supabase, supabaseUrl } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Toggle sections
@@ -7,17 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const sectionTemplates = document.getElementById('sectionTemplates');
   const sectionSendEmail = document.getElementById('sectionSendEmail');
 
-  if (!btnTemplates || !btnSendEmail || !sectionTemplates || !sectionSendEmail) {
-    console.error('Required elements not found');
-    return;
-  }
-
   btnTemplates.addEventListener('click', () => {
     btnTemplates.classList.add('active');
     btnSendEmail.classList.remove('active');
     sectionTemplates.style.display = 'block';
     sectionSendEmail.style.display = 'none';
-    fetchTemplates().catch(err => console.error('Fetch error:', err));
+    // No auto-fetch here
   });
 
   btnSendEmail.addEventListener('click', () => {
@@ -56,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
+      // Upload image to Supabase storage
       const { data, error: storageError } = await supabase.storage
         .from('templates')
         .upload(`${Date.now()}-${file.name}`, file, {
@@ -66,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const imageUrl = `${supabaseUrl}/storage/v1/object/public/templates/${data.path}`;
 
+      // Insert template info into DB
       const { error: dbError } = await supabase.from('templates').insert({
         name: formData.get('name'),
         category: formData.get('category'),
@@ -78,22 +75,25 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Template uploaded successfully!');
       uploadForm.reset();
       preview.innerHTML = '';
-      fetchTemplates().catch(err => console.error('Fetch error:', err));
     } catch (err) {
       console.error('Upload error:', err);
       alert('Failed to upload. Check console for details.');
     }
   });
 
-  // Fetch templates
+  // Fetch templates (manual refresh only)
   async function fetchTemplates() {
     try {
       const { data, error } = await supabase.from('templates').select('*');
       if (error) throw error;
 
       const templateList = document.getElementById('templateList');
-      if (!templateList) throw new Error('templateList not found');
       templateList.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        templateList.innerHTML = '<p>No templates found.</p>';
+        return;
+      }
 
       data.forEach(template => {
         const templateItem = document.createElement('div');
@@ -114,6 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Failed to load templates. Check console for details.');
     }
   }
+
+  // Add a refresh button
+  const refreshBtn = document.createElement('button');
+  refreshBtn.textContent = 'Refresh Templates';
+  refreshBtn.className = 'btn';
+  refreshBtn.addEventListener('click', fetchTemplates);
+  document.querySelector('.template-list').insertBefore(refreshBtn, document.getElementById('templateList'));
 
   // Edit template
   window.editTemplate = async (id) => {
@@ -139,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const { error } = await supabase.from('templates').update(updateData).eq('id', id);
       if (error) throw error;
       alert('Template updated successfully!');
-      fetchTemplates().catch(err => console.error('Fetch error:', err));
+      fetchTemplates();
     } catch (err) {
       console.error('Update error:', err);
       alert('Failed to update. Check console for details.');
@@ -149,43 +156,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // Delete template
   window.deleteTemplate = async (id) => {
     if (confirm('Are you sure you want to delete this template?')) {
-      try {
-        const { error } = await supabase.from('templates').delete().eq('id', id);
-        if (error) throw error;
-        alert('Template deleted successfully!');
-        fetchTemplates().catch(err => console.error('Fetch error:', err));
-      } catch (err) {
-        console.error('Delete error:', err);
-        alert('Failed to delete. Check console for details.');
-      }
+      const { error } = await supabase.from('templates').delete().eq('id', id);
+      if (error) throw error;
+      alert('Template deleted successfully!');
+      fetchTemplates();
     }
   };
 
   // Email sending with EmailJS
   const emailForm = document.getElementById('emailForm');
-  if (emailForm) {
-    emailForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(emailForm);
+  emailForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(emailForm);
 
-      emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your EmailJS User ID
-      const templateParams = {
-        to_email: formData.get('customerEmail'),
-        custom_link: formData.get('customLink'),
-        price: formData.get('price'),
-        currency: formData.get('currency')
-      };
+    emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your EmailJS User ID
+    const templateParams = {
+      to_email: formData.get('customerEmail'),
+      custom_link: formData.get('customLink'),
+      price: formData.get('price'),
+      currency: formData.get('currency')
+    };
 
-      try {
-        const response = await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
-        alert('Email sent successfully!');
-        emailForm.reset();
-      } catch (error) {
-        console.error('Email send error:', error);
-        alert('Failed to send email. Check console for details.');
-      }
-    });
-  }
-
-  fetchTemplates().catch(err => console.error('Initial fetch error:', err));
+    try {
+      await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
+      alert('Email sent successfully!');
+      emailForm.reset();
+    } catch (error) {
+      console.error('Email send error:', error);
+      alert('Failed to send email. Check console for details.');
+    }
+  });
 });
