@@ -1,38 +1,6 @@
 import { supabase } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const hamburger = document.getElementById('hamburger');
-  const navMenu = document.getElementById('nav-menu');
-  if (hamburger && navMenu) {
-    hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('show');
-    });
-  }
-
-  let lastScrollTop = 0;
-  const header = document.querySelector('.top-header');
-  window.addEventListener('scroll', () => {
-    let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (currentScroll > lastScrollTop) {
-      header.style.transform = 'translateY(-100%)';
-      header.style.opacity = '0';
-      navMenu.classList.remove('show');
-    } else {
-      header.style.transform = 'translateY(0)';
-      header.style.opacity = '1';
-    }
-    lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
-  });
-
-  const categoryButtons = document.querySelectorAll('.category-buttons button');
-  categoryButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      categoryButtons.forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-      showCategory(button.textContent);
-    });
-  });
-
   const templateContainer = document.getElementById('template-container');
   if (templateContainer) {
     async function fetchTemplates() {
@@ -60,6 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    // Initial load
+    fetchTemplates();
+
+    // Set active category button
+    const categoryButtons = document.querySelectorAll('.category-buttons button');
+    categoryButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        categoryButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        showCategory(button.textContent);
+      });
+    });
+
+    // Filter template cards based on category
     window.showCategory = function(category) {
       const cards = document.querySelectorAll('.template-card');
       cards.forEach(card => {
@@ -72,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     };
 
+    // Search templates by name
     window.filterTemplates = function() {
       const searchInput = document.getElementById('search-input').value.toLowerCase();
       const templateCards = document.querySelectorAll('.template-card');
@@ -85,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     };
 
+    // Auto-fill request form
     if (window.location.pathname.includes('request.html')) {
       const getParam = key => new URLSearchParams(window.location.search).get(key);
       const category = getParam('category');
@@ -92,7 +76,5 @@ document.addEventListener('DOMContentLoaded', () => {
       if (category && document.getElementById('category')) document.getElementById('category').value = category;
       if (template && document.getElementById('template')) document.getElementById('template').value = template;
     }
-
-    fetchTemplates();
   }
 });
