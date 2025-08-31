@@ -1,19 +1,6 @@
-import { db, storage, auth } from './firebase-config.js';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { supabase } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Ensure admin is authenticated
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      signInAnonymously(auth).catch(error => {
-        console.error('Authentication error:', error);
-        alert('Failed to authenticate. Please try again.');
-      });
-    }
-  });
-
   // Toggle sections
   const btnTemplates = document.getElementById('btnTemplates');
   const btnSendEmail = document.getElementById('btnSendEmail');
@@ -35,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sectionTemplates.style.display = 'none';
   });
 
-  // Template upload preview and form submit
+  // Image preview
   const imageFile = document.getElementById('imageFile');
   const preview = document.getElementById('imagePreview');
   const uploadForm = document.getElementById('uploadForm');
@@ -53,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsDataURL(file);
   });
 
+  // Upload template
   uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(uploadForm);
@@ -63,19 +51,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      // Upload image to Firebase Storage
-      const storageRef = ref(storage, `templates/${file.name}`);
-      await uploadBytes(storageRef, file);
-      const imageUrl = await getDownloadURL(storageRef);
+      const { data, error: storageError } = await supabase.storage
+        .from('templates')
+        .upload(`${Date.now()}-${file.name}`, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      if (storageError) throw storageError;
 
-      // Add template to Firestore
-      await addDoc(collection(db, 'templates'), {
+      const imageUrl = `${supabaseUrl}/storage/v1/object/public/templates/${data.path}`;
+
+      const { error: dbError } = await supabase.from('templates').insert({
         name: formData.get('name'),
         category: formData.get('category'),
         description: formData.get('description'),
         link: formData.get('link'),
         image: imageUrl
       });
+      if (dbError) throw dbError;
 
       alert('Template uploaded successfully!');
       uploadForm.reset();
@@ -87,15 +80,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Fetch and display templates for management
+  // Fetch templates
   async function fetchTemplates() {
     try {
-      const querySnapshot = await getDocs(collection(db, 'templates'));
+      const { data, error } = await supabase.from('templates').select('*');
+      if (error) throw error;
+
       const templateList = document.getElementById('templateList');
       templateList.innerHTML = '';
 
-      querySnapshot.forEach(doc => {
-        const template = doc.data();
+      data.forEach(template => {
         const templateItem = document.createElement('div');
         templateItem.className = 'template-item';
         templateItem.innerHTML = `
@@ -104,8 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <p>Category: ${template.category}</p>
           <p>Description: ${template.description}</p>
           <p><a href="${template.link}" target="_blank">Preview</a></p>
-          <button onclick="editTemplate('${doc.id}')">Edit</button>
-          <button onclick="deleteTemplate('${doc.id}')">Delete</button>
+          <button onclick="editTemplate('${template.id}')">Edit</button>
+          <button onclick="deleteTemplate('${template.id}')">Delete</button>
         `;
         templateList.appendChild(templateItem);
       });
@@ -118,73 +112,57 @@ document.addEventListener('DOMContentLoaded', () => {
   // Edit template
   window.editTemplate = async (id) => {
     const name = prompt('Enter new template name:');
-    const category = prompt('Enter new category (Business, Portfolio, School, Church, Other):');
+    const category = prompt('Enter new category:');
     const description = prompt('Enter new description:');
     const link = prompt('Enter new preview link:');
     const file = imageFile.files[0];
+    const updateData = {};
 
-    try {
-      const templateRef = doc(db, 'templates', id);
-      const updateData = {};
-      if (name) updateData.name = name;
-      if (category) updateData.category = category;
-      if (description) updateData.description = description;
-      if (link) updateData.link = link;
-      if (file) {
-        const storageRef = ref(storage, `templates/${file.name}`);
-        await uploadBytes(storageRef, file);
-        updateData.image = await getDownloadURL(storageRef);
-      }
+    if (name) updateData.name = name;
+    if (category) updateData.category = category;
+    if (description) updateData.description = description;
+    if (link) updateData.link = link;
+    if (file) {
+      const { data, error: storageError } = await supabase.storage
+        .from('templates')
+        .upload(`${Date.now()}-${file.name}`, file);
+      if (storageError) throw storageError;
+      updateData.image = `${supabaseUrl}/storage/v1/object/public/templates/${data.path}`;
+    }
 
-      if (Object.keys(updateData).length > 0) {
-        await updateDoc(templateRef, updateData);
-        alert('Template updated successfully!');
-        fetchTemplates();
-      }
-    } catch (err) {
-      console.error('Update error:', err);
-      alert('Failed to update. Check console for details.');
+    if (Object.keys(updateData).length > 0) {
+      const { error } = await supabase.from('templates').update(updateData).eq('id', id);
+      if (error) throw error;
+      alert('Template updated successfully!');
+      fetchTemplates();
     }
   };
 
   // Delete template
   window.deleteTemplate = async (id) => {
     if (confirm('Are you sure you want to delete this template?')) {
-      try {
-        await deleteDoc(doc(db, 'templates', id));
-        alert('Template deleted successfully!');
-        fetchTemplates();
-      } catch (err) {
-        console.error('Delete error:', err);
-        alert('Failed to delete. Check console for details.');
-      }
+      const { error } = await supabase.from('templates').delete().eq('id', id);
+      if (error) throw error;
+      alert('Template deleted successfully!');
+      fetchTemplates();
     }
   };
 
-  // Send email form logic
+  // Email sending (mock for now, requires external service)
   const emailForm = document.getElementById('emailForm');
   emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    const formData = new FormData(emailForm);
 
-    emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your EmailJS user ID
-
-    const templateParams = {
-      to_email: emailForm.customerEmail.value,
-      custom_link: emailForm.customLink.value,
-      price: emailForm.price.value,
-      currency: emailForm.currency.value
-    };
-
-    try {
-      const response = await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
-      alert('Email sent successfully!');
-      emailForm.reset();
-    } catch (error) {
-      console.error('Email send error:', error);
-      alert('Failed to send email. Check console for details.');
-    }
+    console.log('Email data:', {
+      to_email: formData.get('customerEmail'),
+      custom_link: formData.get('customLink'),
+      price: formData.get('price'),
+      currency: formData.get('currency')
+    });
+    alert('Email functionality requires external service setup. Check console.');
+    emailForm.reset();
   });
 
-  // Load templates on page load
   fetchTemplates();
 });
