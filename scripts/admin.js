@@ -7,12 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const sectionTemplates = document.getElementById('sectionTemplates');
   const sectionSendEmail = document.getElementById('sectionSendEmail');
 
+  if (!btnTemplates || !btnSendEmail || !sectionTemplates || !sectionSendEmail) {
+    console.error('Required elements not found');
+    return;
+  }
+
   btnTemplates.addEventListener('click', () => {
     btnTemplates.classList.add('active');
     btnSendEmail.classList.remove('active');
     sectionTemplates.style.display = 'block';
     sectionSendEmail.style.display = 'none';
-    fetchTemplates();
+    fetchTemplates().catch(err => console.error('Fetch error:', err));
   });
 
   btnSendEmail.addEventListener('click', () => {
@@ -73,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Template uploaded successfully!');
       uploadForm.reset();
       preview.innerHTML = '';
-      fetchTemplates();
+      fetchTemplates().catch(err => console.error('Fetch error:', err));
     } catch (err) {
       console.error('Upload error:', err);
       alert('Failed to upload. Check console for details.');
@@ -87,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (error) throw error;
 
       const templateList = document.getElementById('templateList');
+      if (!templateList) throw new Error('templateList not found');
       templateList.innerHTML = '';
 
       data.forEach(template => {
@@ -133,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const { error } = await supabase.from('templates').update(updateData).eq('id', id);
       if (error) throw error;
       alert('Template updated successfully!');
-      fetchTemplates();
+      fetchTemplates().catch(err => console.error('Fetch error:', err));
     } catch (err) {
       console.error('Update error:', err);
       alert('Failed to update. Check console for details.');
@@ -143,36 +149,43 @@ document.addEventListener('DOMContentLoaded', () => {
   // Delete template
   window.deleteTemplate = async (id) => {
     if (confirm('Are you sure you want to delete this template?')) {
-      const { error } = await supabase.from('templates').delete().eq('id', id);
-      if (error) throw error;
-      alert('Template deleted successfully!');
-      fetchTemplates();
+      try {
+        const { error } = await supabase.from('templates').delete().eq('id', id);
+        if (error) throw error;
+        alert('Template deleted successfully!');
+        fetchTemplates().catch(err => console.error('Fetch error:', err));
+      } catch (err) {
+        console.error('Delete error:', err);
+        alert('Failed to delete. Check console for details.');
+      }
     }
   };
 
   // Email sending with EmailJS
   const emailForm = document.getElementById('emailForm');
-  emailForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(emailForm);
+  if (emailForm) {
+    emailForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(emailForm);
 
-    emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your EmailJS User ID
-    const templateParams = {
-      to_email: formData.get('customerEmail'),
-      custom_link: formData.get('customLink'),
-      price: formData.get('price'),
-      currency: formData.get('currency')
-    };
+      emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your EmailJS User ID
+      const templateParams = {
+        to_email: formData.get('customerEmail'),
+        custom_link: formData.get('customLink'),
+        price: formData.get('price'),
+        currency: formData.get('currency')
+      };
 
-    try {
-      const response = await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
-      alert('Email sent successfully!');
-      emailForm.reset();
-    } catch (error) {
-      console.error('Email send error:', error);
-      alert('Failed to send email. Check console for details.');
-    }
-  });
+      try {
+        const response = await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
+        alert('Email sent successfully!');
+        emailForm.reset();
+      } catch (error) {
+        console.error('Email send error:', error);
+        alert('Failed to send email. Check console for details.');
+      }
+    });
+  }
 
-  fetchTemplates();
+  fetchTemplates().catch(err => console.error('Initial fetch error:', err));
 });
