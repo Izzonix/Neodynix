@@ -9,29 +9,40 @@ document.addEventListener('DOMContentLoaded', () => {
         if (error) throw error;
 
         templateContainer.innerHTML = '';
+
+        if (!data || data.length === 0) {
+          templateContainer.innerHTML = `<p class="no-templates">🚀 No templates available yet. Please check back soon!</p>`;
+          return;
+        }
+
         data.forEach(template => {
           const card = document.createElement('div');
           card.className = 'template-card';
-          card.setAttribute('data-category', template.category);
+          card.setAttribute('data-category', template.category || 'Other');
           card.innerHTML = `
-            <a href="${template.link}"><img src="${template.image}" alt="${template.name} Template" /></a>
+            <a href="${template.link}" target="_blank">
+              <img src="${template.image}" alt="${template.name} Template" />
+            </a>
             <h3>${template.name}</h3>
-            <p>${template.description}</p>
+            <p>${template.description || ''}</p>
             <a href="request.html?category=${encodeURIComponent(template.category)}&template=${encodeURIComponent(template.name)}" class="btn">Choose Template</a>
           `;
           templateContainer.appendChild(card);
         });
+
+        // Keep current category filter
         const activeButton = document.querySelector('.category-buttons button.active');
         if (activeButton) showCategory(activeButton.textContent);
       } catch (error) {
         console.error('Error fetching templates:', error);
+        templateContainer.innerHTML = `<p class="error">⚠️ Failed to load templates. Please try again later.</p>`;
       }
     }
 
     // Initial load
     fetchTemplates();
 
-    // Set active category button
+    // Category buttons
     const categoryButtons = document.querySelectorAll('.category-buttons button');
     categoryButtons.forEach(button => {
       button.addEventListener('click', () => {
@@ -41,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Filter template cards based on category
+    // Show category
     window.showCategory = function(category) {
       const cards = document.querySelectorAll('.template-card');
       cards.forEach(card => {
@@ -54,17 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     };
 
-    // Search templates by name
+    // Search templates
     window.filterTemplates = function() {
       const searchInput = document.getElementById('search-input').value.toLowerCase();
       const templateCards = document.querySelectorAll('.template-card');
       templateCards.forEach(card => {
         const title = card.querySelector('h3').textContent.toLowerCase();
-        if (title.includes(searchInput)) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
+        card.style.display = title.includes(searchInput) ? 'block' : 'none';
       });
     };
 
