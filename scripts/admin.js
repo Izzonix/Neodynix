@@ -111,30 +111,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Edit template
   window.editTemplate = async (id) => {
-    const name = prompt('Enter new template name:');
-    const category = prompt('Enter new category:');
-    const description = prompt('Enter new description:');
-    const link = prompt('Enter new preview link:');
+    const name = prompt('Enter new template name:') || '';
+    const category = prompt('Enter new category:') || '';
+    const description = prompt('Enter new description:') || '';
+    const link = prompt('Enter new preview link:') || '';
     const file = imageFile.files[0];
-    const updateData = {};
+    const updateData = {
+      name: name,
+      category: category,
+      description: description,
+      link: link
+    };
 
-    if (name) updateData.name = name;
-    if (category) updateData.category = category;
-    if (description) updateData.description = description;
-    if (link) updateData.link = link;
     if (file) {
       const { data, error: storageError } = await supabase.storage
         .from('templates')
         .upload(`${Date.now()}-${file.name}`, file);
       if (storageError) throw storageError;
       updateData.image = `${supabaseUrl}/storage/v1/object/public/templates/${data.path}`;
+    } else {
+      // Retain existing image if no new file
+      const { data: existingData } = await supabase.from('templates').select('image').eq('id', id).single();
+      updateData.image = existingData.image;
     }
 
-    if (Object.keys(updateData).length > 0) {
+    try {
       const { error } = await supabase.from('templates').update(updateData).eq('id', id);
       if (error) throw error;
       alert('Template updated successfully!');
       fetchTemplates();
+    } catch (err) {
+      console.error('Update error:', err);
+      alert('Failed to update. Check console for details.');
     }
   };
 
@@ -148,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Email sending (mock for now, requires external service)
+  // Email sending (mock for now)
   const emailForm = document.getElementById('emailForm');
   emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
