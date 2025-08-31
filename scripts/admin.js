@@ -1,7 +1,7 @@
 import { supabase, supabaseUrl } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Toggle sections
+  // ----- Tab switching -----
   const btnTemplates = document.getElementById('btnTemplates');
   const btnSendEmail = document.getElementById('btnSendEmail');
   const sectionTemplates = document.getElementById('sectionTemplates');
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSendEmail.classList.remove('active');
     sectionTemplates.style.display = 'block';
     sectionSendEmail.style.display = 'none';
-    // No auto-fetch here
   });
 
   btnSendEmail.addEventListener('click', () => {
@@ -22,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sectionTemplates.style.display = 'none';
   });
 
-  // Image preview
+  // ----- Image preview -----
   const imageFile = document.getElementById('imageFile');
   const preview = document.getElementById('imagePreview');
   const uploadForm = document.getElementById('uploadForm');
@@ -40,29 +39,23 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsDataURL(file);
   });
 
-  // Upload template
+  // ----- Upload template -----
   uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(uploadForm);
     const file = imageFile.files[0];
-    if (!file) {
-      alert('Please select an image.');
-      return;
-    }
+    if (!file) return alert('Please select an image.');
 
     try {
-      // Upload image to Supabase storage
-      const { data, error: storageError } = await supabase.storage
+      // Upload to Supabase storage
+      const { data: storageData, error: storageError } = await supabase.storage
         .from('templates')
-        .upload(`${Date.now()}-${file.name}`, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+        .upload(`${Date.now()}-${file.name}`, file, { cacheControl: '3600', upsert: false });
       if (storageError) throw storageError;
 
-      const imageUrl = `${supabaseUrl}/storage/v1/object/public/templates/${data.path}`;
+      const imageUrl = `${supabaseUrl}/storage/v1/object/public/templates/${storageData.path}`;
 
-      // Insert template info into DB
+      // Insert into DB
       const { error: dbError } = await supabase.from('templates').insert({
         name: formData.get('name'),
         category: formData.get('category'),
@@ -77,99 +70,56 @@ document.addEventListener('DOMContentLoaded', () => {
       preview.innerHTML = '';
     } catch (err) {
       console.error('Upload error:', err);
-      alert('Failed to upload. Check console for details.');
+      alert('Failed to upload. Check console.');
     }
   });
 
-  // Fetch templates (manual refresh only)
-  async function fetchTemplates() {
-    try {
-      const { data, error } = await supabase.from('templates').select('*');
-      if (error) throw error;
-
-      const templateList = document.getElementById('templateList');
-      templateList.innerHTML = '';
-
-      if (!data || data.length === 0) {
-        templateList.innerHTML = '<p>No templates found.</p>';
-        return;
-      }
-
-      data.forEach(template => {
-        const templateItem = document.createElement('div');
-        templateItem.className = 'template-item';
-        templateItem.innerHTML = `
-          <img src="${template.image}" alt="${template.name}" />
-          <p><strong>${template.name}</strong></p>
-          <p>Category: ${template.category}</p>
-          <p>Description: ${template.description}</p>
-          <p><a href="${template.link}" target="_blank">Preview</a></p>
-          <button onclick="editTemplate('${template.id}')">Edit</button>
-          <button onclick="deleteTemplate('${template.id}')">Delete</button>
-        `;
-        templateList.appendChild(templateItem);
-      });
-    } catch (err) {
-      console.error('Fetch templates error:', err);
-      alert('Failed to load templates. Check console for details.');
-    }
-  }
-
-  // Add a refresh button
-  const refreshBtn = document.createElement('button');
-  refreshBtn.textContent = 'Refresh Templates';
-  refreshBtn.className = 'btn';
-  refreshBtn.addEventListener('click', fetchTemplates);
-  document.querySelector('.template-list').insertBefore(refreshBtn, document.getElementById('templateList'));
-
-  // Edit template
+  // ----- Edit template -----
   window.editTemplate = async (id) => {
-    const { data: existingData } = await supabase.from('templates').select('*').eq('id', id).single();
-    const name = prompt('Enter new template name:', existingData.name) || existingData.name;
-    const category = prompt('Enter new category:', existingData.category) || existingData.category;
-    const description = prompt('Enter new description:', existingData.description) || existingData.description;
-    const link = prompt('Enter new preview link:', existingData.link) || existingData.link;
-    const file = imageFile.files[0];
-    const updateData = { name, category, description, link };
+    const { data: existingData, error: fetchError } = await supabase.from('templates').select('*').eq('id', id).single();
+    if (fetchError) return alert('Failed to fetch template.');
 
+    const name = prompt('New name:', existingData.name) || existingData.name;
+    const category = prompt('New category:', existingData.category) || existingData.category;
+    const description = prompt('New description:', existingData.description) || existingData.description;
+    const link = prompt('New link:', existingData.link) || existingData.link;
+
+    let updateData = { name, category, description, link };
+
+    const file = imageFile.files[0];
     if (file) {
-      const { data, error: storageError } = await supabase.storage
+      const { data: imgData, error: imgError } = await supabase.storage
         .from('templates')
         .upload(`${Date.now()}-${file.name}`, file);
-      if (storageError) throw storageError;
-      updateData.image = `${supabaseUrl}/storage/v1/object/public/templates/${data.path}`;
+      if (imgError) return alert('Image upload failed.');
+      updateData.image = `${supabaseUrl}/storage/v1/object/public/templates/${imgData.path}`;
     } else {
       updateData.image = existingData.image;
     }
 
-    try {
-      const { error } = await supabase.from('templates').update(updateData).eq('id', id);
-      if (error) throw error;
-      alert('Template updated successfully!');
-      fetchTemplates();
-    } catch (err) {
-      console.error('Update error:', err);
-      alert('Failed to update. Check console for details.');
-    }
+    const { error: updateError } = await supabase.from('templates').update(updateData).eq('id', id);
+    if (updateError) return alert('Update failed.');
+
+    alert('Template updated successfully!');
   };
 
-  // Delete template
+  // ----- Delete template -----
   window.deleteTemplate = async (id) => {
-    if (confirm('Are you sure you want to delete this template?')) {
-      const { error } = await supabase.from('templates').delete().eq('id', id);
-      if (error) throw error;
-      alert('Template deleted successfully!');
-      fetchTemplates();
-    }
+    if (!confirm('Are you sure?')) return;
+    const { error } = await supabase.from('templates').delete().eq('id', id);
+    if (error) return alert('Delete failed.');
+    alert('Template deleted!');
   };
 
-  // Email sending with EmailJS
+  // ----- Email sending -----
   const emailForm = document.getElementById('emailForm');
   emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(emailForm);
 
-    emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your EmailJS User ID
+    if (!window.emailjs) return alert('EmailJS not loaded!');
+    emailjs.init('YOUR_EMAILJS_USER_ID');
+
     const templateParams = {
       to_email: formData.get('customerEmail'),
       custom_link: formData.get('customLink'),
@@ -181,9 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
       await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
       alert('Email sent successfully!');
       emailForm.reset();
-    } catch (error) {
-      console.error('Email send error:', error);
-      alert('Failed to send email. Check console for details.');
+    } catch (err) {
+      console.error('Email error:', err);
+      alert('Failed to send email.');
     }
   });
 });
