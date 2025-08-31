@@ -111,17 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Edit template
   window.editTemplate = async (id) => {
-    const name = prompt('Enter new template name:') || '';
-    const category = prompt('Enter new category:') || '';
-    const description = prompt('Enter new description:') || '';
-    const link = prompt('Enter new preview link:') || '';
+    const { data: existingData } = await supabase.from('templates').select('*').eq('id', id).single();
+    const name = prompt('Enter new template name:', existingData.name) || existingData.name;
+    const category = prompt('Enter new category:', existingData.category) || existingData.category;
+    const description = prompt('Enter new description:', existingData.description) || existingData.description;
+    const link = prompt('Enter new preview link:', existingData.link) || existingData.link;
     const file = imageFile.files[0];
-    const updateData = {
-      name: name,
-      category: category,
-      description: description,
-      link: link
-    };
+    const updateData = { name, category, description, link };
 
     if (file) {
       const { data, error: storageError } = await supabase.storage
@@ -130,8 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (storageError) throw storageError;
       updateData.image = `${supabaseUrl}/storage/v1/object/public/templates/${data.path}`;
     } else {
-      // Retain existing image if no new file
-      const { data: existingData } = await supabase.from('templates').select('image').eq('id', id).single();
       updateData.image = existingData.image;
     }
 
@@ -156,20 +150,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Email sending (mock for now)
+  // Email sending with EmailJS
   const emailForm = document.getElementById('emailForm');
   emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(emailForm);
 
-    console.log('Email data:', {
+    emailjs.init('YOUR_EMAILJS_USER_ID'); // Replace with your EmailJS User ID
+    const templateParams = {
       to_email: formData.get('customerEmail'),
       custom_link: formData.get('customLink'),
       price: formData.get('price'),
       currency: formData.get('currency')
-    });
-    alert('Email functionality requires external service setup. Check console.');
-    emailForm.reset();
+    };
+
+    try {
+      const response = await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
+      alert('Email sent successfully!');
+      emailForm.reset();
+    } catch (error) {
+      console.error('Email send error:', error);
+      alert('Failed to send email. Check console for details.');
+    }
   });
 
   fetchTemplates();
