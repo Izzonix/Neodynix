@@ -7,19 +7,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const sectionTemplates = document.getElementById('sectionTemplates');
   const sectionSendEmail = document.getElementById('sectionSendEmail');
 
-  btnTemplates.addEventListener('click', () => {
-    btnTemplates.classList.add('active');
-    btnSendEmail.classList.remove('active');
-    sectionTemplates.style.display = 'block';
-    sectionSendEmail.style.display = 'none';
-  });
+  function showSection(section) {
+    if (section === 'templates') {
+      btnTemplates.classList.add('active');
+      btnSendEmail.classList.remove('active');
+      sectionTemplates.style.display = 'block';
+      sectionSendEmail.style.display = 'none';
+    } else if (section === 'email') {
+      btnSendEmail.classList.add('active');
+      btnTemplates.classList.remove('active');
+      sectionSendEmail.style.display = 'block';
+      sectionTemplates.style.display = 'none';
+    }
+  }
 
-  btnSendEmail.addEventListener('click', () => {
-    btnSendEmail.classList.add('active');
-    btnTemplates.classList.remove('active');
-    sectionSendEmail.style.display = 'block';
-    sectionTemplates.style.display = 'none';
-  });
+  btnTemplates.addEventListener('click', () => showSection('templates'));
+  btnSendEmail.addEventListener('click', () => showSection('email'));
 
   // ----- Image preview -----
   const imageFile = document.getElementById('imageFile');
@@ -68,11 +71,43 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Template uploaded successfully!');
       uploadForm.reset();
       preview.innerHTML = '';
+      fetchTemplates(); // Refresh template list
     } catch (err) {
       console.error('Upload error:', err);
       alert('Failed to upload. Check console.');
     }
   });
+
+  // ----- Fetch and display templates -----
+  const templateList = document.getElementById('templateList');
+
+  async function fetchTemplates() {
+    try {
+      const { data, error } = await supabase.from('templates').select('*').order('id', { ascending: true });
+      if (error) throw error;
+
+      templateList.innerHTML = '';
+      data.forEach(template => {
+        const card = document.createElement('div');
+        card.className = 'template-card';
+        card.innerHTML = `
+          <img src="${template.image}" alt="${template.name}" />
+          <h4>${template.name}</h4>
+          <p>${template.description}</p>
+          <div class="template-actions">
+            <button onclick="editTemplate(${template.id})">Edit</button>
+            <button onclick="deleteTemplate(${template.id})">Delete</button>
+          </div>
+        `;
+        templateList.appendChild(card);
+      });
+    } catch (err) {
+      console.error('Error fetching templates:', err);
+    }
+  }
+
+  // Fetch templates initially
+  fetchTemplates();
 
   // ----- Edit template -----
   window.editTemplate = async (id) => {
@@ -101,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (updateError) return alert('Update failed.');
 
     alert('Template updated successfully!');
+    fetchTemplates();
   };
 
   // ----- Delete template -----
@@ -109,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const { error } = await supabase.from('templates').delete().eq('id', id);
     if (error) return alert('Delete failed.');
     alert('Template deleted!');
+    fetchTemplates();
   };
 
   // ----- Email sending -----
