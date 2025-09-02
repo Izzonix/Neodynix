@@ -32,6 +32,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
   showSection('templates');
 
+  // ----- Fetch and display templates -----
+  const templateList = document.getElementById('templateList');
+  async function fetchTemplates() {
+    try {
+      const { data, error } = await supabase.from('templates').select('*');
+      if (error) throw error;
+
+      templateList.innerHTML = '';
+
+      if (!data || data.length === 0) {
+        templateList.innerHTML = `<p>No templates available.</p>`;
+        return;
+      }
+
+      data.forEach(template => {
+        const card = document.createElement('div');
+        card.className = 'template-card';
+        card.innerHTML = `
+          <img src="${template.image}" alt="${template.name} Template" style="max-width: 100%; border-radius: 6px;" />
+          <h3>${template.name}</h3>
+          <p>Category: ${template.category}</p>
+          <p>${template.description || ''}</p>
+          <a href="${template.link}" target="_blank">Preview</a>
+          <button onclick="editTemplate(${template.id})" class="btn">Edit</button>
+          <button onclick="deleteTemplate(${template.id})" class="btn btn-delete">Delete</button>
+        `;
+        templateList.appendChild(card);
+      });
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      templateList.innerHTML = `<p class="error">Failed to load templates.</p>`;
+    }
+  }
+
+  // Initial load
+  fetchTemplates();
+
   // ----- Image preview -----
   const imageFile = document.getElementById('imageFile');
   const preview = document.getElementById('imagePreview');
@@ -102,6 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showResult('Data and file posted successfully!', 'success');
       uploadForm.reset();
       preview.innerHTML = '';
+      fetchTemplates(); // Refresh template list
     } catch (err) {
       showResult(err.message, 'error');
       console.error('Submission error:', err);
@@ -153,6 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showResult(`Update failed: ${updateError.message}`, 'error');
     } else {
       showResult('Template updated successfully!', 'success');
+      fetchTemplates(); // Refresh template list
     }
     loadingPopup.style.display = 'none';
   };
@@ -168,6 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     showResult('Template deleted!', 'success');
+    fetchTemplates(); // Refresh template list
   };
 
   // ----- Email sending -----
