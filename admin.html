@@ -37,14 +37,20 @@
               <option value="Business">Business</option>
               <option value="Portfolio">Portfolio</option>
               <option value="Education">Education</option>
-              <option value="Church">Church</option>
+              <option value="Religion">Religion</option>
+              <option value="Health">Health</option>
+              <option value="Media">Media</option>
+              <option value="NonProfit">Non-Profit</option>
+              <option value="Tech">Tech</option>
+              <option value="Industry">Industry</option>
+              <option value="Travel">Travel</option>
               <option value="Other">Other</option>
             </select>
             <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
             <input type="text" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
             <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
             <div id="imagePreview"></div>
-            <button type="submit" class="btn">Upload Template</button>
+            <button type="submit" id="upload-btn" class="btn">Upload Template</button>
           </form>
           <div id="result"></div>
         </div>
@@ -66,8 +72,15 @@
             <option value="EUR">EUR</option>
             <option value="GBP">GBP</option>
           </select>
-          <button type="submit" class="btn">Send Email</button>
+          <button type="submit" id="email-btn" class="btn">Send Email</button>
         </form>
+      </div>
+      <!-- Loading Popup -->
+      <div id="loading-popup" class="loading-popup" style="display: none;">
+        <div class="loading-content">
+          <p>Processing...</p>
+          <div class="spinner"></div>
+        </div>
       </div>
     </section>
   </main>
