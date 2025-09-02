@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const preview = document.getElementById('imagePreview');
   const uploadForm = document.getElementById('uploadForm');
   const result = document.getElementById('result');
+  const loadingPopup = document.getElementById('loading-popup');
+  const uploadBtn = document.getElementById('upload-btn');
+  const emailBtn = document.getElementById('email-btn');
 
   imageFile.addEventListener('change', () => {
     const file = imageFile.files[0];
@@ -54,16 +57,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----- Upload template -----
   uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!confirm('Double-check everything before submission?')) return;
+
+    loadingPopup.style.display = 'flex';
+    uploadBtn.disabled = true;
+
     const formData = new FormData(uploadForm);
     const file = imageFile.files[0];
 
     if (!file) {
       showResult('Please select a file.', 'error');
+      loadingPopup.style.display = 'none';
+      uploadBtn.disabled = false;
       return;
     }
 
     try {
-      showResult('Uploading file...', 'info');
       const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data: storageData, error: storageError } = await supabase.storage
         .from('templates')
@@ -96,14 +105,22 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       showResult(err.message, 'error');
       console.error('Submission error:', err);
+    } finally {
+      loadingPopup.style.display = 'none';
+      uploadBtn.disabled = false;
     }
   });
 
   // ----- Edit template -----
   window.editTemplate = async (id) => {
+    if (!confirm('Double-check everything before submission?')) return;
+
+    loadingPopup.style.display = 'flex';
+
     const { data: existingData, error: fetchError } = await supabase.from('templates').select('*').eq('id', id).single();
     if (fetchError) {
       showResult('Failed to fetch template.', 'error');
+      loadingPopup.style.display = 'none';
       return;
     }
 
@@ -116,13 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const file = imageFile.files[0];
     if (file) {
-      showResult('Uploading new image...', 'info');
       const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data: imgData, error: imgError } = await supabase.storage
         .from('templates')
         .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
       if (imgError) {
         showResult(`Image upload failed: ${imgError.message}`, 'error');
+        loadingPopup.style.display = 'none';
         return;
       }
       updateData.image = `${supabaseUrl}/storage/v1/object/public/templates/${imgData.path}`;
@@ -134,16 +151,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const { error: updateError } = await supabase.from('templates').update(updateData).eq('id', id);
     if (updateError) {
       showResult(`Update failed: ${updateError.message}`, 'error');
-      return;
+    } else {
+      showResult('Template updated successfully!', 'success');
     }
-
-    showResult('Template updated successfully!', 'success');
+    loadingPopup.style.display = 'none';
   };
 
   // ----- Delete template -----
   window.deleteTemplate = async (id) => {
     if (!confirm('Are you sure?')) return;
+    loadingPopup.style.display = 'flex';
     const { error } = await supabase.from('templates').delete().eq('id', id);
+    loadingPopup.style.display = 'none';
     if (error) {
       showResult(`Delete failed: ${error.message}`, 'error');
       return;
@@ -155,10 +174,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const emailForm = document.getElementById('emailForm');
   emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (!confirm('Double-check everything before submission?')) return;
+
+    loadingPopup.style.display = 'flex';
+    emailBtn.disabled = true;
+
     const formData = new FormData(emailForm);
 
     if (!window.emailjs) {
       showResult('EmailJS not loaded!', 'error');
+      loadingPopup.style.display = 'none';
+      emailBtn.disabled = false;
       return;
     }
     emailjs.init('YOUR_EMAILJS_USER_ID');
@@ -177,6 +203,9 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       showResult('Failed to send email.', 'error');
       console.error('Email error:', err);
+    } finally {
+      loadingPopup.style.display = 'none';
+      emailBtn.disabled = false;
     }
   });
 
