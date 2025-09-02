@@ -4,19 +4,16 @@ body {
   background-color: #121212;
   color: #f0f0f0;
 }
-
 .admin-container {
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
 }
-
 .admin-tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 30px;
 }
-
 .tab-button {
   background-color: #2a2a2a;
   color: #f0f0f0;
@@ -27,16 +24,13 @@ body {
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s;
 }
-
 .tab-button.active {
   background-color: #4fc3f7;
   color: #000;
 }
-
 .tab-button:hover {
   background-color: #4fc3f71a;
 }
-
 .admin-section {
   background: #1e1e1e;
   padding: 30px;
@@ -44,30 +38,25 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   border: 1px solid #4fc3f733;
 }
-
 .admin-section h2 {
   margin-top: 0;
   font-size: 1.8rem;
   color: #4fc3f7;
 }
-
 .template-upload, .template-list {
   margin-bottom: 40px;
 }
-
 .template-upload h3, .template-list h3 {
   font-size: 1.4rem;
   margin-bottom: 20px;
   color: #f0f0f0;
 }
-
 #uploadForm, #emailForm {
   display: flex;
   flex-direction: column;
   gap: 15px;
   max-width: 500px;
 }
-
 #uploadForm input, #uploadForm select, #emailForm input, #emailForm select {
   padding: 12px;
   border: 1px solid #4fc3f733;
@@ -76,23 +65,19 @@ body {
   color: #f0f0f0;
   font-size: 1rem;
 }
-
 #uploadForm input[type="file"] {
   background-color: transparent;
   border: none;
 }
-
 #imagePreview {
   margin-top: 10px;
   min-height: 100px;
 }
-
 .template-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
 }
-
 .template-item {
   background: #2a2a2a;
   padding: 15px;
@@ -100,18 +85,15 @@ body {
   text-align: center;
   border: 1px solid #4fc3f733;
 }
-
 .template-item img {
   max-width: 100%;
   border-radius: 6px;
   margin-bottom: 10px;
 }
-
 .template-item p {
   margin: 5px 0;
   font-size: 0.9rem;
 }
-
 .template-item button {
   background-color: #ff4d4d;
   color: #fff;
@@ -121,27 +103,22 @@ body {
   cursor: pointer;
   transition: background-color 0.3s;
 }
-
 .template-item button:hover {
   background-color: #cc0000;
 }
-
 @media (max-width: 600px) {
   .admin-container {
     margin: 20px auto;
     padding: 0 15px;
   }
-
   .admin-section {
     padding: 20px;
   }
-
   .tab-button {
     padding: 10px 20px;
     font-size: 0.9rem;
   }
-
   .template-grid {
     grid-template-columns: 1fr;
   }
-}
+  }
