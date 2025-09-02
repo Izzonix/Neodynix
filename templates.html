@@ -8,42 +8,65 @@
   <link rel="stylesheet" href="styles/template.css" />
 </head>
 <body>
+  <!-- Header -->
   <header class="top-header">
     <span class="logo">Neodynix Technologies</span>
     <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
     <nav id="nav-menu">
       <a href="index.html">Home</a>
       <a href="templates.html">Templates</a>
-      <a href="About.html">About</a>
+      <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
     </nav>
   </header>
+
+  <!-- Main Section -->
   <main>
     <section class="templates-gallery">
       <h1>Explore Our Templates</h1>
       <p>Tap on a template image to preview or select to get started.</p>
+
       <!-- Search Bar -->
       <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search Templates..." onkeyup="filterTemplates()" aria-label="Search Templates" />
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Search Templates..." 
+          onkeyup="filterTemplates()" 
+          aria-label="Search Templates" />
       </div>
+
+      <!-- Category Buttons -->
       <div class="category-buttons">
         <button onclick="showCategory('All')" class="active">All</button>
         <button onclick="showCategory('Business')">Business</button>
         <button onclick="showCategory('Portfolio')">Portfolio</button>
         <button onclick="showCategory('Education')">Education</button>
-        <button onclick="showCategory('Church')">Church</button>
+        <button onclick="showCategory('Religion')">Religion</button>
+        <button onclick="showCategory('Health')">Health</button>
+        <button onclick="showCategory('Media')">Media</button>
+        <button onclick="showCategory('NonProfit')">Non-Profit</button>
+        <button onclick="showCategory('Tech')">Tech</button>
+        <button onclick="showCategory('Industry')">Industry</button>
+        <button onclick="showCategory('Travel')">Travel</button>
         <button onclick="showCategory('Other')">Other</button>
       </div>
+
+      <!-- Template Grid -->
       <div class="template-grid" id="template-container">
-        <!-- Templates will be populated dynamically -->
+        <!-- Templates will be populated dynamically with JavaScript -->
       </div>
     </section>
   </main>
+
+  <!-- Footer -->
   <footer>
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
+
+  <!-- Scripts -->
   <script type="module" src="scripts/supabase-config.js"></script>
-<script type="module" src="scripts/java.js"></script>
-<script type="module" src="scripts/main.js"></script>
+  <script type="module" src="scripts/java.js"></script>
+  <script type="module" src="scripts/main.js"></script>
 </body>
-</html>
+        </html>
