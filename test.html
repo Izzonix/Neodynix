@@ -1,1 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Test Posting to Supabase</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; }
+    input, select, button { display: block; margin: 10px 0; padding: 8px; }
+    #result { margin-top: 20px; color: green; }
+  </style>
+</head>
+<body>
+  <h2>Test Form</h2>
+  <form id="testForm">
+    <input type="text" name="name" placeholder="Name" required />
+    <select name="category" required>
+      <option value="" disabled selected>Select Category</option>
+      <option value="Business">Business</option>
+      <option value="Portfolio">Portfolio</option>
+    </select>
+    <input type="text" name="description" placeholder="Description" required />
+    <input type="text" name="link" placeholder="Link" required />
+    <input type="text" name="image" placeholder="Image URL" required />
+    <button type="submit">Submit</button>
+  </form>
+  <div id="result"></div>
 
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const supabaseUrl = 'https://spnxywyrjbwbwntblcjl.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwbnh5d3lyamJ3YndudGJsY2psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NDc2NDYsImV4cCI6MjA3MjIyMzY0Nn0.Kjta7PEMwTcq1uu5RuKYKvEPPjpR3ko5KCwR8Qh4b6E';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const form = document.getElementById('testForm');
+    const result = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      const data = {
+        name: formData.get('name'),
+        category: formData.get('category'),
+        description: formData.get('description'),
+        link: formData.get('link'),
+        image: formData.get('image'),
+        created_at: new Date().toISOString()
+      };
+
+      try {
+        const { error } = await supabase.from('templates').insert(data);
+        if (error) throw error;
+        result.textContent = 'Data posted successfully!';
+        form.reset();
+      } catch (err) {
+        result.textContent = `Error: ${err.message}`;
+        console.error('Post error:', err);
+      }
+    });
+  </script>
+</body>
+  </html>
