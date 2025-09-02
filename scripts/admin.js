@@ -1,4 +1,4 @@
-import { supabase, supabaseUrl } from 'scripts/supabase-config.js';
+import { supabase, supabaseUrl } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // ----- Tab switching -----
