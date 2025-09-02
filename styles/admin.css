@@ -1,124 +1,206 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #121212;
-  color: #f0f0f0;
+  font-family: "Segoe UI", sans-serif;
+  background: #0d1117;
+  color: #ffffff;
 }
-.admin-container {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
-}
-.admin-tabs {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-.tab-button {
-  background-color: #2a2a2a;
-  color: #f0f0f0;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s, color 0.3s;
-}
-.tab-button.active {
-  background-color: #4fc3f7;
-  color: #000;
-}
-.tab-button:hover {
-  background-color: #4fc3f71a;
-}
-.admin-section {
+
+.top-header {
   background: #1e1e1e;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  border: 1px solid #4fc3f733;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
-.admin-section h2 {
-  margin-top: 0;
-  font-size: 1.8rem;
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
   color: #4fc3f7;
 }
-.template-upload, .template-list {
-  margin-bottom: 40px;
+
+nav a {
+  color: #ccc;
+  margin: 0 10px;
+  text-decoration: none;
 }
-.template-upload h3, .template-list h3 {
-  font-size: 1.4rem;
-  margin-bottom: 20px;
-  color: #f0f0f0;
+
+nav a:hover {
+  color: #4fc3f7;
 }
-#uploadForm, #emailForm {
+
+.hero {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: #161616;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  color: #4fc3f7;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  color: #cbd5e1;
+}
+
+.about-us {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
+  flex-wrap: wrap;
+  padding: 40px 20px;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-text {
   max-width: 500px;
 }
-#uploadForm input, #uploadForm select, #emailForm input, #emailForm select {
-  padding: 12px;
-  border: 1px solid #4fc3f733;
-  border-radius: 6px;
-  background-color: #2a2a2a;
-  color: #f0f0f0;
-  font-size: 1rem;
+
+.about-image img {
+  max-width: 300px;
+  border-radius: 12px;
 }
-#uploadForm input[type="file"] {
-  background-color: transparent;
-  border: none;
-}
-#imagePreview {
-  margin-top: 10px;
-  min-height: 100px;
-}
-.template-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-}
-.template-item {
-  background: #2a2a2a;
-  padding: 15px;
-  border-radius: 8px;
+
+.mission, .values, .team {
+  padding: 40px 20px;
   text-align: center;
-  border: 1px solid #4fc3f733;
 }
-.template-item img {
-  max-width: 100%;
-  border-radius: 6px;
+
+.mission h2, .values h2, .team h2 {
+  color: #4fc3f7;
   margin-bottom: 10px;
 }
-.template-item p {
-  margin: 5px 0;
+
+.values ul {
+  list-style: none;
+  padding: 0;
+}
+
+.values li {
+  margin: 10px 0;
+  font-size: 1.1rem;
+  color: #cbd5e1;
+}
+
+.founder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.founder img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  border: 3px solid #4fc3f7;
+}
+
+footer {
+  background: #161b22;
+  text-align: center;
+  padding: 15px;
   font-size: 0.9rem;
+  color: #888;
 }
-.template-item button {
-  background-color: #ff4d4d;
-  color: #fff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+
+/* Admin Specific Styles */
+.admin-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #1e1e1e;
+  border-radius: 8px;
+}
+
+.admin-tabs {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  background: #4fc3f71a;
+  color: #4fc3f7;
+  border: 1px solid #4fc3f7;
   cursor: pointer;
-  transition: background-color 0.3s;
 }
-.template-item button:hover {
-  background-color: #cc0000;
+
+.tab-button.active {
+  background: #4fc3f7;
+  color: #000;
 }
-@media (max-width: 600px) {
-  .admin-container {
-    margin: 20px auto;
-    padding: 0 15px;
-  }
-  .admin-section {
-    padding: 20px;
-  }
-  .tab-button {
-    padding: 10px 20px;
-    font-size: 0.9rem;
-  }
-  .template-grid {
-    grid-template-columns: 1fr;
-  }
+
+.admin-section {
+  display: none;
+}
+
+.admin-section.active {
+  display: block;
+}
+
+.template-upload form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.template-upload input, .template-upload select {
+  padding: 10px;
+  background: #2a2a2a;
+  color: #fff;
+  border: 1px solid #4fc3f7;
+}
+
+.btn {
+  background: #4fc3f7;
+  color: #000;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  background: #4fc3f77a;
+  cursor: not-allowed;
+}
+
+/* Loading Popup */
+.loading-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.spinner {
+  border: 4px solid #4fc3f7;
+  border-top: 4px solid #03a9f4;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
   }
