@@ -52,6 +52,26 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
+    // Handle more categories
+    const MAX_VISIBLE = 6;
+    const categoryButtonsDiv = document.querySelector('.category-buttons');
+    const buttons = categoryButtonsDiv.querySelectorAll('button');
+    if (buttons.length > MAX_VISIBLE) {
+      for (let i = MAX_VISIBLE; i < buttons.length; i++) {
+        buttons[i].classList.add('hidden');
+      }
+      const moreBtn = document.createElement('button');
+      moreBtn.textContent = '...';
+      moreBtn.classList.add('more-btn');
+      moreBtn.onclick = function() {
+        for (let i = MAX_VISIBLE; i < buttons.length; i++) {
+          buttons[i].classList.remove('hidden');
+        }
+        moreBtn.style.display = 'none';
+      };
+      categoryButtonsDiv.insertBefore(moreBtn, buttons[MAX_VISIBLE]);
+    }
+
     // Show category
     window.showCategory = function(category) {
       const cards = document.querySelectorAll('.template-card');
@@ -74,14 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
         card.style.display = title.includes(searchInput) ? 'block' : 'none';
       });
     };
+  }
 
-    // Auto-fill request form
-    if (window.location.pathname.includes('request.html')) {
-      const getParam = key => new URLSearchParams(window.location.search).get(key);
-      const category = getParam('category');
-      const template = getParam('template');
-      if (category && document.getElementById('category')) document.getElementById('category').value = category;
-      if (template && document.getElementById('template')) document.getElementById('template').value = template;
-    }
+  // Auto-fill request form (moved outside)
+  if (window.location.pathname.includes('request.html')) {
+    const getParam = key => new URLSearchParams(window.location.search).get(key);
+    const category = getParam('category');
+    const template = getParam('template');
+    if (category && document.getElementById('category')) document.getElementById('category').value = category;
+    if (template && document.getElementById('template')) document.getElementById('template').value = template;
   }
 });
