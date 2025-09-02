@@ -77,42 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Template uploaded successfully!');
       uploadForm.reset();
       preview.innerHTML = '';
-      fetchTemplates();
+      // Removed fetchTemplates call since display is handled by templates.html
     } catch (err) {
       console.error('Upload error:', err);
       alert('Failed to upload. Check console.');
     }
   });
-
-  // ----- Fetch and display templates -----
-  const templateList = document.getElementById('templateList');
-
-  async function fetchTemplates() {
-    try {
-      const { data, error } = await supabase.from('templates').select('*').order('id', { ascending: true });
-      if (error) throw error;
-
-      templateList.innerHTML = '';
-      data.forEach(template => {
-        const card = document.createElement('div');
-        card.className = 'template-card';
-        card.innerHTML = `
-          <img src="${template.image}" alt="${template.name}" />
-          <h4>${template.name}</h4>
-          <p>${template.description}</p>
-          <div class="template-actions">
-            <button onclick="editTemplate(${template.id})">Edit</button>
-            <button onclick="deleteTemplate(${template.id})">Delete</button>
-          </div>
-        `;
-        templateList.appendChild(card);
-      });
-    } catch (err) {
-      console.error('Error fetching templates:', err);
-    }
-  }
-
-  fetchTemplates();
 
   // ----- Edit template -----
   window.editTemplate = async (id) => {
@@ -141,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (updateError) return alert('Update failed.');
 
     alert('Template updated successfully!');
-    fetchTemplates();
+    // Removed fetchTemplates call since display is handled by templates.html
   };
 
   // ----- Delete template -----
@@ -150,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const { error } = await supabase.from('templates').delete().eq('id', id);
     if (error) return alert('Delete failed.');
     alert('Template deleted!');
-    fetchTemplates();
+    // Removed fetchTemplates call since display is handled by templates.html
   };
 
   // ----- Email sending -----
