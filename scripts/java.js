@@ -1,6 +1,23 @@
 import { supabase } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Auto-fill request form
+  function autoFillForm() {
+    const getParam = key => new URLSearchParams(window.location.search).get(key);
+    const category = getParam('category');
+    const template = getParam('template');
+    const categoryInput = document.getElementById('category');
+    const templateInput = document.getElementById('template');
+    if (category && categoryInput) categoryInput.value = decodeURIComponent(category);
+    if (template && templateInput) templateInput.value = decodeURIComponent(template);
+  }
+
+  // Run autofill if on request.html
+  if (window.location.pathname.includes('request.html')) {
+    autoFillForm();
+  }
+
+  // Template-related logic
   const templateContainer = document.getElementById('template-container');
   if (templateContainer) {
     async function fetchTemplates() {
@@ -80,21 +97,5 @@ document.addEventListener('DOMContentLoaded', () => {
         card.style.display = title.includes(searchInput) ? 'block' : 'none';
       });
     };
-
-    // Auto-fill request form
-    function autoFillForm() {
-      const getParam = key => new URLSearchParams(window.location.search).get(key);
-      const category = getParam('category');
-      const template = getParam('template');
-      const categoryInput = document.getElementById('category');
-      const templateInput = document.getElementById('template');
-      if (category && categoryInput) categoryInput.value = decodeURIComponent(category);
-      if (template && templateInput) templateInput.value = decodeURIComponent(template);
-    }
-
-    // Check if on request.html and apply auto-fill
-    if (window.location.pathname.includes('request.html')) {
-      autoFillForm();
-    }
   }
 });
