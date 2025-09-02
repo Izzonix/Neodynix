@@ -75,6 +75,29 @@ p {
   box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
 }
 
+.category-buttons button.hidden {
+  display: none;
+}
+
+.more-btn {
+  padding: 12px 28px;
+  background-color: #4fc3f71a;
+  color: #4fc3f7;
+  border: 1px solid #4fc3f7;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  transition: background-color 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.more-btn:hover {
+  background-color: #4fc3f7;
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+}
+
 /* Template Cards */
 .template-grid {
   display: grid;
@@ -200,4 +223,4 @@ p {
   .category-buttons {
     gap: 8px;
   }
-  }
+}
