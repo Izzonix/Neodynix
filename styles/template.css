@@ -77,9 +77,14 @@ p {
   box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
 }
 
+#more-button {
+  padding: 12px 20px;
+}
+
 #more-categories {
-  display: flex;
+  display: none;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* Template Cards */
@@ -211,4 +216,4 @@ p {
   .category-buttons, #more-categories {
     gap: 8px;
   }
-  }
+    }
