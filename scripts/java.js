@@ -43,12 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchTemplates();
 
     // Category buttons
-    const categoryButtons = document.querySelectorAll('.category-buttons button');
+    const categoryButtons = document.querySelectorAll('.category-buttons button, #more-categories button');
     categoryButtons.forEach(button => {
       button.addEventListener('click', () => {
         categoryButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
-        showCategory(button.textContent);
+        if (button.id !== 'more-button') showCategory(button.textContent);
       });
     });
 
