@@ -12,7 +12,7 @@
 </head>
 <body>
   <h2>Test Form</h2>
-  <form id="testForm">
+  <form id="testForm" enctype="multipart/form-data">
     <input type="text" name="name" placeholder="Name" required />
     <select name="category" required>
       <option value="" disabled selected>Select Category</option>
@@ -21,7 +21,7 @@
     </select>
     <input type="text" name="description" placeholder="Description" required />
     <input type="text" name="link" placeholder="Link" required />
-    <input type="text" name="image" placeholder="Image URL" required />
+    <input type="file" name="image" accept="image/*" required />
     <button type="submit">Submit</button>
   </form>
   <div id="result"></div>
@@ -39,20 +39,36 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const formData = new FormData(form);
+      const file = formData.get('image');
 
-      const data = {
-        name: formData.get('name'),
-        category: formData.get('category'),
-        description: formData.get('description'),
-        link: formData.get('link'),
-        image: formData.get('image'),
-        created_at: new Date().toISOString()
-      };
+      if (!file) {
+        result.textContent = 'Please select an image.';
+        return;
+      }
 
       try {
+        // Upload image to Supabase Storage
+        const { data: storageData, error: storageError } = await supabase.storage
+          .from('templates')
+          .upload(`${Date.now()}-${file.name}`, file, { cacheControl: '3600', upsert: false });
+        if (storageError) throw storageError;
+
+        const imageUrl = `${supabaseUrl}/storage/v1/object/public/templates/${storageData.path}`;
+
+        // Insert data into templates table
+        const data = {
+          name: formData.get('name'),
+          category: formData.get('category'),
+          description: formData.get('description'),
+          link: formData.get('link'),
+          image: imageUrl,
+          created_at: new Date().toISOString()
+        };
+
         const { error } = await supabase.from('templates').insert(data);
         if (error) throw error;
-        result.textContent = 'Data posted successfully!';
+
+        result.textContent = 'Data and image posted successfully!';
         form.reset();
       } catch (err) {
         result.textContent = `Error: ${err.message}`;
@@ -61,4 +77,4 @@
     });
   </script>
 </body>
-  </html>
+      </html>
