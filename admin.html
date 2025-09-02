@@ -26,7 +26,7 @@
         <button id="btnSendEmail" class="tab-button">Send Email</button>
       </div>
       <!-- Template Management Section -->
-      <div id="sectionTemplates" class="admin-section">
+      <div id="sectionTemplates" class="admin-section active">
         <h2>Manage Templates</h2>
         <div class="template-upload">
           <h3>Add New Template</h3>
@@ -42,10 +42,11 @@
             </select>
             <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
             <input type="text" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
-            <input type="file" id="imageFile" name="image" accept="image/*" required aria-label="Template Image" />
+            <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
             <div id="imagePreview"></div>
             <button type="submit" class="btn">Upload Template</button>
           </form>
+          <div id="result"></div>
         </div>
         <div class="template-list">
           <h3>Existing Templates</h3>
@@ -53,7 +54,7 @@
         </div>
       </div>
       <!-- Email Sending Section -->
-      <div id="sectionSendEmail" class="admin-section" style="display: none;">
+      <div id="sectionSendEmail" class="admin-section">
         <h2>Send Custom Email</h2>
         <form id="emailForm">
           <input type="email" name="customerEmail" placeholder="Customer Email" required aria-label="Customer Email" />
