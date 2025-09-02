@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const imageFile = document.getElementById('imageFile');
   const preview = document.getElementById('imagePreview');
   const uploadForm = document.getElementById('uploadForm');
+  const result = document.getElementById('result');
 
   imageFile.addEventListener('change', () => {
     const file = imageFile.files[0];
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const reader = new FileReader();
     reader.onload = (e) => {
-      preview.innerHTML = `<img src="${e.target.result}" alt="preview" style="max-width: 100%; border-radius: 8px;">`;
+      preview.innerHTML = `<img src="${e.target.result}" alt="preview" style="max-width: 100%; border-radius: 6px;">`;
     };
     reader.readAsDataURL(file);
   });
@@ -55,39 +56,56 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const formData = new FormData(uploadForm);
     const file = imageFile.files[0];
-    if (!file) return alert('Please select an image.');
+
+    if (!file) {
+      showResult('Please select a file.', 'error');
+      return;
+    }
 
     try {
+      showResult('Uploading file...', 'info');
+      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data: storageData, error: storageError } = await supabase.storage
         .from('templates')
-        .upload(`${Date.now()}-${file.name}`, file, { cacheControl: '3600', upsert: false });
-      if (storageError) throw storageError;
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: file.type
+        });
+      if (storageError) throw new Error(`Storage upload failed: ${storageError.message}`);
 
       const imageUrl = `${supabaseUrl}/storage/v1/object/public/templates/${storageData.path}`;
+      console.log('File uploaded, URL:', imageUrl);
 
-      const { error: dbError } = await supabase.from('templates').insert({
+      const data = {
         name: formData.get('name'),
         category: formData.get('category'),
         description: formData.get('description'),
         link: formData.get('link'),
-        image: imageUrl
-      });
-      if (dbError) throw dbError;
+        image: imageUrl,
+        created_at: new Date().toISOString()
+      };
+      console.log('Inserting data:', data);
 
-      alert('Template uploaded successfully!');
+      const { error } = await supabase.from('templates').insert(data);
+      if (error) throw new Error(`Database insert failed: ${error.message}`);
+
+      showResult('Data and file posted successfully!', 'success');
       uploadForm.reset();
       preview.innerHTML = '';
-      // Removed fetchTemplates call since display is handled by templates.html
     } catch (err) {
-      console.error('Upload error:', err);
-      alert('Failed to upload. Check console.');
+      showResult(err.message, 'error');
+      console.error('Submission error:', err);
     }
   });
 
   // ----- Edit template -----
   window.editTemplate = async (id) => {
     const { data: existingData, error: fetchError } = await supabase.from('templates').select('*').eq('id', id).single();
-    if (fetchError) return alert('Failed to fetch template.');
+    if (fetchError) {
+      showResult('Failed to fetch template.', 'error');
+      return;
+    }
 
     const name = prompt('New name:', existingData.name) || existingData.name;
     const category = prompt('New category:', existingData.category) || existingData.category;
@@ -98,29 +116,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const file = imageFile.files[0];
     if (file) {
+      showResult('Uploading new image...', 'info');
+      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data: imgData, error: imgError } = await supabase.storage
         .from('templates')
-        .upload(`${Date.now()}-${file.name}`, file);
-      if (imgError) return alert('Image upload failed.');
+        .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+      if (imgError) {
+        showResult(`Image upload failed: ${imgError.message}`, 'error');
+        return;
+      }
       updateData.image = `${supabaseUrl}/storage/v1/object/public/templates/${imgData.path}`;
+      console.log('Updated image URL:', updateData.image);
     } else {
       updateData.image = existingData.image;
     }
 
     const { error: updateError } = await supabase.from('templates').update(updateData).eq('id', id);
-    if (updateError) return alert('Update failed.');
+    if (updateError) {
+      showResult(`Update failed: ${updateError.message}`, 'error');
+      return;
+    }
 
-    alert('Template updated successfully!');
-    // Removed fetchTemplates call since display is handled by templates.html
+    showResult('Template updated successfully!', 'success');
   };
 
   // ----- Delete template -----
   window.deleteTemplate = async (id) => {
     if (!confirm('Are you sure?')) return;
     const { error } = await supabase.from('templates').delete().eq('id', id);
-    if (error) return alert('Delete failed.');
-    alert('Template deleted!');
-    // Removed fetchTemplates call since display is handled by templates.html
+    if (error) {
+      showResult(`Delete failed: ${error.message}`, 'error');
+      return;
+    }
+    showResult('Template deleted!', 'success');
   };
 
   // ----- Email sending -----
@@ -129,7 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const formData = new FormData(emailForm);
 
-    if (!window.emailjs) return alert('EmailJS not loaded!');
+    if (!window.emailjs) {
+      showResult('EmailJS not loaded!', 'error');
+      return;
+    }
     emailjs.init('YOUR_EMAILJS_USER_ID');
 
     const templateParams = {
@@ -141,11 +172,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams);
-      alert('Email sent successfully!');
+      showResult('Email sent successfully!', 'success');
       emailForm.reset();
     } catch (err) {
+      showResult('Failed to send email.', 'error');
       console.error('Email error:', err);
-      alert('Failed to send email.');
     }
   });
+
+  function showResult(message, type) {
+    result.textContent = message;
+    result.className = type === 'success' ? 'success' : 'error';
+    result.style.display = 'block';
+    setTimeout(() => result.style.display = 'none', 5000);
+  }
 });
