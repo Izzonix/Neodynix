@@ -8,21 +8,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const sectionSendEmail = document.getElementById('sectionSendEmail');
 
   function showSection(section) {
+    // Remove active class from all buttons
+    btnTemplates.classList.remove('active');
+    btnSendEmail.classList.remove('active');
+    // Hide all sections
+    sectionTemplates.style.display = 'none';
+    sectionSendEmail.style.display = 'none';
+
+    // Show selected section and set active button
     if (section === 'templates') {
       btnTemplates.classList.add('active');
-      btnSendEmail.classList.remove('active');
       sectionTemplates.style.display = 'block';
-      sectionSendEmail.style.display = 'none';
     } else if (section === 'email') {
       btnSendEmail.classList.add('active');
-      btnTemplates.classList.remove('active');
       sectionSendEmail.style.display = 'block';
-      sectionTemplates.style.display = 'none';
     }
   }
 
   btnTemplates.addEventListener('click', () => showSection('templates'));
   btnSendEmail.addEventListener('click', () => showSection('email'));
+
+  // Set default section on load
+  showSection('templates');
 
   // ----- Image preview -----
   const imageFile = document.getElementById('imageFile');
