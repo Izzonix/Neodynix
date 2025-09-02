@@ -8,14 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const sectionSendEmail = document.getElementById('sectionSendEmail');
 
   function showSection(section) {
-    // Remove active class from all buttons
     btnTemplates.classList.remove('active');
     btnSendEmail.classList.remove('active');
-    // Hide all sections
     sectionTemplates.style.display = 'none';
     sectionSendEmail.style.display = 'none';
-
-    // Show selected section and set active button
     if (section === 'templates') {
       btnTemplates.classList.add('active');
       sectionTemplates.style.display = 'block';
@@ -25,10 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  btnTemplates.addEventListener('click', () => showSection('templates'));
-  btnSendEmail.addEventListener('click', () => showSection('email'));
+  btnTemplates.addEventListener('click', () => {
+    console.log('Templates button clicked');
+    showSection('templates');
+  });
+  btnSendEmail.addEventListener('click', () => {
+    console.log('Send Email button clicked');
+    showSection('email');
+  });
 
-  // Set default section on load
   showSection('templates');
 
   // ----- Image preview -----
@@ -57,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) return alert('Please select an image.');
 
     try {
-      // Upload to Supabase storage
       const { data: storageData, error: storageError } = await supabase.storage
         .from('templates')
         .upload(`${Date.now()}-${file.name}`, file, { cacheControl: '3600', upsert: false });
@@ -65,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const imageUrl = `${supabaseUrl}/storage/v1/object/public/templates/${storageData.path}`;
 
-      // Insert into DB
       const { error: dbError } = await supabase.from('templates').insert({
         name: formData.get('name'),
         category: formData.get('category'),
@@ -78,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Template uploaded successfully!');
       uploadForm.reset();
       preview.innerHTML = '';
-      fetchTemplates(); // Refresh template list
+      fetchTemplates();
     } catch (err) {
       console.error('Upload error:', err);
       alert('Failed to upload. Check console.');
@@ -113,7 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Fetch templates initially
   fetchTemplates();
 
   // ----- Edit template -----
