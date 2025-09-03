@@ -274,10 +274,11 @@ body {
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 120px);
+  padding-top: 20px;
 }
 
 .login-container {
-  max-width: 100%;
+  max-width: 400px;
   width: 90%;
   padding: 20px;
   background: #1e1e1e;
@@ -297,6 +298,10 @@ body {
 
 /* Mobile-specific styles */
 @media (max-width: 600px) {
+  .login-section {
+    padding-top: 10px;
+  }
+
   .admin-container {
     margin: 5px;
     padding: 10px;
