@@ -107,6 +107,23 @@ input[type="range"]::-moz-range-thumb {
   display: block;
 }
 
+/* Mobile Price Popup */
+.mobile-price-popup {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2c2c2c;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #4fc3f7;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  text-align: center;
+}
+
 /* Button */
 .btn {
   background: #4fc3f7;
@@ -121,11 +138,26 @@ input[type="range"]::-moz-range-thumb {
   margin: 25px auto 0;
   width: 100%;
   max-width: 320px;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.btn:hover {
+.btn.btn-request {
+  background: #4fc3f7;
+  color: #000;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.btn.btn-request:hover {
   background: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
+}
+
+.btn.btn-request:disabled {
+  background: #4fc3f77a;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Custom File Upload */
@@ -246,6 +278,44 @@ input[type="range"]::-moz-range-thumb {
   margin-top: 10px;
 }
 
+/* Loading Popup */
+.loading-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.spinner {
+  border: 3px solid #4fc3f7;
+  border-top: 3px solid #03a9f4;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin: 8px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 @media (max-width: 600px) {
   .form-section {
     padding: 20px 15px;
@@ -260,4 +330,8 @@ input[type="range"]::-moz-range-thumb {
   .theme-choice label {
     padding-left: 30px;
   }
-}
+  .mobile-price-popup {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+  }
