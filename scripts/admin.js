@@ -69,9 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial load
   fetchTemplates();
 
-  // ----- Image preview -----
+  // ----- Image preview and file name display -----
   const imageFile = document.getElementById('imageFile');
   const preview = document.getElementById('imagePreview');
+  const fileName = document.getElementById('file-name');
   const uploadForm = document.getElementById('uploadForm');
   const result = document.getElementById('result');
   const loadingPopup = document.getElementById('loading-popup');
@@ -82,8 +83,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = imageFile.files[0];
     if (!file) {
       preview.innerHTML = '';
+      fileName.textContent = 'No file chosen';
       return;
     }
+    fileName.textContent = file.name;
     const reader = new FileReader();
     reader.onload = (e) => {
       preview.innerHTML = `<img src="${e.target.result}" alt="preview" style="max-width: 100%; border-radius: 6px;">`;
@@ -139,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showResult('Data and file posted successfully!', 'success');
       uploadForm.reset();
       preview.innerHTML = '';
+      fileName.textContent = 'No file chosen';
       fetchTemplates(); // Refresh template list
     } catch (err) {
       showResult(err.message, 'error');
