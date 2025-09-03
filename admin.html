@@ -21,13 +21,15 @@
   </header>
   <main>
     <section id="login-section" class="login-section" style="display: none;">
-      <h2>Admin Login</h2>
-      <form id="loginForm" class="login-form">
-        <input type="email" id="email" placeholder="Email" required aria-label="Email" />
-        <input type="password" id="password" placeholder="Password" required aria-label="Password" />
-        <button type="submit" class="btn">Login</button>
-      </form>
-      <p id="login-error" class="error" style="display: none;"></p>
+      <div class="login-container">
+        <h2>Admin Login</h2>
+        <form id="loginForm" class="login-form">
+          <input type="email" id="email" placeholder="Email" required aria-label="Email" />
+          <input type="password" id="password" placeholder="Password" required aria-label="Password" />
+          <button type="submit" class="btn">Login</button>
+        </form>
+        <p id="login-error" class="error" style="display: none;"></p>
+      </div>
     </section>
     <section id="admin-container" class="admin-container" style="display: none;">
       <div class="admin-tabs">
