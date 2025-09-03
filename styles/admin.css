@@ -126,10 +126,18 @@ footer {
   background: #4fc3f71a;
   color: #4fc3f7;
   border: 1px solid #4fc3f7;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 .tab-button.active {
+  background: #4fc3f7;
+  color: #000;
+  transform: translateY(-2px);
+}
+
+.tab-button:hover {
   background: #4fc3f7;
   color: #000;
 }
@@ -145,14 +153,65 @@ footer {
 .template-upload form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
+}
+
+.template-upload h3 {
+  color: #4fc3f7;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
 }
 
 .template-upload input, .template-upload select {
-  padding: 10px;
+  padding: 12px;
   background: #2a2a2a;
   color: #fff;
-  border: 1px solid #4fc3f7;
+  border: 2px solid #4fc3f7;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.template-upload input:focus, .template-upload select:focus {
+  outline: none;
+  border-color: #03a9f4;
+  box-shadow: 0 0 8px rgba(3, 169, 244, 0.4);
+}
+
+.template-upload input[name="link"] {
+  font-family: "Segoe UI", sans-serif;
+  background: #1e1e1e;
+}
+
+.file-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.file-input-wrapper input[type="file"] {
+  display: none;
+}
+
+.file-input-label {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #4fc3f7;
+  color: #000;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.file-input-label:hover {
+  background: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+}
+
+#imagePreview {
+  margin-top: 10px;
 }
 
 .template-grid {
@@ -198,11 +257,19 @@ footer {
   border: none;
   border-radius: 6px;
   margin: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn:hover {
+  background: #03a9f4;
+  transform: translateY(-2px);
 }
 
 .btn:disabled {
   background: #4fc3f77a;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn-delete {
