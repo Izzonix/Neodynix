@@ -47,8 +47,11 @@
               <option value="Other">Other</option>
             </select>
             <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
-            <input type="text" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
-            <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
+            <input type="url" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
+            <div class="file-input-wrapper">
+              <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
+              <label for="imageFile" class="file-input-label">Choose File</label>
+            </div>
             <div id="imagePreview"></div>
             <button type="submit" id="upload-btn" class="btn">Upload Template</button>
           </form>
