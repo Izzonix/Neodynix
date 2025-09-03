@@ -1,6 +1,18 @@
 import { supabase, supabaseUrl } from './supabase-config.js';
 
+// Simple client-side password protection
+const ADMIN_PASSWORD = 'neodynix2025'; // Change this to a secure password
+
 document.addEventListener('DOMContentLoaded', () => {
+  const authContainer = document.getElementById('auth-container');
+  const password = prompt('Enter admin password:');
+  if (password !== ADMIN_PASSWORD) {
+    alert('Incorrect password. Redirecting to homepage.');
+    window.location.href = 'index.html';
+    return;
+  }
+  authContainer.style.display = 'block';
+
   // ----- Tab switching -----
   const btnTemplates = document.getElementById('btnTemplates');
   const btnSendEmail = document.getElementById('btnSendEmail');
@@ -69,10 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial load
   fetchTemplates();
 
-  // ----- Image preview and file name display -----
+  // ----- Image preview -----
   const imageFile = document.getElementById('imageFile');
   const preview = document.getElementById('imagePreview');
-  const fileName = document.getElementById('file-name');
   const uploadForm = document.getElementById('uploadForm');
   const result = document.getElementById('result');
   const loadingPopup = document.getElementById('loading-popup');
@@ -83,10 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = imageFile.files[0];
     if (!file) {
       preview.innerHTML = '';
-      fileName.textContent = 'No file chosen';
       return;
     }
-    fileName.textContent = file.name;
     const reader = new FileReader();
     reader.onload = (e) => {
       preview.innerHTML = `<img src="${e.target.result}" alt="preview" style="max-width: 100%; border-radius: 6px;">`;
@@ -142,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showResult('Data and file posted successfully!', 'success');
       uploadForm.reset();
       preview.innerHTML = '';
-      fileName.textContent = 'No file chosen';
       fetchTemplates(); // Refresh template list
     } catch (err) {
       showResult(err.message, 'error');
