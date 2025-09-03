@@ -1,110 +1,379 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Panel - Neodynix</title>
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/admin.css" />
-</head>
-<body>
-  <header class="top-header">
-    <span class="logo">Neodynix Technologies - Admin</span>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
-    <nav id="nav-menu">
-      <a href="index.html">Home</a>
-      <a href="templates.html">Templates</a>
-      <a href="About.html">About</a>
-      <a href="contact.html">Contact</a>
-      <a href="admin.html">Admin</a>
-    </nav>
-  </header>
-  <main>
-    <section id="login-section" class="login-section" style="display: none;">
-      <div class="login-container">
-        <h2>Admin Login</h2>
-        <form id="loginForm" class="login-form">
-          <input type="email" id="email" placeholder="Email" required aria-label="Email" />
-          <input type="password" id="password" placeholder="Password" required aria-label="Password" />
-          <button type="submit" class="btn">Login</button>
-        </form>
-        <p id="login-error" class="error" style="display: none;"></p>
-      </div>
-    </section>
-    <section id="admin-container" class="admin-container" style="display: none;">
-      <div class="admin-tabs">
-        <button id="btnTemplates" class="tab-button active">Manage Templates</button>
-        <button id="btnSendEmail" class="tab-button">Send Email</button>
-        <button id="logout-btn" class="btn btn-logout">Logout</button>
-      </div>
-      <!-- Template Management Section -->
-      <div id="sectionTemplates" class="admin-section active">
-        <h2>Manage Templates</h2>
-        <div class="template-upload">
-          <h3>Add New Template</h3>
-          <form id="uploadForm">
-            <input type="text" name="name" placeholder="Template Name" required aria-label="Template Name" />
-            <select name="category" required aria-label="Template Category">
-              <option value="" disabled selected>Select Category</option>
-              <option value="Business">Business</option>
-              <option value="Portfolio">Portfolio</option>
-              <option value="Education">Education</option>
-              <option value="Religion">Religion</option>
-              <option value="Health">Health</option>
-              <option value="Media">Media</option>
-              <option value="NonProfit">Non-Profit</option>
-              <option value="Tech">Tech</option>
-              <option value="Industry">Industry</option>
-              <option value="Travel">Travel</option>
-              <option value="Other">Other</option>
-            </select>
-            <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
-            <input type="url" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
-            <div class="file-input-wrapper">
-              <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
-              <label for="imageFile" class="file-input-label">Choose File</label>
-            </div>
-            <div id="imagePreview"></div>
-            <button type="submit" id="upload-btn" class="btn">Upload Template</button>
-          </form>
-          <div id="result"></div>
-        </div>
-        <div class="template-list">
-          <h3>Existing Templates</h3>
-          <div id="templateList" class="template-grid"></div>
-        </div>
-      </div>
-      <!-- Email Sending Section -->
-      <div id="sectionSendEmail" class="admin-section">
-        <h2>Send Custom Email</h2>
-        <form id="emailForm" class="email-form">
-          <input type="email" name="customerEmail" placeholder="Customer Email" required aria-label="Customer Email" />
-          <input type="url" name="customLink" placeholder="Custom Link" required aria-label="Custom Link" />
-          <input type="number" name="price" placeholder="Price" required aria-label="Price" />
-          <select name="currency" required aria-label="Currency">
-            <option value="" disabled selected>Select Currency</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
-          <button type="submit" id="email-btn" class="btn">Send Email</button>
-        </form>
-      </div>
-      <!-- Loading Popup -->
-      <div id="loading-popup" class="loading-popup" style="display: none;">
-        <div class="loading-content">
-          <p>Processing...</p>
-          <div class="spinner"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-  <footer>
-    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
-  </footer>
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-  <script type="module" src="scripts/admin.js"></script>
-  <script type="module" src="scripts/main.js"></script>
-</body>
-</html>
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #0d1117;
+  color: #ffffff;
+}
+
+.top-header {
+  background: #1e1e1e;
+  padding: 15px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4fc3f7;
+}
+
+nav a {
+  color: #ccc;
+  margin: 0 10px;
+  text-decoration: none;
+}
+
+nav a:hover {
+  color: #4fc3f7;
+}
+
+.hero {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: #161616;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  color: #4fc3f7;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  margin-top: 10px;
+  color: #cbd5e1;
+}
+
+.about-us {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 40px 20px;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-text {
+  max-width: 500px;
+}
+
+.about-image img {
+  max-width: 300px;
+  border-radius: 12px;
+}
+
+.mission, .values, .team {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.mission h2, .values h2, .team h2 {
+  color: #4fc3f7;
+  margin-bottom: 10px;
+}
+
+.values ul {
+  list-style: none;
+  padding: 0;
+}
+
+.values li {
+  margin: 10px 0;
+  font-size: 1.1rem;
+  color: #cbd5e1;
+}
+
+.founder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.founder img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  border: 3px solid #4fc3f7;
+}
+
+footer {
+  background: #161b22;
+  text-align: center;
+  padding: 15px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+/* Admin Specific Styles */
+.admin-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.admin-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  gap: 10px;
+  align-items: center;
+}
+
+.tab-button {
+  padding: 10px 20px;
+  background: #4fc3f71a;
+  color: #4fc3f7;
+  border: 1px solid #4fc3f7;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.tab-button.active {
+  background: #4fc3f7;
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+}
+
+.tab-button:hover {
+  background: #4fc3f7;
+  color: #000;
+  transform: translateY(-2px);
+}
+
+.admin-section {
+  display: none;
+}
+
+.admin-section.active {
+  display: block;
+}
+
+.template-upload h3, .admin-section h2, .login-section h2 {
+  color: #4fc3f7;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.template-upload form, .email-form, .login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input {
+  padding: 12px;
+  background: #1e1e1e;
+  color: #fff;
+  border: 2px solid #4fc3f7;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: "Segoe UI", sans-serif;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.template-upload input:focus, .template-upload select:focus, .email-form input:focus, .email-form select:focus, .login-form input:focus {
+  outline: none;
+  border-color: #03a9f4;
+  box-shadow: 0 0 8px rgba(3, 169, 244, 0.4);
+}
+
+.file-input-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.file-input-wrapper input[type="file"] {
+  display: none;
+}
+
+.file-input-label {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #4fc3f7;
+  color: #000;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.file-input-label:hover {
+  background: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+}
+
+#imagePreview {
+  margin-top: 10px;
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.template-card {
+  background: #2a2a2a;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.template-card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.template-card p {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-bottom: 10px;
+}
+
+.template-card a {
+  color: #4fc3f7;
+  text-decoration: none;
+  margin-bottom: 10px;
+  display: inline-block;
+}
+
+.template-card a:hover {
+  text-decoration: underline;
+}
+
+.btn {
+  background: #4fc3f7;
+  color: #000;
+  padding: 12px 24px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  margin: 5px;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.btn:hover {
+  background: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+}
+
+.btn:disabled {
+  background: #4fc3f77a;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-logout {
+  background: #ff4d4d;
+  margin-left: auto;
+}
+
+.btn-logout:hover {
+  background: #e60000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(230, 0, 0, 0.3);
+}
+
+.btn-delete {
+  background: #ff4d4d;
+}
+
+.btn-delete:hover {
+  background: #e60000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(230, 0, 0, 0.3);
+}
+
+/* Loading Popup */
+.loading-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.spinner {
+  border: 4px solid #4fc3f7;
+  border-top: 4px solid #03a9f4;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Result Message */
+.success {
+  color: #4fc3f7;
+  font-weight: bold;
+}
+
+.error {
+  color: #ff4d4d;
+  font-weight: bold;
+  padding: 10px;
+  border-radius: 4px;
+  background: #ff4d4d1a;
+}
+
+/* Login Section */
+.login-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 150px);
+}
+
+.login-container {
+  max-width: 400px;
+  width: 100%;
+  padding: 30px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.login-form {
+  margin-top: 20px;
+}
+
+.login-form input, .login-form button {
+  width: 100%;
+  box-sizing: border-box;
+}
