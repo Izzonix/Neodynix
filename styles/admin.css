@@ -150,37 +150,33 @@ footer {
   display: block;
 }
 
-.template-upload form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.template-upload h3 {
+.template-upload h3, .admin-section h2 {
   color: #4fc3f7;
   font-size: 1.5rem;
   margin-bottom: 15px;
 }
 
-.template-upload input, .template-upload select {
+.template-upload form, .email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.template-upload input, .template-upload select, .email-form input, .email-form select {
   padding: 12px;
-  background: #2a2a2a;
+  background: #1e1e1e;
   color: #fff;
   border: 2px solid #4fc3f7;
   border-radius: 6px;
   font-size: 1rem;
+  font-family: "Segoe UI", sans-serif;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.template-upload input:focus, .template-upload select:focus {
+.template-upload input:focus, .template-upload select:focus, .email-form input:focus, .email-form select:focus {
   outline: none;
   border-color: #03a9f4;
   box-shadow: 0 0 8px rgba(3, 169, 244, 0.4);
-}
-
-.template-upload input[name="link"] {
-  font-family: "Segoe UI", sans-serif;
-  background: #1e1e1e;
 }
 
 .file-input-wrapper {
