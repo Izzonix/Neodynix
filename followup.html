@@ -14,10 +14,16 @@
         <label for="category">Select Category</label>  
         <select id="category" name="category" required>  
           <option value="">-- Select Category --</option>  
-          <option value="school">School</option>  
           <option value="business">Business</option>  
           <option value="portfolio">Portfolio</option>  
+          <option value="education">Education</option>  
+          <option value="ecommerce">E-commerce</option>  
+          <option value="charity">Charity</option>  
+          <option value="blog">Blog</option>  
+          <option value="healthcare">Healthcare</option>  
+          <option value="event">Event</option>  
           <option value="church">Church</option>  
+          <option value="nonprofit">Non-profit</option>  
           <option value="other">Other</option>  
         </select>  
 
@@ -73,7 +79,7 @@
           <textarea id="extraPages" name="extraPages" placeholder="List page names separated by commas" rows="3"></textarea>  
         </div>  
 
-        <div class="category-fields school-fields" style="display:none;">  
+        <div class="category-fields education-fields" style="display:none;">  
           <label for="schoolName">School Name</label>  
           <input type="text" id="schoolName" name="schoolName" />  
           <label for="numStudents">Number of Students</label>  
@@ -98,20 +104,74 @@
           <input type="text" id="contactPersonPortfolio" name="contactPersonPortfolio" />  
         </div>  
 
+        <div class="category-fields ecommerce-fields" style="display:none;">  
+          <label for="businessName">Business Name</label>  
+          <input type="text" id="businessNameEcommerce" name="businessName" />  
+          <label for="products">Products Offered</label>  
+          <textarea id="products" name="products"></textarea>  
+          <label for="contactPersonEcommerce">Contact Person</label>  
+          <input type="text" id="contactPersonEcommerce" name="contactPersonEcommerce" />  
+        </div>  
+
+        <div class="category-fields charity-fields" style="display:none;">  
+          <label for="charityName">Charity Name</label>  
+          <input type="text" id="charityName" name="charityName" />  
+          <label for="mission">Mission Statement</label>  
+          <textarea id="mission" name="mission"></textarea>  
+          <label for="contactPersonCharity">Contact Person</label>  
+          <input type="text" id="contactPersonCharity" name="contactPersonCharity" />  
+        </div>  
+
+        <div class="category-fields blog-fields" style="display:none;">  
+          <label for="blogName">Blog Name</label>  
+          <input type="text" id="blogName" name="blogName" />  
+          <label for="topics">Blog Topics</label>  
+          <textarea id="topics" name="topics"></textarea>  
+          <label for="contactPersonBlog">Contact Person</label>  
+          <input type="text" id="contactPersonBlog" name="contactPersonBlog" />  
+        </div>  
+
+        <div class="category-fields healthcare-fields" style="display:none;">  
+          <label for="facilityName">Facility Name</label>  
+          <input type="text" id="facilityName" name="facilityName" />  
+          <label for="services">Medical Services</label>  
+          <textarea id="servicesHealthcare" name="services"></textarea>  
+          <label for="contactPersonHealthcare">Contact Person</label>  
+          <input type="text" id="contactPersonHealthcare" name="contactPersonHealthcare" />  
+        </div>  
+
+        <div class="category-fields event-fields" style="display:none;">  
+          <label for="eventName">Event Name</label>  
+          <input type="text" id="eventName" name="eventName" />  
+          <label for="eventDetails">Event Details</label>  
+          <textarea id="eventDetails" name="eventDetails"></textarea>  
+          <label for="contactPersonEvent">Contact Person</label>  
+          <input type="text" id="contactPersonEvent" name="contactPersonEvent" />  
+        </div>  
+
         <div class="category-fields church-fields" style="display:none;">  
           <label for="churchName">Church Name</label>  
           <input type="text" id="churchName" name="churchName" />  
           <label for="services">Services/Events</label>  
-          <textarea id="services" name="services"></textarea>  
+          <textarea id="servicesChurch" name="services"></textarea>  
           <label for="contactPersonChurch">Contact Person</label>  
           <input type="text" id="contactPersonChurch" name="contactPersonChurch" />  
+        </div>  
+
+        <div class="category-fields nonprofit-fields" style="display:none;">  
+          <label for="nonprofitName">Non-profit Name</label>  
+          <input type="text" id="nonprofitName" name="nonprofitName" />  
+          <label for="mission">Mission Statement</label>  
+          <textarea id="missionNonprofit" name="mission"></textarea>  
+          <label for="contactPersonNonprofit">Contact Person</label>  
+          <input type="text" id="contactPersonNonprofit" name="contactPersonNonprofit" />  
         </div>  
 
         <div class="category-fields other-fields" style="display:none;">  
           <label for="otherName">Organization Name</label>  
           <input type="text" id="otherName" name="otherName" />  
           <label for="services">Services/Products</label>  
-          <textarea id="services" name="services"></textarea>  
+          <textarea id="servicesOther" name="services"></textarea>  
           <label for="contactPersonOther">Contact Person</label>  
           <input type="text" id="contactPersonOther" name="contactPersonOther" />  
         </div>  
@@ -158,12 +218,24 @@
           Estimated Price: <span id="price">0</span> <span id="currency"></span>  
         </div>  
 
-        <button type="submit" class="btn">Submit Details</button>  
+        <button type="submit" class="btn btn-request">Submit Details</button>  
       </form>  
+
+      <div id="loading-popup" style="display: none;">  
+        <div class="loading-content">  
+          <div class="spinner"></div>  
+          <p>Submitting...</p>  
+        </div>  
+      </div>  
     </section>  
   </main>  
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>  
-  <script src="scripts /followup.js"></script>  
+  <div id="mobile-price-popup" class="mobile-price-popup" style="display: none;">  
+    <p>Estimated Price: <span id="mobile-price">0</span> <span id="mobile-currency"></span></p>  
+  </div>  
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>  
+  <script src="scripts/supabase-config.js"></script>  
+  <script src="scripts/followup.js"></script>  
 </body>  
-</html>
+  </html>
