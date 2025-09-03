@@ -8,91 +8,93 @@
   <link rel="stylesheet" href="styles/admin.css" />
 </head>
 <body>
-  <header class="top-header">
-    <span class="logo">Neodynix Technologies - Admin</span>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
-    <nav id="nav-menu">
-      <a href="index.html">Home</a>
-      <a href="templates.html">Templates</a>
-      <a href="About.html">About</a>
-      <a href="contact.html">Contact</a>
-      <a href="admin.html">Admin</a>
-    </nav>
-  </header>
-  <main>
-    <section class="admin-container">
-      <div class="admin-tabs">
-        <button id="btnTemplates" class="tab-button active">Manage Templates</button>
-        <button id="btnSendEmail" class="tab-button">Send Email</button>
-      </div>
-      <!-- Template Management Section -->
-      <div id="sectionTemplates" class="admin-section active">
-        <h2>Manage Templates</h2>
-        <div class="template-upload">
-          <h3>Add New Template</h3>
-          <form id="uploadForm">
-            <input type="text" name="name" placeholder="Template Name" required aria-label="Template Name" />
-            <select name="category" required aria-label="Template Category">
-              <option value="" disabled selected>Select Category</option>
-              <option value="Business">Business</option>
-              <option value="Portfolio">Portfolio</option>
-              <option value="Education">Education</option>
-              <option value="Religion">Religion</option>
-              <option value="Health">Health</option>
-              <option value="Media">Media</option>
-              <option value="NonProfit">Non-Profit</option>
-              <option value="Tech">Tech</option>
-              <option value="Industry">Industry</option>
-              <option value="Travel">Travel</option>
-              <option value="Other">Other</option>
+  <div id="auth-container" style="display: none;">
+    <header class="top-header">
+      <span class="logo">Neodynix Technologies - Admin</span>
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
+      <nav id="nav-menu">
+        <a href="index.html">Home</a>
+        <a href="templates.html">Templates</a>
+        <a href="About.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="admin.html">Admin</a>
+      </nav>
+    </header>
+    <main>
+      <section class="admin-container">
+        <div class="admin-tabs">
+          <button id="btnTemplates" class="tab-button active">Manage Templates</button>
+          <button id="btnSendEmail" class="tab-button">Send Email</button>
+        </div>
+        <!-- Template Management Section -->
+        <div id="sectionTemplates" class="admin-section active">
+          <h2>Manage Templates</h2>
+          <div class="template-upload">
+            <h3>Add New Template</h3>
+            <form id="uploadForm">
+              <input type="text" name="name" placeholder="Template Name" required aria-label="Template Name" />
+              <select name="category" required aria-label="Template Category">
+                <option value="" disabled selected>Select Category</option>
+                <option value="Business">Business</option>
+                <option value="Portfolio">Portfolio</option>
+                <option value="Education">Education</option>
+                <option value="Religion">Religion</option>
+                <option value="Health">Health</option>
+                <option value="Media">Media</option>
+                <option value="NonProfit">Non-Profit</option>
+                <option value="Tech">Tech</option>
+                <option value="Industry">Industry</option>
+                <option value="Travel">Travel</option>
+                <option value="Other">Other</option>
+              </select>
+              <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
+              <input type="url" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
+              <div class="file-input-wrapper">
+                <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
+                <label for="imageFile" class="file-input-label">Choose File</label>
+              </div>
+              <div id="imagePreview"></div>
+              <button type="submit" id="upload-btn" class="btn">Upload Template</button>
+            </form>
+            <div id="result"></div>
+          </div>
+          <div class="template-list">
+            <h3>Existing Templates</h3>
+            <div id="templateList" class="template-grid"></div>
+          </div>
+        </div>
+        <!-- Email Sending Section -->
+        <div id="sectionSendEmail" class="admin-section">
+          <h2>Send Custom Email</h2>
+          <form id="emailForm" class="email-form">
+            <input type="email" name="customerEmail" placeholder="Customer Email" required aria-label="Customer Email" />
+            <input type="url" name="customLink" placeholder="Custom Link" required aria-label="Custom Link" />
+            <input type="number" name="price" placeholder="Price" required aria-label="Price" />
+            <select name="currency" required aria-label="Currency">
+              <option value="" disabled selected>Select Currency</option>
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
             </select>
-            <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
-            <input type="url" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
-            <div class="file-input-wrapper">
-              <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
-              <label for="imageFile" class="file-input-label">Choose File</label>
-            </div>
-            <div id="imagePreview"></div>
-            <button type="submit" id="upload-btn" class="btn">Upload Template</button>
+            <button type="submit" id="email-btn" class="btn">Send Email</button>
           </form>
-          <div id="result"></div>
         </div>
-        <div class="template-list">
-          <h3>Existing Templates</h3>
-          <div id="templateList" class="template-grid"></div>
+        <!-- Loading Popup -->
+        <div id="loading-popup" class="loading-popup" style="display: none;">
+          <div class="loading-content">
+            <p>Processing...</p>
+            <div class="spinner"></div>
+          </div>
         </div>
-      </div>
-      <!-- Email Sending Section -->
-      <div id="sectionSendEmail" class="admin-section">
-        <h2>Send Custom Email</h2>
-        <form id="emailForm">
-          <input type="email" name="customerEmail" placeholder="Customer Email" required aria-label="Customer Email" />
-          <input type="text" name="customLink" placeholder="Custom Link" required aria-label="Custom Link" />
-          <input type="number" name="price" placeholder="Price" required aria-label="Price" />
-          <select name="currency" required aria-label="Currency">
-            <option value="" disabled selected>Select Currency</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
-          <button type="submit" id="email-btn" class="btn">Send Email</button>
-        </form>
-      </div>
-      <!-- Loading Popup -->
-      <div id="loading-popup" class="loading-popup" style="display: none;">
-        <div class="loading-content">
-          <p>Processing...</p>
-          <div class="spinner"></div>
-        </div>
-      </div>
-    </section>
-  </main>
-  <footer>
-    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
-  </footer>
+      </section>
+    </main>
+    <footer>
+      <p>© 2025 Neodynix Technologies. All rights reserved.</p>
+    </footer>
+  </div>
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script type="module" src="scripts/admin.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
-  </html>
+                </html>
