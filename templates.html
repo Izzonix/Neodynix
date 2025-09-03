@@ -3,97 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Panel - Neodynix</title>
+  <title>All Templates - Neodynix</title>
   <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/admin.css" />
+  <link rel="stylesheet" href="styles/template.css" />
 </head>
 <body>
+  <!-- Header -->
   <header class="top-header">
-    <span class="logo">Neodynix Technologies - Admin</span>
+    <span class="logo">Neodynix Technologies</span>
     <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
     <nav id="nav-menu">
       <a href="index.html">Home</a>
       <a href="templates.html">Templates</a>
-      <a href="About.html">About</a>
+      <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
-      <a href="admin.html">Admin</a>
     </nav>
   </header>
+
+  <!-- Main Section -->
   <main>
-    <section class="admin-container">
-      <div class="admin-tabs">
-        <button id="btnTemplates" class="tab-button active">Manage Templates</button>
-        <button id="btnSendEmail" class="tab-button">Send Email</button>
+    <section class="templates-gallery">
+      <h1>Explore Our Templates</h1>
+      <p>Tap on a template image to preview or select to get started.</p>
+
+      <!-- Search Bar -->
+      <div class="search-bar">
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Search Templates..." 
+          onkeyup="filterTemplates()" 
+          aria-label="Search Templates" />
       </div>
-      <!-- Template Management Section -->
-      <div id="sectionTemplates" class="admin-section active">
-        <h2>Manage Templates</h2>
-        <div class="template-upload">
-          <h3>Add New Template</h3>
-          <form id="uploadForm">
-            <input type="text" name="name" placeholder="Template Name" required aria-label="Template Name" />
-            <select name="category" required aria-label="Template Category">
-              <option value="" disabled selected>Select Category</option>
-              <option value="Business">Business</option>
-              <option value="Portfolio">Portfolio</option>
-              <option value="Education">Education</option>
-              <option value="Religion">Religion</option>
-              <option value="Health">Health</option>
-              <option value="Media">Media</option>
-              <option value="NonProfit">Non-Profit</option>
-              <option value="Tech">Tech</option>
-              <option value="Industry">Industry</option>
-              <option value="Travel">Travel</option>
-              <option value="Other">Other</option>
-            </select>
-            <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
-            <input type="text" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
-            <div class="file-input-wrapper">
-              <label for="imageFile" class="file-input-label">Choose Image</label>
-              <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
-              <span id="file-name" class="file-name">No file chosen</span>
-            </div>
-            <div id="imagePreview"></div>
-            <button type="submit" id="upload-btn" class="btn">Upload Template</button>
-          </form>
-          <div id="result"></div>
-        </div>
-        <div class="template-list">
-          <h3>Existing Templates</h3>
-          <div id="templateList" class="template-grid"></div>
+
+      <!-- Category Buttons -->
+      <div class="category-buttons">
+        <button onclick="showCategory('All')" class="active">All</button>
+        <button onclick="showCategory('Business')">Business</button>
+        <button onclick="showCategory('Portfolio')">Portfolio</button>
+        <button onclick="showCategory('Education')">Education</button>
+        <button id="more-button" onclick="toggleMoreCategories()">...</button>
+        <div id="more-categories" style="display: none;">
+          <button onclick="showCategory('Religion')">Religion</button>
+          <button onclick="showCategory('Health')">Health</button>
+          <button onclick="showCategory('Media')">Media</button>
+          <button onclick="showCategory('NonProfit')">Non-Profit</button>
+          <button onclick="showCategory('Tech')">Tech</button>
+          <button onclick="showCategory('Industry')">Industry</button>
+          <button onclick="showCategory('Travel')">Travel</button>
+          <button onclick="showCategory('Other')">Other</button>
         </div>
       </div>
-      <!-- Email Sending Section -->
-      <div id="sectionSendEmail" class="admin-section">
-        <h2>Send Custom Email</h2>
-        <form id="emailForm">
-          <input type="email" name="customerEmail" placeholder="Customer Email" required aria-label="Customer Email" />
-          <input type="text" name="customLink" placeholder="Custom Link" required aria-label="Custom Link" />
-          <input type="number" name="price" placeholder="Price" required aria-label="Price" />
-          <select name="currency" required aria-label="Currency">
-            <option value="" disabled selected>Select Currency</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
-          <button type="submit" id="email-btn" class="btn">Send Email</button>
-        </form>
-      </div>
-      <!-- Loading Popup -->
-      <div id="loading-popup" class="loading-popup" style="display: none;">
-        <div class="loading-content">
-          <p>Processing...</p>
-          <div class="spinner"></div>
-        </div>
+
+      <!-- Template Grid -->
+      <div class="template-grid" id="template-container">
+        <!-- Templates will be populated dynamically with JavaScript -->
       </div>
     </section>
   </main>
+
+  <!-- Footer -->
   <footer>
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
+
   <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-  <script type="module" src="scripts/admin.js"></script>
+  <script type="module" src="scripts/supabase-config.js"></script>
+  <script type="module" src="scripts/java.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
-              </html>
+            </html>
