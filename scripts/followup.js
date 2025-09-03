@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     blog: ["personal_blog", "tech_blog", "lifestyle_blog"],
     healthcare: ["clinic", "hospital", "wellness", "medical_center"],
     event: ["conference", "wedding", "festival", "meetup"],
-    church: ["community_worship", "faith_hub", "sacred_space"],
+    religion: ["community_worship", "faith_hub", "sacred_space"],
     nonprofit: ["nonprofit_impact", "advocacy", "community_service"],
     other: ["custom_project", "event_spotlight", "miscellaneous"]
   };
