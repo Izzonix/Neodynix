@@ -7,9 +7,14 @@ body {
 
 /* Admin Specific Styles */
 .admin-container {
-  max-width: 100%;
-  margin: 10px;
-  padding: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
   background: #1e1e1e;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
@@ -303,8 +308,7 @@ body {
   }
 
   .admin-container {
-    margin: 5px;
-    padding: 10px;
+    padding: 15px;
   }
 
   .admin-tabs {
@@ -372,4 +376,4 @@ body {
     width: 20px;
     height: 20px;
   }
-  }
+}
