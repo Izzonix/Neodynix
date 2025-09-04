@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const detailsTextarea = document.getElementById('details');
   if (detailsTextarea) detailsTextarea.value = 'Hello Neodynix, customize the above template';
 
-  emailjs.init('CQLyFEifsrwv5oLQz'); // Your EmailJS public key
+  emailjs.init('CQLyFEifsrwv5oLQz'); // Verify this is your correct EmailJS public key
 
   const form = document.getElementById('website-request-form');
   const loadingPopup = document.getElementById('loading-popup');
@@ -15,10 +15,11 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = true;
 
     const token = grecaptcha.getResponse();
+    console.log('reCAPTCHA Token:', token); // Debug: Log token
     if (!token) {
       loadingPopup.style.display = 'none';
       submitBtn.disabled = false;
-      alert("⚠️ Please complete the CAPTCHA.");
+      alert('⚠️ Please complete the CAPTCHA.');
       return;
     }
 
@@ -26,32 +27,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const verifyRes = await fetch(
-        "https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/verify-captcha",
+        'https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/verify-captcha',
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
         }
       );
 
       const verifyData = await verifyRes.json();
+      console.log('Supabase Response:', verifyData); // Debug: Log response
 
       if (!verifyData.success) {
         loadingPopup.style.display = 'none';
         submitBtn.disabled = false;
-        alert("❌ CAPTCHA verification failed. Please try again.");
+        alert(`❌ CAPTCHA verification failed: ${verifyData.error || 'Unknown error'}`);
         grecaptcha.reset();
         return;
       }
 
-      // Send EmailJS only after successful CAPTCHA
+      // Send EmailJS after successful CAPTCHA
       await emailjs.send('service_1k3ysnw', 'template_tj0u6yu', {
         name: formData.get('name'),
         email: formData.get('email'),
         category: formData.get('category'),
         template: formData.get('template'),
         details: formData.get('details') || 'Hello Neodynix, customize the above template',
-        followup_link: 'https://izzonix.github.io/Neodynix/additional-details.html'
+        followup_link: 'https://izzonix.github.io/Neodynix/additional-details.html',
       });
 
       alert('✅ Request submitted successfully! Check your email.');
@@ -60,10 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
       grecaptcha.reset();
       loadingPopup.style.display = 'none';
       submitBtn.disabled = false;
-
     } catch (err) {
-      console.error("Error submitting request:", err);
-      alert("❌ An error occurred while submitting the request.");
+      console.error('Error submitting request:', err);
+      alert('❌ An error occurred while submitting the request.');
       grecaptcha.reset();
       loadingPopup.style.display = 'none';
       submitBtn.disabled = false;
