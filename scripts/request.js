@@ -4,20 +4,22 @@ document.addEventListener('DOMContentLoaded', () => {
     detailsTextarea.value = 'Hello Neodynix, customize the above template';
   }
 
-  // ✅ Initialize EmailJS
+  // Initialize EmailJS
   emailjs.init('CQLyFEifsrwv5oLQz'); // Your EmailJS public key
 
-  document.getElementById('website-request-form').addEventListener('submit', async function(event) {
+  const form = document.getElementById('website-request-form');
+  const loadingPopup = document.getElementById('loading-popup');
+  const submitBtn = document.getElementById('submit-btn');
+
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const loadingPopup = document.getElementById('loading-popup');
-    const submitBtn = document.getElementById('submit-btn');
     loadingPopup.style.display = 'flex';
     submitBtn.disabled = true;
 
-    const formData = new FormData(this);
+    const formData = new FormData(form);
 
-    // ✅ Get token from reCAPTCHA v2
+    // ✅ Get token from reCAPTCHA v2 checkbox
     const token = grecaptcha.getResponse();
 
     if (!token) {
@@ -27,13 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // ✅ Verify with Supabase Edge Function
     try {
-      const verifyRes = await fetch("https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/verify-captcha", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token }),
-      });
+      // ✅ Verify token via Supabase Edge Function
+      const verifyRes = await fetch(
+        "https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/verify-captcha",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token }),
+        }
+      );
 
       const verifyData = await verifyRes.json();
 
@@ -41,45 +46,37 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingPopup.style.display = 'none';
         submitBtn.disabled = false;
         alert("❌ CAPTCHA verification failed. Please try again.");
-        grecaptcha.reset(); // Reset widget
+        grecaptcha.reset(); // Reset CAPTCHA widget
         return;
       }
-    } catch (err) {
-      console.error("Verification error:", err);
+
+      // ✅ If CAPTCHA passed, send EmailJS
+      const emailData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        category: formData.get('category'),
+        template: formData.get('template'),
+        details: formData.get('details') || 'Hello Neodynix, customize the above template',
+        followup_link: 'https://izzonix.github.io/Neodynix/additional-details.html'
+      };
+
+      await emailjs.send('service_1k3ysnw', 'template_tj0u6yu', emailData);
+
       loadingPopup.style.display = 'none';
       submitBtn.disabled = false;
-      alert("❌ An error occurred during CAPTCHA verification.");
+      alert('✅ Request submitted successfully! Check your email for further instructions.');
+      form.reset();
+      if (detailsTextarea) {
+        detailsTextarea.value = 'Hello Neodynix, customize the above template';
+      }
       grecaptcha.reset();
-      return;
+
+    } catch (err) {
+      console.error("Error submitting request:", err);
+      loadingPopup.style.display = 'none';
+      submitBtn.disabled = false;
+      alert('❌ An error occurred while submitting the request.');
+      grecaptcha.reset();
     }
-
-    // ✅ If passed, continue to EmailJS
-    const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      category: formData.get('category'),
-      template: formData.get('template'),
-      details: formData.get('details') || 'Hello Neodynix, customize the above template',
-      followup_link: 'https://izzonix.github.io/Neodynix/additional-details.html'
-    };
-
-    emailjs.send('service_1k3ysnw', 'template_tj0u6yu', data)
-      .then(() => {
-        loadingPopup.style.display = 'none';
-        submitBtn.disabled = false;
-        alert('✅ Request submitted successfully! Check your email for further instructions.');
-        this.reset();
-        if (detailsTextarea) {
-          detailsTextarea.value = 'Hello Neodynix, customize the above template';
-        }
-        grecaptcha.reset(); // Reset CAPTCHA after success
-      })
-      .catch(error => {
-        console.error('EmailJS Error:', error);
-        loadingPopup.style.display = 'none';
-        submitBtn.disabled = false;
-        alert('❌ An error occurred while submitting the request.');
-        grecaptcha.reset();
-      });
   });
 });
