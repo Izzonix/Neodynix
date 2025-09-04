@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/request.css" />
 
-  <!-- ✅ reCAPTCHA v2 script -->
+  <!-- reCAPTCHA v2 -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
@@ -25,9 +25,7 @@
   <main>
     <section class="request-section">
       <h1>Request Your Website</h1>
-      <p>
-        Fill in your details to request your website. We’ll send an email with a link to submit further customization details.
-      </p>
+      <p>Fill in your details to request your website. We’ll send an email with a link to submit further customization details.</p>
 
       <form id="website-request-form" class="request-form">
         <label for="name">Full Name</label>
@@ -46,13 +44,12 @@
         <textarea id="details" name="details" rows="5" aria-describedby="details-hint"></textarea>
         <p id="details-hint" class="form-hint">Optional: Share any specific customization requests.</p>
 
-        <!-- ✅ reCAPTCHA v2 checkbox -->
+        <!-- reCAPTCHA v2 -->
         <div class="g-recaptcha" data-sitekey="6LfPnb0rAAAAAA5565nJ039snmjUz1eFpSwDPpXG"></div>
 
         <button type="submit" id="submit-btn" class="btn">Submit Request</button>
       </form>
 
-      <!-- Loading Popup -->
       <div id="loading-popup" class="loading-popup" style="display: none;">
         <div class="loading-content">
           <p>Submitting your request...</p>
@@ -67,9 +64,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script type="module" src="scripts/supabase-config.js"></script>
-  <script type="module" src="scripts/java.js"></script>
-  <script src="scripts/main.js"></script>
   <script src="scripts/request.js"></script>
 </body>
-  </html>
+</html>
