@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     detailsTextarea.value = 'Hello Neodynix, customize the above template';
   }
 
-  emailjs.init('CQLyFEifsrwv5oLQz'); // Replace with your EmailJS public key
+  // ✅ Initialize EmailJS
+  emailjs.init('CQLyFEifsrwv5oLQz'); // Replace with your real public key
 
   const form = document.getElementById('website-request-form');
   const loadingPopup = document.getElementById('loading-popup');
