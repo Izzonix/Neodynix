@@ -285,30 +285,31 @@ input[type="range"]::-moz-range-thumb {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
 }
 
 .loading-content {
   background: #1e1e1e;
-  padding: 15px;
-  border-radius: 8px;
+  padding: 20px 30px;
+  border-radius: 10px;
   text-align: center;
   color: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  min-width: 200px;
 }
 
 .spinner {
-  border: 3px solid #4fc3f7;
-  border-top: 3px solid #03a9f4;
+  border: 4px solid #4fc3f7;
+  border-top: 4px solid #03a9f4;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   animation: spin 1s linear infinite;
-  margin: 8px auto;
+  margin: 0 auto 10px;
 }
 
 @keyframes spin {
