@@ -147,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
   calculatePrice();
   checkExtraPages();
   managePricePopup();
+  pagesValue.textContent = pagesSlider.value; // Initialize pages value
 
   // Event listeners
   categorySelect.addEventListener("change", () => {
@@ -234,7 +235,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = {
         category: formData.get("category"),
         template: formData.get("template"),
-        domain: formData.get("domain") || null,
         social_media: formData.get("socialMedia") || null,
         phone: formData.get("phone") || null,
         contact_method: formData.get("contactMethod") || "email",
