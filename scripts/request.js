@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const detailsTextarea = document.getElementById('details');
   if (detailsTextarea) detailsTextarea.value = 'Hello Neodynix, customize the above template';
 
-  emailjs.init('CQLyFEifsrwv5oLQz'); // Verify this is your correct EmailJS public key
+  emailjs.init('CQLyFEifsrwv5oLQz'); // Replace with your EmailJS public key
 
   const form = document.getElementById('website-request-form');
   const loadingPopup = document.getElementById('loading-popup');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = true;
 
     const token = grecaptcha.getResponse();
-    console.log('reCAPTCHA Token:', token); // Debug: Log token
+    console.log('reCAPTCHA Token:', token);
     if (!token) {
       loadingPopup.style.display = 'none';
       submitBtn.disabled = false;
@@ -36,17 +36,16 @@ document.addEventListener('DOMContentLoaded', () => {
       );
 
       const verifyData = await verifyRes.json();
-      console.log('Supabase Response:', verifyData); // Debug: Log response
+      console.log('Supabase Response:', verifyData);
 
       if (!verifyData.success) {
         loadingPopup.style.display = 'none';
         submitBtn.disabled = false;
-        alert(`❌ CAPTCHA verification failed: ${verifyData.error || 'Unknown error'}`);
+        alert(`❌ CAPTCHA verification failed: ${verifyData.error || verifyData['error-codes']?.join(', ') || 'Unknown error'}`);
         grecaptcha.reset();
         return;
       }
 
-      // Send EmailJS after successful CAPTCHA
       await emailjs.send('service_1k3ysnw', 'template_tj0u6yu', {
         name: formData.get('name'),
         email: formData.get('email'),
