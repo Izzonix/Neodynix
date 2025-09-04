@@ -1,11 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Autofill category and template from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const categoryInput = document.getElementById('category');
+  const templateInput = document.getElementById('template');
   const detailsTextarea = document.getElementById('details');
-  if (detailsTextarea) {
-    detailsTextarea.value = 'Hello Neodynix, customize the above template';
-  }
 
-  // ✅ Initialize EmailJS
-  emailjs.init('CQLyFEifsrwv5oLQz'); // Replace with your real public key
+  if (categoryInput) categoryInput.value = urlParams.get('category') || '';
+  if (templateInput) templateInput.value = urlParams.get('template') || '';
+  if (detailsTextarea) detailsTextarea.value = 'Hello Neodynix, customize the above template';
+
+  emailjs.init('CQLyFEifsrwv5oLQz'); // Replace with your EmailJS public key
 
   const form = document.getElementById('website-request-form');
   const loadingPopup = document.getElementById('loading-popup');
@@ -31,13 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       alert('✅ Request submitted successfully! Check your email.');
       form.reset();
-      if (detailsTextarea) {
-        detailsTextarea.value = 'Hello Neodynix, customize the above template';
-      }
+      if (categoryInput) categoryInput.value = urlParams.get('category') || '';
+      if (templateInput) templateInput.value = urlParams.get('template') || '';
+      if (detailsTextarea) detailsTextarea.value = 'Hello Neodynix, customize the above template';
+      loadingPopup.style.display = 'none';
+      submitBtn.disabled = false;
     } catch (err) {
-      console.error('Error submitting request:', err);
-      alert('❌ An error occurred while submitting the request.');
-    } finally {
+      console.error('Submission Error:', err.message, err.stack);
+      alert(`❌ Submission failed: ${err.message || 'Failed to send email'}`);
       loadingPopup.style.display = 'none';
       submitBtn.disabled = false;
     }
