@@ -6,7 +6,6 @@
   <title>Request Website Setup</title>
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/request.css" />
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
   <header class="top-header">
@@ -42,8 +41,6 @@
         <textarea id="details" name="details" rows="5" aria-describedby="details-hint"></textarea>
         <p id="details-hint" class="form-hint">Optional: Share any specific customization requests.</p>
 
-        <div class="g-recaptcha" data-sitekey="6LfPnb0rAAAAAA5565nJ039snmjUz1eFpSwDPpXG"></div>
-
         <button type="submit" id="submit-btn" class="btn">Submit Request</button>
       </form>
 
@@ -61,8 +58,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script type="module" src="scripts/supabase-config.js"></script>
-  <script type="module" src="scripts/java.js"></script>
   <script src="scripts/request.js"></script>
 </body>
-        </html>
+  </html>
