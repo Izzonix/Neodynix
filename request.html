@@ -26,20 +26,19 @@
 
       <form id="website-request-form" class="request-form">
         <label for="name">Full Name</label>
-        <input type="text" id="name" name="name" required aria-required="true" />
+        <input type="text" id="name" name="name" required />
 
         <label for="email">Email Address</label>
-        <input type="email" id="email" name="email" required aria-required="true" />
+        <input type="email" id="email" name="email" required />
 
         <label for="category">Template Category</label>
-        <input type="text" id="category" name="category" placeholder="e.g. Business" required aria-required="true" />
+        <input type="text" id="category" name="category" placeholder="e.g. Business" required />
 
         <label for="template">Template Name</label>
-        <input type="text" id="template" name="template" placeholder="e.g. Business Classic" required aria-required="true" />
+        <input type="text" id="template" name="template" placeholder="e.g. Business Classic" required />
 
         <label for="details">Additional Details</label>
-        <textarea id="details" name="details" rows="5" aria-describedby="details-hint"></textarea>
-        <p id="details-hint" class="form-hint">Optional: Share any specific customization requests.</p>
+        <textarea id="details" name="details" rows="5"></textarea>
 
         <button type="submit" id="submit-btn" class="btn">Submit Request</button>
       </form>
@@ -57,7 +56,9 @@
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
 
+  <!-- ✅ Load EmailJS first -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- ✅ Then load your script -->
   <script src="scripts/request.js"></script>
 </body>
   </html>
