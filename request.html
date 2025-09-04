@@ -43,6 +43,9 @@
         <textarea id="details" name="details" rows="5" aria-describedby="details-hint"></textarea>
         <p id="details-hint" class="form-hint">Optional: Share any specific customization requests.</p>
 
+        <!-- ✅ reCAPTCHA with your site key -->
+        <div class="g-recaptcha" data-sitekey="6LfPnb0rAAAAAA5565nJ039snmjUz1eFpSwDPpXG"></div>
+
         <button type="submit" id="submit-btn" class="btn">Submit Request</button>
       </form>
 
@@ -60,10 +63,10 @@
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <!-- reCAPTCHA script -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
   <script type="module" src="scripts/supabase-config.js"></script>
-  <script type="module" src="scripts/java.js"></script>
-  <script src="scripts/main.js"></script>
-  <script src="scripts/request.js"></script>
+  <script type="module" src="scripts/request.js"></script>
 </body>
   </html>
