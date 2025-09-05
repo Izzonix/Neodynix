@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         category: formData.get('category'),
         template: formData.get('template'),
         details: formData.get('details') || 'Hello Neodynix, customize the above template',
-        followup_link: 'https://izzonix.github.io/Neodynix/additional-details.html',
+        followup_link: 'https://izzonix.github.io/Neodynix/followup.html',
       });
 
       alert('✅ Request submitted successfully! Check your email.');
