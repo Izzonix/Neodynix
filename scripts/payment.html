@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neodynix Payment</title>
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/payment.css" />
+</head>
+<body>
+  <main>
+    <section class="payment-section" role="region" aria-labelledby="payment-title">
+      <h1 id="payment-title">Secure Payment</h1>
+      <form id="payment-form" class="payment-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" name="name" placeholder="Enter full name" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="Enter email" required />
+        </div>
+        <div class="form-group">
+          <label for="amount">Amount</label>
+          <input type="text" id="amount" name="amount" placeholder="Fetching amount..." disabled />
+        </div>
+        <div class="form-group payment-options">
+          <label>Payment Method</label>
+          <div class="options-grid">
+            <button type="button" class="option-btn" data-method="mobile-money">
+              <img src="images/mobile-money-icon.png" alt="Mobile Money Icon" class="option-icon" />
+              <span>Mobile Money</span>
+            </button>
+            <button type="button" class="option-btn" data-method="bank-card">
+              <img src="images/bank-card-icon.png" alt="Bank Card Icon" class="option-icon" />
+              <span>Bank Card</span>
+            </button>
+          </div>
+          <input type="hidden" id="payment-method" name="payment-method" />
+        </div>
+        <button type="submit" class="btn btn-pay">Pay Now</button>
+      </form>
+      <p class="success-msg" id="success-msg">✅ Payment initiated! Redirecting...</p>
+      <p class="error-msg" id="error-msg">❌ Error: Check details and try again.</p>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="scripts/payment.js"></script>
+</body>
+  </html>
