@@ -1,0 +1,147 @@
+.payment-section {
+  max-width: 550px;
+  margin: clamp(40px, 10vw, 60px) auto;
+  background: #1e1e1e;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+.payment-section h1 {
+  font-size: clamp(1.9rem, 5vw, 2.3rem);
+  color: #4fc3f7;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  text-align: left;
+}
+
+.form-group label {
+  font-size: clamp(0.95rem, 2.5vw, 1rem);
+  color: #ddd;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px;
+  font-size: clamp(0.95rem, 2.5vw, 1rem);
+  border: 1px solid #4fc3f7;
+  border-radius: 8px;
+  background: #121212;
+  color: #fff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #03a9f4;
+  box-shadow: 0 0 6px rgba(3, 169, 244, 0.5);
+}
+
+.form-group input:disabled {
+  background: #2c2c2c;
+  color: #aaa;
+}
+
+.payment-options .options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+}
+
+.option-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #292929;
+  padding: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid #444;
+  transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+}
+
+.option-btn.selected {
+  background: #4fc3f7;
+  color: #000;
+  border-color: #03a9f4;
+}
+
+.option-btn:hover {
+  background: #3a3a3a;
+  transform: translateY(-2px);
+}
+
+.option-btn.selected:hover {
+  background: #03a9f4;
+}
+
+.option-icon {
+  width: 45px;
+  height: 45px;
+  margin-bottom: 10px;
+}
+
+.option-btn span {
+  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-weight: 600;
+}
+
+.btn-pay {
+  background: #4fc3f7;
+  color: #000;
+  padding: 14px;
+  font-size: clamp(1rem, 3vw, 1.1rem);
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.btn-pay:hover {
+  background: #03a9f4;
+  transform: translateY(-2px);
+}
+
+.success-msg,
+.error-msg {
+  font-size: clamp(0.95rem, 2.5vw, 1rem);
+  text-align: center;
+  margin-top: 20px;
+  display: none;
+}
+
+.success-msg {
+  color: #4fc3f7;
+}
+
+.error-msg {
+  color: #ff4444;
+}
+
+@media (max-width: 600px) {
+  .payment-section {
+    margin: 20px 10px;
+    padding: 20px;
+  }
+
+  .payment-section h1 {
+    font-size: clamp(1.7rem, 5vw, 2rem);
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+  }
