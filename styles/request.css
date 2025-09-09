@@ -47,8 +47,7 @@ main {
   color: #ffffff;
 }
 
-.request-form input,
-.request-form textarea {
+.request-form input {
   background-color: #1e1e1e;
   color: #ffffff;
   border: 2px solid #4fc3f7;
@@ -58,22 +57,10 @@ main {
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.request-form input:focus,
-.request-form textarea:focus {
+.request-form input:focus {
   outline: none;
   border-color: #4fc3f7;
   box-shadow: 0 0 8px rgba(79, 195, 247, 0.3);
-}
-
-.request-form textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-hint {
-  font-size: 0.85rem;
-  color: #aaaaaa;
-  margin-top: 5px;
 }
 
 /* Button */
@@ -156,8 +143,7 @@ main {
     gap: 15px;
   }
 
-  .request-form input,
-  .request-form textarea {
+  .request-form input {
     padding: 10px;
   }
 
@@ -168,4 +154,4 @@ main {
   .loading-content {
     padding: 15px;
   }
-  }
+                            }
