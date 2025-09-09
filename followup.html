@@ -33,14 +33,21 @@
         <label for="socialMedia">Social Media Links (comma separated)</label>  
         <textarea id="socialMedia" name="socialMedia" placeholder="e.g. https://facebook.com/yourpage, https://twitter.com/yourhandle" rows="3"></textarea>  
 
-        <label for="phone">Contact Phone Number</label>  
-        <input type="tel" id="phone" name="phone" placeholder="e.g. +256 123 456 789" />  
-
         <label for="contactMethod">Preferred Contact Method</label>  
-        <select id="contactMethod" name="contactMethod">  
-          <option value="email">Email</option>  
-          <option value="phone">Phone</option>  
-        </select>  
+        <div class="contact-method-choice">  
+          <label><input type="checkbox" name="contactMethod" value="email" /> Email</label>  
+          <label><input type="checkbox" name="contactMethod" value="phone" /> Phone</label>  
+        </div>  
+
+        <div id="emailContainer" style="display:none;">  
+          <label for="email">Contact Email</label>  
+          <input type="email" id="email" name="email" placeholder="e.g. example@domain.com" />  
+        </div>  
+
+        <div id="phoneContainer" style="display:none;">  
+          <label for="phone">Contact Phone Number</label>  
+          <input type="tel" id="phone" name="phone" placeholder="e.g. +256 123 456 789" />  
+        </div>  
 
         <label for="purpose">Website Purpose</label>  
         <textarea id="purpose" name="purpose" placeholder="e.g. Education, E-commerce, Portfolio" rows="3"></textarea>  
@@ -60,6 +67,17 @@
           <option value="GB">🇬🇧 United Kingdom</option>  
           <option value="OTHER">🌐 Other</option>  
         </select>  
+
+        <label>Domain Name Preference</label>  
+        <div class="domain-choice">  
+          <label><input type="radio" name="domainChoice" value="setup" checked /> Let us set up the domain</label>  
+          <label><input type="radio" name="domainChoice" value="custom" /> I will provide a domain name</label>  
+        </div>  
+
+        <div id="domainNameContainer" style="display:none;">  
+          <label for="domainName">Preferred Domain Name</label>  
+          <input type="text" id="domainName" name="domainName" placeholder="e.g. mywebsite.com" />  
+        </div>  
 
         <div class="range-group">  
           <label for="duration">Hosting Duration (months): <span id="duration-value">12</span></label>  
@@ -183,7 +201,7 @@
         </div>  
 
         <div class="file-upload">  
-          <label for="media">Upload Photos or Videos</label>  
+          <label for="media">Upload Photos or Videos (5-10 photos, max 3 videos)</label>  
           <div class="custom-upload">  
             <input type="file" id="media" name="media" multiple accept="image/*,video/*" />  
             <span class="file-name" id="media-name">No files chosen</span>  
@@ -192,7 +210,7 @@
         </div>  
 
         <div class="file-upload">  
-          <label for="others">Other Files (PDF or docs)</label>  
+          <label for="others">Other Files (PDF or docs, max 4)</label>  
           <div class="custom-upload">  
             <input type="file" id="others" name="others" multiple accept=".pdf,.doc,.docx,.txt" />  
             <span class="file-name" id="others-name">No files chosen</span>  
@@ -235,4 +253,4 @@
   <script type="module" src="scripts/supabase-config.js"></script>  
   <script type="module" src="scripts/followup.js"></script>  
 </body>  
-  </html>
+          </html>
