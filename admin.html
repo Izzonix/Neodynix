@@ -35,6 +35,7 @@
       <div class="admin-tabs">
         <button id="btnTemplates" class="tab-button active">Manage Templates</button>
         <button id="btnSendEmail" class="tab-button">Send Email</button>
+        <button id="btnChat" class="tab-button">Chat Requests</button>
         <button id="logout-btn" class="btn btn-logout">Logout</button>
       </div>
       <!-- Template Management Section -->
@@ -90,6 +91,24 @@
           <button type="submit" id="email-btn" class="btn">Send Email</button>
         </form>
       </div>
+      <!-- Chat Requests Section -->
+      <div id="sectionChat" class="admin-section">
+        <h2>Chat Requests</h2>
+        <div class="chat-requests">
+          <h3>Pending Requests</h3>
+          <div id="chatRequestList" class="chat-request-grid"></div>
+        </div>
+        <div class="chat-reply">
+          <h3>Reply to Customer</h3>
+          <form id="chatReplyForm" class="chat-reply-form">
+            <input type="hidden" name="userId" id="replyUserId" />
+            <p id="replyUserInfo"></p>
+            <textarea name="message" id="replyMessage" placeholder="Type your reply..." required aria-label="Reply Message"></textarea>
+            <button type="submit" id="reply-btn" class="btn">Send Reply</button>
+          </form>
+          <div id="chatResult"></div>
+        </div>
+      </div>
       <!-- Loading Popup -->
       <div id="loading-popup" class="loading-popup" style="display: none;">
         <div class="loading-content">
@@ -104,7 +123,8 @@
   </footer>
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+  <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/admin.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
-        </html>
+      </html>
