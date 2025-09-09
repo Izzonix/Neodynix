@@ -3,11 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const categoryInput = document.getElementById('category');
   const templateInput = document.getElementById('template');
-  const detailsTextarea = document.getElementById('details');
 
   if (categoryInput) categoryInput.value = urlParams.get('category') || '';
   if (templateInput) templateInput.value = urlParams.get('template') || '';
-  if (detailsTextarea) detailsTextarea.value = 'Hello Neodynix, customize the above template';
 
   emailjs.init('CQLyFEifsrwv5oLQz'); // Replace with your EmailJS public key
 
@@ -29,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
         email: formData.get('email'),
         category: formData.get('category'),
         template: formData.get('template'),
-        details: formData.get('details') || 'Hello Neodynix, customize the above template',
         followup_link: 'https://izzonix.github.io/Neodynix/followup.html',
       });
 
@@ -37,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
       form.reset();
       if (categoryInput) categoryInput.value = urlParams.get('category') || '';
       if (templateInput) templateInput.value = urlParams.get('template') || '';
-      if (detailsTextarea) detailsTextarea.value = 'Hello Neodynix, customize the above template';
       loadingPopup.style.display = 'none';
       submitBtn.disabled = false;
     } catch (err) {
