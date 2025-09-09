@@ -216,7 +216,7 @@ input[type="range"]::-moz-range-thumb {
   margin-bottom: 15px;
 }
 
-/* Cool Custom Radio Buttons and Checkboxes */
+/* Custom Radio Buttons */
 .theme-choice label, .contact-method-choice label, .domain-choice label {
   display: flex;
   align-items: center;
@@ -229,7 +229,7 @@ input[type="range"]::-moz-range-thumb {
   transition: color 0.3s ease;
 }
 
-.theme-choice input[type="radio"], .contact-method-choice input[type="checkbox"], .domain-choice input[type="radio"] {
+.theme-choice input[type="radio"], .contact-method-choice input[type="radio"], .domain-choice input[type="radio"] {
   display: none;
 }
 
@@ -245,7 +245,7 @@ input[type="range"]::-moz-range-thumb {
   transition: all 0.3s ease;
 }
 
-.theme-choice label::after, .domain-choice label::after {
+.theme-choice label::after, .contact-method-choice label::after, .domain-choice label::after {
   content: '';
   position: absolute;
   left: 5px;
@@ -259,24 +259,12 @@ input[type="range"]::-moz-range-thumb {
   transform: scale(0);
 }
 
-.contact-method-choice label::after {
-  content: '✔';
-  position: absolute;
-  left: 5px;
-  top: 2px;
-  font-size: 14px;
-  color: #03a9f4;
-  opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  transform: scale(0);
-}
-
-.theme-choice input[type="radio"]:checked + label::after, .contact-method-choice input[type="checkbox"]:checked + label::after, .domain-choice input[type="radio"]:checked + label::after {
+.theme-choice input[type="radio"]:checked + label::after, .contact-method-choice input[type="radio"]:checked + label::after, .domain-choice input[type="radio"]:checked + label::after {
   opacity: 1;
   transform: scale(1);
 }
 
-.theme-choice input[type="radio"]:checked + label, .contact-method-choice input[type="checkbox"]:checked + label, .domain-choice input[type="radio"]:checked + label {
+.theme-choice input[type="radio"]:checked + label, .contact-method-choice input[type="radio"]:checked + label, .domain-choice input[type="radio"]:checked + label {
   color: #fff;
 }
 
@@ -286,7 +274,6 @@ input[type="range"]::-moz-range-thumb {
 }
 
 #colorPickerContainer, #emailContainer, #phoneContainer, #domainNameContainer {
-  display: none;
   margin-top: 10px;
 }
 
