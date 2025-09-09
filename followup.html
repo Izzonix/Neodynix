@@ -11,6 +11,15 @@
     <section class="form-section">  
       <h1>Customize Your Website</h1>  
       <form id="customForm" enctype="multipart/form-data">  
+        <label for="firstName">First Name</label>  
+        <input type="text" id="firstName" name="firstName" placeholder="e.g. John" required autocomplete="given-name" />  
+
+        <label for="lastName">Last Name</label>  
+        <input type="text" id="lastName" name="lastName" placeholder="e.g. Doe" required autocomplete="family-name" />  
+
+        <label for="email">Email Address</label>  
+        <input type="email" id="email" name="email" placeholder="e.g. example@domain.com" required autocomplete="email" />  
+
         <label for="category">Select Category</label>  
         <select id="category" name="category" required>  
           <option value="">-- Select Category --</option>  
@@ -35,14 +44,9 @@
 
         <label>Preferred Contact Method</label>  
         <div class="contact-method-choice">  
-          <label><input type="radio" name="contactMethod" value="email" /> Email</label>  
+          <label><input type="radio" name="contactMethod" value="email" checked /> Email</label>  
           <label><input type="radio" name="contactMethod" value="phone" /> Phone</label>  
           <label><input type="radio" name="contactMethod" value="both" /> Both</label>  
-        </div>  
-
-        <div id="emailContainer" style="display:none;">  
-          <label for="email">Contact Email</label>  
-          <input type="email" id="email" name="email" placeholder="e.g. example@domain.com" />  
         </div>  
 
         <div id="phoneContainer" style="display:none;">  
