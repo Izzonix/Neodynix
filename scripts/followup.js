@@ -16,6 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const extraPagesInput = document.getElementById("extraPages");
   const themeChoiceRadios = document.querySelectorAll('input[name="themeChoice"]');
   const colorPickerContainer = document.getElementById("colorPickerContainer");
+  const contactMethodCheckboxes = document.querySelectorAll('input[name="contactMethod"]');
+  const emailContainer = document.getElementById("emailContainer");
+  const phoneContainer = document.getElementById("phoneContainer");
+  const domainChoiceRadios = document.querySelectorAll('input[name="domainChoice"]');
+  const domainNameContainer = document.getElementById("domainNameContainer");
   const customForm = document.getElementById("customForm");
   const submitBtn = customForm.querySelector(".btn-request");
   const loadingPopup = document.getElementById("loading-popup");
@@ -129,6 +134,23 @@ document.addEventListener("DOMContentLoaded", () => {
     mobilePricePopup.style.display = isVisible ? "none" : "block";
   }
 
+  // Show/hide contact input fields
+  function updateContactFields() {
+    const emailChecked = document.querySelector('input[name="contactMethod"][value="email"]').checked;
+    const phoneChecked = document.querySelector('input[name="contactMethod"][value="phone"]').checked;
+    emailContainer.style.display = emailChecked ? "block" : "none";
+    phoneContainer.style.display = phoneChecked ? "block" : "none";
+    document.getElementById("email").required = emailChecked;
+    document.getElementById("phone").required = phoneChecked;
+  }
+
+  // Show/hide domain name input
+  function updateDomainField() {
+    const customDomain = document.querySelector('input[name="domainChoice"][value="custom"]').checked;
+    domainNameContainer.style.display = customDomain ? "block" : "none";
+    document.getElementById("domainName").required = customDomain;
+  }
+
   // Setup file inputs
   setupFileInput("logo", "logo-name");
   setupFileInput("media", "media-name");
@@ -142,12 +164,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Contact method toggle
+  contactMethodCheckboxes.forEach(checkbox => {
+    checkbox.addEventListener("change", updateContactFields);
+  });
+
+  // Domain choice toggle
+  domainChoiceRadios.forEach(radio => {
+    radio.addEventListener("change", updateDomainField);
+  });
+
   // Initialize on page load
   updateCategoryFields();
   calculatePrice();
   checkExtraPages();
   managePricePopup();
-  pagesValue.textContent = pagesSlider.value; // Initialize pages value
+  updateContactFields();
+  updateDomainField();
+  pagesValue.textContent = pagesSlider.value;
 
   // Event listeners
   categorySelect.addEventListener("change", () => {
@@ -192,6 +226,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const mediaFiles = formData.getAll("media");
     const otherFiles = formData.getAll("others");
 
+    // Validate media files
+    const photos = Array.from(mediaFiles).filter(file => file.type.startsWith("image/"));
+    const videos = Array.from(mediaFiles).filter(file => file.type.startsWith("video/"));
+    if (photos.length < 5 || photos.length > 10) {
+      alert("Please upload between 5 and 10 photos.");
+      loadingPopup.style.display = "none";
+      submitBtn.disabled = false;
+      return;
+    }
+    if (videos.length > 3) {
+      alert("Please upload a maximum of 3 videos.");
+      loadingPopup.style.display = "none";
+      submitBtn.disabled = false;
+      return;
+    }
+    if (otherFiles.length > 4) {
+      alert("Please upload a maximum of 4 PDF or doc files.");
+      loadingPopup.style.display = "none";
+      submitBtn.disabled = false;
+      return;
+    }
+
     try {
       // Upload logo
       let logoUrl = "";
@@ -232,15 +288,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Prepare data for Supabase
       const selectedTheme = document.querySelector('input[name="themeChoice"]:checked').value;
+      const selectedDomain = document.querySelector('input[name="domainChoice"]:checked').value;
+      const contactMethods = Array.from(contactMethodCheckboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
       const data = {
         category: formData.get("category"),
         template: formData.get("template"),
         social_media: formData.get("socialMedia") || null,
+        email: formData.get("email") || null,
         phone: formData.get("phone") || null,
-        contact_method: formData.get("contactMethod") || "email",
+        contact_methods: contactMethods.length > 0 ? contactMethods : null,
         purpose: formData.get("purpose") || null,
         target_audience: formData.get("targetAudience") || null,
         country: formData.get("country"),
+        domain_choice: selectedDomain,
+        domain_name: selectedDomain === "custom" ? formData.get("domainName") || null : null,
         duration: parseInt(formData.get("duration")),
         pages: parseInt(formData.get("pages")),
         extra_pages: formData.get("extraPages") || null,
@@ -249,7 +312,6 @@ document.addEventListener("DOMContentLoaded", () => {
         other_urls: otherUrls.length > 0 ? otherUrls : null,
         theme_color: selectedTheme === "default" ? "#4fc3f7" : formData.get("customColor") || "#4fc3f7",
         created_at: new Date().toISOString(),
-        // Category-specific fields
         school_name: formData.get("schoolName") || null,
         num_students: formData.get("numStudents") ? parseInt(formData.get("numStudents")) : null,
         business_name: formData.get("businessName") || formData.get("businessNameEcommerce") || null,
@@ -276,6 +338,8 @@ document.addEventListener("DOMContentLoaded", () => {
       updateCategoryFields();
       calculatePrice();
       checkExtraPages();
+      updateContactFields();
+      updateDomainField();
       managePricePopup();
     } catch (error) {
       alert(`Submission failed: ${error.message}`);
