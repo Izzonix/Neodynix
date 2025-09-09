@@ -60,14 +60,14 @@ body {
   display: block;
 }
 
-.template-upload h3, .admin-section h2, .login-section h2 {
+.template-upload h3, .admin-section h2, .login-section h2, .chat-requests h3, .chat-reply h3 {
   color: #4fc3f7;
   font-size: 1.3rem;
   margin-bottom: 10px;
   text-align: center;
 }
 
-.template-upload form, .email-form, .login-form {
+.template-upload form, .email-form, .login-form, .chat-reply-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -76,7 +76,7 @@ body {
   padding: 0 10px;
 }
 
-.template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input {
+.template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
   padding: 10px;
   background: #1e1e1e;
   color: #fff;
@@ -89,10 +89,15 @@ body {
   box-sizing: border-box;
 }
 
-.template-upload input:focus, .template-upload select:focus, .email-form input:focus, .email-form select:focus, .login-form input:focus {
+.template-upload input:focus, .template-upload select:focus, .email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus {
   outline: none;
   border-color: #03a9f4;
   box-shadow: 0 0 6px rgba(3, 169, 244, 0.3);
+}
+
+.chat-reply-form textarea {
+  min-height: 100px;
+  resize: vertical;
 }
 
 .file-input-wrapper {
@@ -133,13 +138,13 @@ body {
   border-radius: 6px;
 }
 
-.template-grid {
+.template-grid, .chat-request-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
 }
 
-.template-card {
+.template-card, .chat-request-card {
   background: #2a2a2a;
   padding: 10px;
   border-radius: 8px;
@@ -147,18 +152,18 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.template-card h3 {
+.template-card h3, .chat-request-card h3 {
   font-size: 1rem;
   margin-bottom: 8px;
 }
 
-.template-card p {
+.template-card p, .chat-request-card p {
   font-size: 0.8rem;
   color: #ccc;
   margin-bottom: 8px;
 }
 
-.template-card a {
+.template-card a, .chat-request-card a {
   color: #4fc3f7;
   text-decoration: none;
   font-size: 0.8rem;
@@ -166,7 +171,7 @@ body {
   display: inline-block;
 }
 
-.template-card a:hover {
+.template-card a:hover, .chat-request-card a:hover {
   text-decoration: underline;
 }
 
@@ -328,16 +333,16 @@ body {
     margin-left: 0;
   }
 
-  .template-upload h3, .admin-section h2, .login-section h2 {
+  .template-upload h3, .admin-section h2, .login-section h2, .chat-requests h3, .chat-reply h3 {
     font-size: 1.1rem;
   }
 
-  .template-upload form, .email-form, .login-form {
+  .template-upload form, .email-form, .login-form, .chat-reply-form {
     gap: 8px;
     padding: 0 5px;
   }
 
-  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input {
+  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
     padding: 8px;
     font-size: 0.8rem;
   }
@@ -347,20 +352,20 @@ body {
     font-size: 0.8rem;
   }
 
-  .template-grid {
+  .template-grid, .chat-request-grid {
     grid-template-columns: 1fr;
     gap: 10px;
   }
 
-  .template-card {
+  .template-card, .chat-request-card {
     padding: 8px;
   }
 
-  .template-card h3 {
+  .template-card h3, .chat-request-card h3 {
     font-size: 0.9rem;
   }
 
-  .template-card p, .template-card a {
+  .template-card p, .chat-request-card p, .chat-request-card a {
     font-size: 0.7rem;
   }
 
@@ -376,4 +381,4 @@ body {
     width: 20px;
     height: 20px;
   }
-}
+  }
