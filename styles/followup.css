@@ -194,11 +194,13 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .custom-upload button:hover {
   background-color: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
 }
 
 .file-name {
@@ -226,7 +228,7 @@ input[type="range"]::-moz-range-thumb {
   padding-left: 35px;
   margin-right: 15px;
   color: #bbb;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .theme-choice input[type="radio"], .contact-method-choice input[type="radio"], .domain-choice input[type="radio"] {
@@ -266,6 +268,12 @@ input[type="range"]::-moz-range-thumb {
 
 .theme-choice input[type="radio"]:checked + label, .contact-method-choice input[type="radio"]:checked + label, .domain-choice input[type="radio"]:checked + label {
   color: #fff;
+}
+
+.theme-choice label:hover, .contact-method-choice label:hover, .domain-choice label:hover {
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
 }
 
 .theme-choice label:hover::before, .contact-method-choice label:hover::before, .domain-choice label:hover::before {
