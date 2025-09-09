@@ -50,31 +50,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ----- Tab switching -----
     const btnTemplates = document.getElementById('btnTemplates');
     const btnSendEmail = document.getElementById('btnSendEmail');
+    const btnChat = document.getElementById('btnChat');
     const sectionTemplates = document.getElementById('sectionTemplates');
     const sectionSendEmail = document.getElementById('sectionSendEmail');
+    const sectionChat = document.getElementById('sectionChat');
 
     function showSection(section) {
       btnTemplates.classList.remove('active');
       btnSendEmail.classList.remove('active');
+      btnChat.classList.remove('active');
       sectionTemplates.style.display = 'none';
       sectionSendEmail.style.display = 'none';
+      sectionChat.style.display = 'none';
       if (section === 'templates') {
         btnTemplates.classList.add('active');
         sectionTemplates.style.display = 'block';
       } else if (section === 'email') {
         btnSendEmail.classList.add('active');
         sectionSendEmail.style.display = 'block';
+      } else if (section === 'chat') {
+        btnChat.classList.add('active');
+        sectionChat.style.display = 'block';
       }
     }
 
-    btnTemplates.addEventListener('click', () => {
-      console.log('Templates button clicked');
-      showSection('templates');
-    });
-    btnSendEmail.addEventListener('click', () => {
-      console.log('Send Email button clicked');
-      showSection('email');
-    });
+    btnTemplates.addEventListener('click', () => showSection('templates'));
+    btnSendEmail.addEventListener('click', () => showSection('email'));
+    btnChat.addEventListener('click', () => showSection('chat'));
 
     showSection('templates');
 
@@ -167,7 +169,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (storageError) throw new Error(`Storage upload failed: ${storageError.message}`);
 
         const imageUrl = `${supabaseUrl}/storage/v1/object/public/templates/${storageData.path}`;
-        console.log('File uploaded, URL:', imageUrl);
 
         const data = {
           name: formData.get('name'),
@@ -177,7 +178,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           image: imageUrl,
           created_at: new Date().toISOString()
         };
-        console.log('Inserting data:', data);
 
         const { error } = await supabase.from('templates').insert(data);
         if (error) throw new Error(`Database insert failed: ${error.message}`);
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showResult('Data and file posted successfully!', 'success');
         uploadForm.reset();
         preview.innerHTML = '';
-        fetchTemplates(); // Refresh template list
+        fetchTemplates();
       } catch (err) {
         showResult(err.message, 'error');
         console.error('Submission error:', err);
@@ -227,7 +227,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           return;
         }
         updateData.image = `${supabaseUrl}/storage/v1/object/public/templates/${imgData.path}`;
-        console.log('Updated image URL:', updateData.image);
       } else {
         updateData.image = existingData.image;
       }
@@ -237,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         showResult(`Update failed: ${updateError.message}`, 'error');
       } else {
         showResult('Template updated successfully!', 'success');
-        fetchTemplates(); // Refresh template list
+        fetchTemplates();
       }
       loadingPopup.style.display = 'none';
     };
@@ -253,7 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
       showResult('Template deleted!', 'success');
-      fetchTemplates(); // Refresh template list
+      fetchTemplates();
     };
 
     // ----- Email sending -----
@@ -295,6 +294,119 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
+    // ----- Fetch and display chat requests -----
+    const chatRequestList = document.getElementById('chatRequestList');
+    const chatReplyForm = document.getElementById('chatReplyForm');
+    const replyUserId = document.getElementById('replyUserId');
+    const replyUserInfo = document.getElementById('replyUserInfo');
+    const replyMessage = document.getElementById('replyMessage');
+    const replyBtn = document.getElementById('reply-btn');
+    const chatResult = document.getElementById('chatResult');
+
+    async function fetchChatRequests() {
+      try {
+        // Get users with messages that have no support reply
+        const { data: users, error: userError } = await supabase
+          .from('users')
+          .select('id, name, email')
+          .gte('created_at', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString());
+        if (userError) throw userError;
+
+        chatRequestList.innerHTML = '';
+
+        if (!users || users.length === 0) {
+          chatRequestList.innerHTML = `<p>No pending chat requests.</p>`;
+          return;
+        }
+
+        for (const user of users) {
+          const { data: messages, error: msgError } = await supabase
+            .from('messages')
+            .select('id, content, created_at, sender')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+          if (msgError) throw msgError;
+
+          // Check if the latest message is from the user (not support or auto)
+          const latestMessage = messages[0];
+          if (latestMessage && latestMessage.sender === 'user') {
+            const card = document.createElement('div');
+            card.className = 'chat-request-card';
+            card.innerHTML = `
+              <h3>${user.name}</h3>
+              <p>Email: ${user.email}</p>
+              <p>Latest: ${latestMessage.content}</p>
+              <p>Time: ${new Date(latestMessage.created_at).toLocaleString()}</p>
+              <button onclick="selectUserForReply('${user.id}', '${user.name}', '${user.email}')" class="btn">Reply</button>
+            `;
+            chatRequestList.appendChild(card);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching chat requests:', error);
+        chatRequestList.innerHTML = `<p class="error">Failed to load chat requests.</p>`;
+      }
+    }
+
+    // Select user for reply
+    window.selectUserForReply = (userId, name, email) => {
+      replyUserId.value = userId;
+      replyUserInfo.textContent = `Replying to ${name} (${email})`;
+      replyMessage.value = '';
+      chatResult.style.display = 'none';
+    };
+
+    // Send reply
+    chatReplyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!confirm('Send reply?')) return;
+
+      loadingPopup.style.display = 'flex';
+      replyBtn.disabled = true;
+
+      const userId = replyUserId.value;
+      const message = replyMessage.value.trim();
+
+      if (!userId || !message) {
+        showChatResult('Please select a user and enter a message.', 'error');
+        loadingPopup.style.display = 'none';
+        replyBtn.disabled = false;
+        return;
+      }
+
+      try {
+        const { error } = await supabase.from('messages').insert({
+          user_id: userId,
+          content: message,
+          sender: 'support',
+          is_auto: false
+        });
+        if (error) throw error;
+
+        showChatResult('Reply sent successfully!', 'success');
+        chatReplyForm.reset();
+        replyUserInfo.textContent = '';
+        fetchChatRequests();
+      } catch (error) {
+        showChatResult(`Failed to send reply: ${error.message}`, 'error');
+      } finally {
+        loadingPopup.style.display = 'none';
+        replyBtn.disabled = false;
+      }
+    });
+
+    // Show chat result
+    function showChatResult(message, type) {
+      chatResult.textContent = message;
+      chatResult.className = type === 'success' ? 'success' : 'error';
+      chatResult.style.display = 'block';
+      setTimeout(() => chatResult.style.display = 'none', 5000);
+    }
+
+    // Initial load for chat requests
+    fetchChatRequests();
+
+    // Show result for templates and email
     function showResult(message, type) {
       result.textContent = message;
       result.className = type === 'success' ? 'success' : 'error';
