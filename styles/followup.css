@@ -210,14 +210,14 @@ input[type="range"]::-moz-range-thumb {
   text-overflow: ellipsis;
 }
 
-.theme-choice {
+.theme-choice, .contact-method-choice, .domain-choice {
   display: flex;
   gap: 20px;
   margin-bottom: 15px;
 }
 
-/* Cool Custom Radio Buttons */
-.theme-choice label {
+/* Cool Custom Radio Buttons and Checkboxes */
+.theme-choice label, .contact-method-choice label, .domain-choice label {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -229,11 +229,11 @@ input[type="range"]::-moz-range-thumb {
   transition: color 0.3s ease;
 }
 
-.theme-choice input[type="radio"] {
+.theme-choice input[type="radio"], .contact-method-choice input[type="checkbox"], .domain-choice input[type="radio"] {
   display: none;
 }
 
-.theme-choice label::before {
+.theme-choice label::before, .contact-method-choice label::before, .domain-choice label::before {
   content: '';
   position: absolute;
   left: 0;
@@ -245,7 +245,7 @@ input[type="range"]::-moz-range-thumb {
   transition: all 0.3s ease;
 }
 
-.theme-choice label::after {
+.theme-choice label::after, .domain-choice label::after {
   content: '';
   position: absolute;
   left: 5px;
@@ -259,21 +259,33 @@ input[type="range"]::-moz-range-thumb {
   transform: scale(0);
 }
 
-.theme-choice input[type="radio"]:checked + label::after {
+.contact-method-choice label::after {
+  content: '✔';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  font-size: 14px;
+  color: #03a9f4;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  transform: scale(0);
+}
+
+.theme-choice input[type="radio"]:checked + label::after, .contact-method-choice input[type="checkbox"]:checked + label::after, .domain-choice input[type="radio"]:checked + label::after {
   opacity: 1;
   transform: scale(1);
 }
 
-.theme-choice input[type="radio"]:checked + label {
+.theme-choice input[type="radio"]:checked + label, .contact-method-choice input[type="checkbox"]:checked + label, .domain-choice input[type="radio"]:checked + label {
   color: #fff;
 }
 
-.theme-choice label:hover::before {
+.theme-choice label:hover::before, .contact-method-choice label:hover::before, .domain-choice label:hover::before {
   background: #1e1e1e;
   border-color: #03a9f4;
 }
 
-#colorPickerContainer {
+#colorPickerContainer, #emailContainer, #phoneContainer, #domainNameContainer {
   display: none;
   margin-top: 10px;
 }
@@ -324,11 +336,11 @@ input[type="range"]::-moz-range-thumb {
   .btn {
     padding: 12px 24px;
   }
-  .theme-choice {
+  .theme-choice, .contact-method-choice, .domain-choice {
     flex-direction: column;
     gap: 10px;
   }
-  .theme-choice label {
+  .theme-choice label, .contact-method-choice label, .domain-choice label {
     padding-left: 30px;
   }
   .mobile-price-popup {
