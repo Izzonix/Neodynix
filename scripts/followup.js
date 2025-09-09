@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const extraPagesInput = document.getElementById("extraPages");
   const themeChoiceRadios = document.querySelectorAll('input[name="themeChoice"]');
   const colorPickerContainer = document.getElementById("colorPickerContainer");
-  const contactMethodCheckboxes = document.querySelectorAll('input[name="contactMethod"]');
+  const contactMethodRadios = document.querySelectorAll('input[name="contactMethod"]');
   const emailContainer = document.getElementById("emailContainer");
   const phoneContainer = document.getElementById("phoneContainer");
   const domainChoiceRadios = document.querySelectorAll('input[name="domainChoice"]');
@@ -136,12 +136,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Show/hide contact input fields
   function updateContactFields() {
-    const emailChecked = document.querySelector('input[name="contactMethod"][value="email"]').checked;
-    const phoneChecked = document.querySelector('input[name="contactMethod"][value="phone"]').checked;
-    emailContainer.style.display = emailChecked ? "block" : "none";
-    phoneContainer.style.display = phoneChecked ? "block" : "none";
-    document.getElementById("email").required = emailChecked;
-    document.getElementById("phone").required = phoneChecked;
+    const selectedMethod = document.querySelector('input[name="contactMethod"]:checked')?.value;
+    emailContainer.style.display = selectedMethod === "email" || selectedMethod === "both" ? "block" : "none";
+    phoneContainer.style.display = selectedMethod === "phone" || selectedMethod === "both" ? "block" : "none";
+    document.getElementById("email").required = selectedMethod === "email" || selectedMethod === "both";
+    document.getElementById("phone").required = selectedMethod === "phone" || selectedMethod === "both";
   }
 
   // Show/hide domain name input
@@ -165,8 +164,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Contact method toggle
-  contactMethodCheckboxes.forEach(checkbox => {
-    checkbox.addEventListener("change", updateContactFields);
+  contactMethodRadios.forEach(radio => {
+    radio.addEventListener("change", updateContactFields);
   });
 
   // Domain choice toggle
@@ -289,16 +288,14 @@ document.addEventListener("DOMContentLoaded", () => {
       // Prepare data for Supabase
       const selectedTheme = document.querySelector('input[name="themeChoice"]:checked').value;
       const selectedDomain = document.querySelector('input[name="domainChoice"]:checked').value;
-      const contactMethods = Array.from(contactMethodCheckboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+      const selectedContactMethod = document.querySelector('input[name="contactMethod"]:checked')?.value || null;
       const data = {
         category: formData.get("category"),
         template: formData.get("template"),
         social_media: formData.get("socialMedia") || null,
         email: formData.get("email") || null,
         phone: formData.get("phone") || null,
-        contact_methods: contactMethods.length > 0 ? contactMethods : null,
+        contact_method: selectedContactMethod,
         purpose: formData.get("purpose") || null,
         target_audience: formData.get("targetAudience") || null,
         country: formData.get("country"),
