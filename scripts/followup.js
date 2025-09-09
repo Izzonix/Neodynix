@@ -17,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const themeChoiceRadios = document.querySelectorAll('input[name="themeChoice"]');
   const colorPickerContainer = document.getElementById("colorPickerContainer");
   const contactMethodRadios = document.querySelectorAll('input[name="contactMethod"]');
-  const emailContainer = document.getElementById("emailContainer");
   const phoneContainer = document.getElementById("phoneContainer");
   const domainChoiceRadios = document.querySelectorAll('input[name="domainChoice"]');
   const domainNameContainer = document.getElementById("domainNameContainer");
@@ -137,9 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Show/hide contact input fields
   function updateContactFields() {
     const selectedMethod = document.querySelector('input[name="contactMethod"]:checked')?.value;
-    emailContainer.style.display = selectedMethod === "email" || selectedMethod === "both" ? "block" : "none";
     phoneContainer.style.display = selectedMethod === "phone" || selectedMethod === "both" ? "block" : "none";
-    document.getElementById("email").required = selectedMethod === "email" || selectedMethod === "both";
     document.getElementById("phone").required = selectedMethod === "phone" || selectedMethod === "both";
   }
 
@@ -290,10 +287,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const selectedDomain = document.querySelector('input[name="domainChoice"]:checked').value;
       const selectedContactMethod = document.querySelector('input[name="contactMethod"]:checked')?.value || null;
       const data = {
+        first_name: formData.get("firstName"),
+        last_name: formData.get("lastName"),
+        email: formData.get("email"),
         category: formData.get("category"),
         template: formData.get("template"),
         social_media: formData.get("socialMedia") || null,
-        email: formData.get("email") || null,
         phone: formData.get("phone") || null,
         contact_method: selectedContactMethod,
         purpose: formData.get("purpose") || null,
