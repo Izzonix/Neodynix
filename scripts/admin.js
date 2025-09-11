@@ -305,7 +305,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function fetchChatRequests() {
       try {
-        // Get users with messages that have no support reply
         const { data: users, error: userError } = await supabase
           .from('users')
           .select('id, name, email')
@@ -327,16 +326,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             .order('created_at', { ascending: false });
           if (msgError) throw msgError;
 
-          // Check if the latest message is from the user (not support or auto)
-          const latestMessage = messages[0];
-          if (latestMessage && latestMessage.sender === 'user') {
+          const userMessages = messages.filter(msg => msg.sender === 'user');
+          if (userMessages.length > 0) {
             const card = document.createElement('div');
             card.className = 'chat-request-card';
             card.innerHTML = `
               <h3>${user.name}</h3>
               <p>Email: ${user.email}</p>
-              <p>Latest: ${latestMessage.content}</p>
-              <p>Time: ${new Date(latestMessage.created_at).toLocaleString()}</p>
+              ${userMessages.map(msg => `
+                <p>Message: ${msg.content}</p>
+                <p>Time: ${new Date(msg.created_at).toLocaleString()}</p>
+              `).join('')}
               <button onclick="selectUserForReply('${user.id}', '${user.name}', '${user.email}')" class="btn">Reply</button>
             `;
             chatRequestList.appendChild(card);
@@ -347,6 +347,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatRequestList.innerHTML = `<p class="error">Failed to load chat requests.</p>`;
       }
     }
+
+    // Subscribe to real-time updates
+    supabase.channel('chat_admin')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'messages', 
+        filter: 'sender=eq.user'
+      }, () => {
+        fetchChatRequests();
+      })
+      .subscribe();
+
+    // Initial load and periodic refresh
+    fetchChatRequests();
+    setInterval(fetchChatRequests, 30000);
 
     // Select user for reply
     window.selectUserForReply = (userId, name, email) => {
@@ -402,9 +418,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       chatResult.style.display = 'block';
       setTimeout(() => chatResult.style.display = 'none', 5000);
     }
-
-    // Initial load for chat requests
-    fetchChatRequests();
 
     // Show result for templates and email
     function showResult(message, type) {
