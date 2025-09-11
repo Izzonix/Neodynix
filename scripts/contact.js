@@ -58,6 +58,7 @@ window.onload = async () => {
     if (data) {
       user = data;
       loadMessages(userId);
+      subscribeToMessages();
     } else {
       localStorage.removeItem('chat_user_id');
       startChat();
@@ -67,12 +68,31 @@ window.onload = async () => {
   }
 };
 
+async function subscribeToMessages() {
+  if (!user) return;
+  supabase.channel('chat')
+    .on('postgres_changes', { 
+      event: 'INSERT', 
+      schema: 'public', 
+      table: 'messages', 
+      filter: `user_id=eq.${user.id}`
+    }, payload => {
+      const msg = payload.new;
+      if (msg.user_id === user.id) {
+        loadMessages(user.id); // Refresh messages to ensure all are displayed
+      }
+    })
+    .subscribe();
+}
+
 sendChat.addEventListener('click', async () => {
   const text = chatInput.value.trim();
   if (text && user) {
-    // Add message locally before sending
     addLocalMessage(text);
-    await supabase.from('messages').insert({ user_id: user.id, content: text, sender: 'user' });
+    const { error } = await supabase.from('messages').insert({ user_id: user.id, content: text, sender: 'user' });
+    if (!error) {
+      loadMessages(user.id); // Force refresh after successful send
+    }
     chatInput.value = '';
   }
 });
@@ -87,34 +107,14 @@ fileInput.addEventListener('change', async () => {
     const { data } = await supabase.storage.from('chat-files').upload(`${user.id}/${file.name}`, file);
     const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
     addLocalMessage(`📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`);
-    await supabase.from('messages').insert({ 
+    const { error } = await supabase.from('messages').insert({ 
       user_id: user.id, 
       content: `📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`, 
       sender: 'user' 
     });
+    if (!error) {
+      loadMessages(user.id); // Force refresh after successful send
+    }
     fileInput.value = '';
   }
 });
-
-supabase.channel('chat').on('postgres_changes', { 
-  event: 'INSERT', 
-  schema: 'public', 
-  table: 'messages', 
-  filter: `user_id=eq.${user?.id}`
-}, payload => {
-  const msg = payload.new;
-  if (msg.user_id === user?.id) {
-    const div = document.createElement('div');
-    div.classList.add('msg', msg.is_auto || msg.sender === 'support' ? 'support-msg' : 'user-msg');
-    div.innerHTML = `<span class="msg-content">${msg.content}</span><span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
-    chatMessages.appendChild(div);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    
-    if (msg.sender === 'support' && user?.notification_permission) {
-      new Notification('New Reply', {
-        body: 'Our team has responded. Check the chat!',
-        icon: '/favicon.ico'
-      });
-    }
-  }
-}).subscribe();
