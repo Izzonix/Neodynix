@@ -43,6 +43,14 @@ async function loadMessages(userId) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+function addLocalMessage(content) {
+  const div = document.createElement('div');
+  div.classList.add('msg', 'user-msg');
+  div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
 window.onload = async () => {
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
@@ -62,6 +70,8 @@ window.onload = async () => {
 sendChat.addEventListener('click', async () => {
   const text = chatInput.value.trim();
   if (text && user) {
+    // Add message locally before sending
+    addLocalMessage(text);
     await supabase.from('messages').insert({ user_id: user.id, content: text, sender: 'user' });
     chatInput.value = '';
   }
@@ -76,6 +86,7 @@ fileInput.addEventListener('change', async () => {
   if (file && user) {
     const { data } = await supabase.storage.from('chat-files').upload(`${user.id}/${file.name}`, file);
     const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
+    addLocalMessage(`📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`);
     await supabase.from('messages').insert({ 
       user_id: user.id, 
       content: `📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`, 
@@ -92,16 +103,18 @@ supabase.channel('chat').on('postgres_changes', {
   filter: `user_id=eq.${user?.id}`
 }, payload => {
   const msg = payload.new;
-  const div = document.createElement('div');
-  div.classList.add('msg', msg.is_auto || msg.sender === 'support' ? 'support-msg' : 'user-msg');
-  div.innerHTML = `<span class="msg-content">${msg.content}</span><span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  
-  if (msg.sender === 'support' && user?.notification_permission) {
-    new Notification('New Reply', {
-      body: 'Our team has responded. Check the chat!',
-      icon: '/favicon.ico'
-    });
+  if (msg.user_id === user?.id) {
+    const div = document.createElement('div');
+    div.classList.add('msg', msg.is_auto || msg.sender === 'support' ? 'support-msg' : 'user-msg');
+    div.innerHTML = `<span class="msg-content">${msg.content}</span><span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    
+    if (msg.sender === 'support' && user?.notification_permission) {
+      new Notification('New Reply', {
+        body: 'Our team has responded. Check the chat!',
+        icon: '/favicon.ico'
+      });
+    }
   }
 }).subscribe();
