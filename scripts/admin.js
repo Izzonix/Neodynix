@@ -323,7 +323,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             .from('messages')
             .select('id, content, created_at, sender')
             .eq('user_id', user.id)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(5); // Fetch only the last 5 messages
           if (msgError) throw msgError;
 
           const userMessages = messages.filter(msg => msg.sender === 'user');
