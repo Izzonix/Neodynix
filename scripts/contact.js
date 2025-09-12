@@ -113,9 +113,9 @@ async function loadMessages(userId) {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function addLocalMessage(content) {
+function addLocalMessage(content, sender = 'user') {
   const div = document.createElement('div');
-  div.classList.add('msg', 'user-msg');
+  div.classList.add('msg', sender === 'support' ? 'support-msg' : 'user-msg');
   div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -149,7 +149,7 @@ async function subscribeToMessages() {
     }, payload => {
       const msg = payload.new;
       if (msg.user_id === user.id) {
-        loadMessages(user.id);
+        addLocalMessage(msg.content, msg.sender);
       }
     })
     .subscribe();
@@ -165,9 +165,8 @@ sendChat.addEventListener('click', async () => {
     addLocalMessage(text);
     const { error } = await supabase.from('messages').insert({ user_id: user.id, content: text, sender: 'user' });
     if (!error) {
-      loadMessages(user.id);
+      chatInput.value = '';
     }
-    chatInput.value = '';
   }
 });
 
@@ -192,14 +191,12 @@ fileInput.addEventListener('change', async () => {
       sender: 'user' 
     });
     if (!error) {
-      loadMessages(user.id);
+      fileInput.value = '';
     }
-    fileInput.value = '';
   }
 });
 
 navigator.serviceWorker.addEventListener('message', event => {
   const { title, body } = event.data;
-  addLocalMessage(body);
-  loadMessages(user.id);
+  addLocalMessage(body, 'support');
 });
