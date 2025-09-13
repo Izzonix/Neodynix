@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const logoutBtn = document.getElementById('logout-btn');
 
   // Check session
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) console.error('Session error:', sessionError);
 
   if (session) {
     loginSection.style.display = 'none';
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initialize admin functionality
   function initAdmin() {
-    // ----- Tab switching -----
+    // Tab switching
     const btnTemplates = document.getElementById('btnTemplates');
     const btnSendEmail = document.getElementById('btnSendEmail');
     const btnChat = document.getElementById('btnChat');
@@ -80,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     showSection('templates');
 
-    // ----- Fetch and display templates -----
+    // Fetch and display templates
     const templateList = document.getElementById('templateList');
     async function fetchTemplates() {
       try {
@@ -110,14 +111,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       } catch (error) {
         console.error('Error fetching templates:', error);
-        templateList.innerHTML = `<p class="error">Failed to load templates.</p>`;
+        templateList.innerHTML = `<p class="error">Failed to load templates: ${error.message}</p>`;
       }
     }
 
-    // Initial load
     fetchTemplates();
 
-    // ----- Image preview -----
+    // Image preview
     const imageFile = document.getElementById('imageFile');
     const preview = document.getElementById('imagePreview');
     const uploadForm = document.getElementById('uploadForm');
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       reader.readAsDataURL(file);
     });
 
-    // ----- Upload template -----
+    // Upload template
     uploadForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!confirm('Double-check everything before submission?')) return;
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // ----- Edit template -----
+    // Edit template
     window.editTemplate = async (id) => {
       if (!confirm('Double-check everything before submission?')) return;
 
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       loadingPopup.style.display = 'none';
     };
 
-    // ----- Delete template -----
+    // Delete template
     window.deleteTemplate = async (id) => {
       if (!confirm('Are you sure?')) return;
       loadingPopup.style.display = 'flex';
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       fetchTemplates();
     };
 
-    // ----- Email sending -----
+    // Email sending
     const emailForm = document.getElementById('emailForm');
     emailForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -294,7 +294,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
 
-    // ----- Fetch and display chat requests -----
+    // Fetch and display chat requests
     const chatRequestList = document.getElementById('chatRequestList');
     const chatReplyForm = document.getElementById('chatReplyForm');
     const replyUserId = document.getElementById('replyUserId');
@@ -308,9 +308,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const cutoffDate = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
         const { data: users, error: userError } = await supabase
           .from('users')
-          .select('id, name, email')
+          .select('id, name, email, created_at')
           .gte('created_at', cutoffDate);
-        if (userError) throw userError;
+        if (userError) throw new Error(`User fetch error: ${userError.message}`);
 
         chatRequestList.innerHTML = '';
 
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(5);
-          if (msgError) throw msgError;
+          if (msgError) throw new Error(`Message fetch error: ${msgError.message}`);
 
           const userMessages = messages.filter(msg => msg.sender === 'user');
           if (userMessages.length > 0) {
@@ -346,7 +346,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       } catch (error) {
         console.error('Error fetching chat requests:', error);
-        chatRequestList.innerHTML = `<p class="error">Failed to load chat requests.</p>`;
+        chatRequestList.innerHTML = `<p class="error">Failed to load chat requests: ${error.message}</p>`;
       }
     }
 
