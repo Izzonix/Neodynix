@@ -340,6 +340,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p>Time: ${new Date(msg.created_at).toLocaleString()}</p>
               `).join('')}
               <button onclick="selectUserForReply('${user.id}', '${user.name}', '${user.email}')" class="btn">Reply</button>
+              <button onclick="deleteConversation('${user.id}')" class="btn btn-delete">Delete Conversation</button>
             `;
             chatRequestList.appendChild(card);
           }
@@ -349,6 +350,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         chatRequestList.innerHTML = `<p class="error">Failed to load chat requests: ${error.message}</p>`;
       }
     }
+
+    // Delete conversation and user
+    window.deleteConversation = async (userId) => {
+      if (!confirm('Are you sure you want to delete this conversation and user data? This cannot be undone.')) return;
+      const loadingPopup = document.getElementById('loading-popup');
+      loadingPopup.style.display = 'flex';
+      try {
+        // Delete all messages for the user
+        const { error: msgError } = await supabase
+          .from('messages')
+          .delete()
+          .eq('user_id', userId);
+        if (msgError) throw new Error(`Failed to delete messages: ${msgError.message}`);
+
+        // Delete the user
+        const { error: userError } = await supabase
+          .from('users')
+          .delete()
+          .eq('id', userId);
+        if (userError) throw new Error(`Failed to delete user: ${userError.message}`);
+
+        showChatResult('Conversation and user deleted successfully!', 'success');
+        fetchChatRequests();
+      } catch (error) {
+        showChatResult(`Failed to delete conversation: ${error.message}`, 'error');
+        console.error('Delete conversation error:', error);
+      } finally {
+        loadingPopup.style.display = 'none';
+      }
+    };
 
     // Subscribe to real-time updates
     supabase.channel('chat_admin')
