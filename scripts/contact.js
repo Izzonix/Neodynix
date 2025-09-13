@@ -1,4 +1,3 @@
-// contact.js
 import { supabase } from './supabase-config.js';
 
 const chatMessages = document.getElementById('chatMessages');
@@ -6,12 +5,10 @@ const chatInput = document.getElementById('chatInput');
 const fileInput = document.getElementById('fileInput');
 const sendChat = document.getElementById('sendChat');
 const attachFile = document.getElementById('attachFile');
-
 let user = null;
 let selectedTopic = '';
 const VAPID_PUBLIC_KEY = 'B03rZz8NEfC6w8aKYNC2WVKXqkaHK1Gsp8i0LBanfhLjcR4S0eZvA57sYXRtTehshsAxjpDvgeOQfiRaAW6xbbA';
 
-// ----- Topic Popup -----
 async function showTopicPopup() {
   return new Promise(resolve => {
     const popup = document.createElement('div');
@@ -43,41 +40,21 @@ async function showTopicPopup() {
   });
 }
 
-// ----- Service Worker & Push Subscription -----
 async function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) {
-    console.log('Service workers not supported in this browser');
-    return null;
-  }
-
-  try {
-    const registration = await navigator.serviceWorker.register('/service-worker.js');
-    console.log('Service worker registered:', registration);
-
-    if (!('PushManager' in window)) {
-      console.log('Push API not supported in this browser');
-      return null;
-    }
-
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      console.log('Notifications permission denied');
-      return null;
-    }
-
-    const subscription = await registration.pushManager.getSubscription() ||
-      await registration.pushManager.subscribe({
+  if ('serviceWorker' in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
       });
-
-    console.log('Push subscription:', subscription);
-    return subscription;
-
-  } catch (error) {
-    console.error('Service worker registration failed:', error);
-    return null;
+      return subscription;
+    } catch (error) {
+      console.error('Service worker registration failed:', error);
+      return null;
+    }
   }
+  return null;
 }
 
 function urlBase64ToUint8Array(base64String) {
@@ -87,7 +64,6 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
 }
 
-// ----- Start Chat -----
 async function startChat() {
   const email = prompt('Enter your email:');
   if (!email) return;
@@ -99,70 +75,52 @@ async function startChat() {
   if (!name) return;
 
   const { data } = await supabase.from('users').select().eq('email', email).single();
+  const permission = await Notification.requestPermission();
   const subscription = await registerServiceWorker();
-  const notificationGranted = subscription !== null;
 
   if (data) {
     user = data;
     if (subscription && user.push_subscription !== JSON.stringify(subscription)) {
       await supabase.from('users').update({
         push_subscription: JSON.stringify(subscription),
-        notification_permission: notificationGranted
+        notification_permission: permission === 'granted'
       }).eq('id', user.id);
     }
     localStorage.setItem('chat_user_id', user.id);
     loadMessages(user.id);
-    subscribeToMessages();
   } else {
     const { data: newUser } = await supabase.from('users').insert({
       name,
       email,
-      notification_permission: notificationGranted,
+      notification_permission: permission === 'granted',
       push_subscription: subscription ? JSON.stringify(subscription) : null
     }).select().single();
     user = newUser;
     localStorage.setItem('chat_user_id', user.id);
     loadMessages(user.id);
-    subscribeToMessages();
   }
 }
 
-// ----- Load Messages -----
 async function loadMessages(userId) {
   const { data } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
   chatMessages.innerHTML = '';
   data.forEach(msg => {
-    addLocalMessage(msg.content, msg.sender === 'support' ? 'support' : 'user', msg.created_at);
+    const div = document.createElement('div');
+    div.classList.add('msg', msg.is_auto || msg.sender === 'support' ? 'support-msg' : 'user-msg');
+    div.innerHTML = `<span class="msg-content">${msg.content}</span><span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+    chatMessages.appendChild(div);
   });
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// ----- Add Local Message -----
-function addLocalMessage(content, sender = 'user', timestamp = new Date()) {
+function addLocalMessage(content, sender = 'user') {
   const div = document.createElement('div');
   div.classList.add('msg', sender === 'support' ? 'support-msg' : 'user-msg');
-  div.innerHTML = `<span class="msg-content">${content}</span>
-                   <span class="msg-timestamp">${new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+  div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// ----- Real-time Subscription -----
-function subscribeToMessages() {
-  if (!user) return;
-  supabase.channel('chat')
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'messages',
-      filter: `user_id=eq.${user.id}`
-    }, payload => {
-      const msg = payload.new;
-      addLocalMessage(msg.content, msg.sender === 'support' ? 'support' : 'user', msg.created_at);
-    })
-    .subscribe();
-}
-
-// ----- Event Listeners -----
 window.onload = async () => {
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
@@ -180,6 +138,23 @@ window.onload = async () => {
   }
 };
 
+async function subscribeToMessages() {
+  if (!user) return;
+  supabase.channel('chat')
+    .on('postgres_changes', { 
+      event: 'INSERT', 
+      schema: 'public', 
+      table: 'messages', 
+      filter: `user_id=eq.${user.id}`
+    }, payload => {
+      const msg = payload.new;
+      if (msg.user_id === user.id) {
+        addLocalMessage(msg.content, msg.sender);
+      }
+    })
+    .subscribe();
+}
+
 sendChat.addEventListener('click', async () => {
   let text = chatInput.value.trim();
   if (text && user) {
@@ -188,16 +163,16 @@ sendChat.addEventListener('click', async () => {
       selectedTopic = '';
     }
     addLocalMessage(text);
-    const { error } = await supabase.from('messages').insert({
-      user_id: user.id,
-      content: text,
-      sender: 'user'
-    });
-    if (!error) chatInput.value = '';
+    const { error } = await supabase.from('messages').insert({ user_id: user.id, content: text, sender: 'user' });
+    if (!error) {
+      chatInput.value = '';
+    }
   }
 });
 
-attachFile.addEventListener('click', () => fileInput.click());
+attachFile.addEventListener('click', () => {
+  fileInput.click();
+});
 
 fileInput.addEventListener('change', async () => {
   const file = fileInput.files[0];
@@ -210,12 +185,14 @@ fileInput.addEventListener('change', async () => {
       selectedTopic = '';
     }
     addLocalMessage(content);
-    const { error } = await supabase.from('messages').insert({
-      user_id: user.id,
-      content,
-      sender: 'user'
+    const { error } = await supabase.from('messages').insert({ 
+      user_id: user.id, 
+      content, 
+      sender: 'user' 
     });
-    if (!error) fileInput.value = '';
+    if (!error) {
+      fileInput.value = '';
+    }
   }
 });
 
