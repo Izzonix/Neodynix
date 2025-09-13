@@ -305,10 +305,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function fetchChatRequests() {
       try {
+        const cutoffDate = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
         const { data: users, error: userError } = await supabase
           .from('users')
           .select('id, name, email')
-          .gte('created_at', new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString());
+          .gte('created_at', cutoffDate);
         if (userError) throw userError;
 
         chatRequestList.innerHTML = '';
@@ -324,7 +325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             .select('id, content, created_at, sender')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
-            .limit(5); // Fetch only the last 5 messages
+            .limit(5);
           if (msgError) throw msgError;
 
           const userMessages = messages.filter(msg => msg.sender === 'user');
