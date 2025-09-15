@@ -62,6 +62,7 @@
             </select>
             <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
             <input type="url" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
+            <input type="number" name="price" placeholder="Template Price (USD)" min="0" step="0.01" required aria-label="Template Price" />
             <div class="file-input-wrapper">
               <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
               <label for="imageFile" class="file-input-label">Choose File</label>
@@ -137,6 +138,7 @@
             </select>
             <input type="text" id="editDescription" placeholder="Description" required aria-label="Template Description" />
             <input type="url" id="editLink" placeholder="Preview Link" required aria-label="Preview Link" />
+            <input type="number" id="editPrice" placeholder="Template Price (USD)" min="0" step="0.01" required aria-label="Template Price" />
             <div class="file-input-wrapper">
               <input type="file" id="editImageFile" accept="image/*,.pdf" aria-label="Template Image" />
               <label for="editImageFile" class="file-input-label">Choose File</label>
@@ -172,4 +174,4 @@
   <script type="module" src="scripts/admin.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
-  </html>
+            </html>
