@@ -1,53 +1,194 @@
-/* Admin Panel Styles */
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Header */
+.top-header {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* Login Section */
+.login-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.login-form input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.login-form button {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.login-form button:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+/* Admin Container */
 .admin-container {
   max-width: 1200px;
-  margin: 2rem auto;
-  padding: 0 1rem;
+  margin: 20px auto;
+  padding: 20px;
 }
 
 .admin-tabs {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 10px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
 
 .tab-button {
-  padding: 0.5rem 1rem;
+  background: #e9ecef;
   border: none;
-  background: #e0e0e0;
+  padding: 10px 20px;
   cursor: pointer;
   border-radius: 4px;
   font-size: 1rem;
 }
 
-.tab-button.active {
+.tab-button.active,
+.tab-button:hover {
   background: #007bff;
   color: white;
 }
 
-.admin-section {
-  display: none;
+.btn-logout {
+  background: #dc3545;
 }
 
-.admin-section.active {
-  display: block;
+.btn-logout:hover {
+  background: #c82333;
 }
 
+/* Template Section */
 .template-upload,
-.chat-reply,
-.email-form,
-.chat-requests {
-  background: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 6px;
-  margin-bottom: 2rem;
+.template-list {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
-.template-upload h3,
-.chat-reply h3,
-.chat-requests h3 {
-  margin-top: 0;
+.template-upload form,
+.email-form,
+.chat-reply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.template-upload input,
+.template-upload select,
+.email-form input,
+.email-form select,
+.chat-reply-form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.file-input-wrapper {
+  position: relative;
+}
+
+.file-input-label {
+  display: inline-block;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.file-input-label:hover {
+  background: #0056b3;
+}
+
+#imageFile,
+#editImageFile {
+  display: none;
 }
 
 .template-grid,
@@ -55,130 +196,67 @@
 .custom-request-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
+  gap: 20px;
 }
 
 .template-card,
 .chat-request-card,
 .custom-request-card {
-  background: white;
-  padding: 1rem;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .template-card img {
-  max-width: 150px; /* Reduced image size */
-  height: auto;
+  max-width: 150px;
+  max-height: 100px;
   border-radius: 6px;
-  margin-bottom: 1rem;
+  margin: 0 auto;
+  display: block;
 }
 
 .template-card h3,
 .chat-request-card h3,
 .custom-request-card h3 {
-  margin: 0.5rem 0;
+  font-size: 1.2rem;
+  margin: 10px 0;
 }
 
-.file-input-wrapper {
-  position: relative;
-  margin-bottom: 1rem;
+.template-card p,
+.chat-request-card p,
+.custom-request-card p {
+  font-size: 0.9rem;
+  color: #555;
 }
 
-.file-input-wrapper input[type="file"] {
-  display: none;
+.template-card a,
+.custom-request-card a {
+  color: #007bff;
+  text-decoration: none;
 }
 
-.file-input-label {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: #007bff;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
+.template-card a:hover,
+.custom-request-card a:hover {
+  text-decoration: underline;
 }
 
-#imagePreview img,
-#editImagePreview img {
-  max-width: 150px; /* Reduced preview image size */
-  height: auto;
-  margin-top: 1rem;
-  border-radius: 6px;
+/* Email and Chat Sections */
+.email-form,
+.chat-reply-form {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.chat-reply-form textarea {
+  min-height: 100px;
+  resize: vertical;
 }
 
-form input,
-form select,
-form textarea {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-form button {
-  align-self: flex-start;
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  background: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  background: #0056b3;
-}
-
-.btn-delete {
-  background: #dc3545;
-}
-
-.btn-delete:hover {
-  background: #b02a37;
-}
-
-.btn-cancel {
-  background: #6c757d;
-}
-
-.btn-cancel:hover {
-  background: #5a6268;
-}
-
-.btn-logout {
-  background: #6c757d;
-  margin-left: auto;
-}
-
-.btn-logout:hover {
-  background: #5a6268;
-}
-
-.success {
-  color: #28a745;
-  background: #d4edda;
-  padding: 0.5rem;
-  border-radius: 4px;
-  margin-top: 1rem;
-}
-
-.error {
-  color: #dc3545;
-  background: #f8d7da;
-  padding: 0.5rem;
-  border-radius: 4px;
-  margin-top: 1rem;
-}
-
+/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -189,31 +267,48 @@ form button {
   background: rgba(0, 0, 0, 0.5);
   justify-content: center;
   align-items: center;
-  z-index: 1000;
 }
 
 .modal-content {
   background: white;
-  padding: 2rem;
-  border-radius: 6px;
+  padding: 20px;
+  border-radius: 8px;
   max-width: 500px;
   width: 90%;
-}
-
-.modal-content h2 {
-  margin-top: 0;
 }
 
 .modal-content form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 15px;
 }
 
-.modal-content button {
-  align-self: flex-start;
+/* Buttons */
+.btn {
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
 }
 
+.btn:hover {
+  background: #0056b3;
+}
+
+.btn-cancel,
+.btn-delete {
+  background: #dc3545;
+}
+
+.btn-cancel:hover,
+.btn-delete:hover {
+  background: #c82333;
+}
+
+/* Loading Popup */
 .loading-popup {
   display: none;
   position: fixed;
@@ -224,13 +319,12 @@ form button {
   background: rgba(0, 0, 0, 0.5);
   justify-content: center;
   align-items: center;
-  z-index: 1000;
 }
 
 .loading-content {
   background: white;
-  padding: 1.5rem;
-  border-radius: 6px;
+  padding: 20px;
+  border-radius: 8px;
   text-align: center;
 }
 
@@ -241,7 +335,7 @@ form button {
   width: 30px;
   height: 30px;
   animation: spin 1s linear infinite;
-  margin: 1rem auto;
+  margin: 10px auto;
 }
 
 @keyframes spin {
@@ -249,24 +343,43 @@ form button {
   100% { transform: rotate(360deg); }
 }
 
-@media (max-width: 600px) {
+/* Success and Error Messages */
+.success {
+  color: #28a745;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+  nav {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background: #007bff;
+    padding: 10px;
+    border-radius: 4px;
+  }
+  nav.active {
+    display: flex;
+  }
   .admin-tabs {
     flex-direction: column;
   }
-
-  .tab-button {
-    width: 100%;
-    text-align: center;
-  }
-
-  .btn-logout {
-    width: 100%;
-    margin-left: 0;
-  }
-
   .template-grid,
   .chat-request-grid,
   .custom-request-grid {
     grid-template-columns: 1fr;
   }
-}
+  }
