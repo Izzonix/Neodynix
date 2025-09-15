@@ -12,11 +12,11 @@
     <span class="logo">Neodynix Technologies - Admin</span>
     <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
     <nav id="nav-menu">
-      <a href="index.html">Home</a>
-      <a href="templates.html">Templates</a>
-      <a href="About.html">About</a>
-      <a href="contact.html">Contact</a>
-      <a href="admin.html">Admin</a>
+      <a href="javascript:void(0)" onclick="showSection('templates')">Manage Templates</a>
+      <a href="javascript:void(0)" onclick="showSection('email')">Send Email</a>
+      <a href="javascript:void(0)" onclick="showSection('chat')">Chat Requests</a>
+      <a href="javascript:void(0)" onclick="showSection('custom')">Custom Requests</a>
+      <a href="javascript:void(0)" onclick="logout()">Logout</a>
     </nav>
   </header>
   <main>
@@ -113,10 +113,7 @@
       <!-- Custom Requests Section -->
       <div id="sectionCustomRequests" class="admin-section">
         <h2>Custom Requests</h2>
-        <div class="custom-requests">
-          <h3>Pending Custom Requests</h3>
-          <div id="customRequestList" class="custom-request-grid"></div>
-        </div>
+        <div id="customRequestList" class="custom-request-grid"></div>
       </div>
       <!-- Loading Popup -->
       <div id="loading-popup" class="loading-popup" style="display: none;">
