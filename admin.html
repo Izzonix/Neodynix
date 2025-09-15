@@ -115,6 +115,46 @@
         <h2>Custom Requests</h2>
         <div id="customRequestList" class="custom-request-grid"></div>
       </div>
+      <!-- Edit Template Modal -->
+      <div id="editTemplateModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <h2>Edit Template</h2>
+          <form id="editTemplateForm">
+            <input type="text" id="editName" placeholder="Template Name" required aria-label="Template Name" />
+            <select id="editCategory" required aria-label="Template Category">
+              <option value="" disabled>Select Category</option>
+              <option value="Business">Business</option>
+              <option value="Portfolio">Portfolio</option>
+              <option value="Education">Education</option>
+              <option value="Religion">Religion</option>
+              <option value="Health">Health</option>
+              <option value="Media">Media</option>
+              <option value="NonProfit">Non-Profit</option>
+              <option value="Tech">Tech</option>
+              <option value="Industry">Industry</option>
+              <option value="Travel">Travel</option>
+              <option value="Other">Other</option>
+            </select>
+            <input type="text" id="editDescription" placeholder="Description" required aria-label="Template Description" />
+            <input type="url" id="editLink" placeholder="Preview Link" required aria-label="Preview Link" />
+            <div class="file-input-wrapper">
+              <input type="file" id="editImageFile" accept="image/*,.pdf" aria-label="Template Image" />
+              <label for="editImageFile" class="file-input-label">Choose File</label>
+            </div>
+            <div id="editImagePreview"></div>
+            <button type="submit" class="btn">Save Changes</button>
+            <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+          </form>
+        </div>
+      </div>
+      <!-- Confirmation Modal -->
+      <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <p id="confirmMessage"></p>
+          <button id="confirmYes" class="btn">Yes</button>
+          <button id="confirmNo" class="btn btn-cancel">No</button>
+        </div>
+      </div>
       <!-- Loading Popup -->
       <div id="loading-popup" class="loading-popup" style="display: none;">
         <div class="loading-content">
@@ -127,10 +167,9 @@
   <footer>
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/admin.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
-          </html>
+  </html>
