@@ -36,6 +36,7 @@
         <button id="btnTemplates" class="tab-button active">Manage Templates</button>
         <button id="btnSendEmail" class="tab-button">Send Email</button>
         <button id="btnChat" class="tab-button">Chat Requests</button>
+        <button id="btnCustomRequests" class="tab-button">Custom Requests</button>
         <button id="logout-btn" class="btn btn-logout">Logout</button>
       </div>
       <!-- Template Management Section -->
@@ -109,6 +110,14 @@
           <div id="chatResult"></div>
         </div>
       </div>
+      <!-- Custom Requests Section -->
+      <div id="sectionCustomRequests" class="admin-section">
+        <h2>Custom Requests</h2>
+        <div class="custom-requests">
+          <h3>Pending Custom Requests</h3>
+          <div id="customRequestList" class="custom-request-grid"></div>
+        </div>
+      </div>
       <!-- Loading Popup -->
       <div id="loading-popup" class="loading-popup" style="display: none;">
         <div class="loading-content">
@@ -127,4 +136,4 @@
   <script type="module" src="scripts/admin.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
-    </html>
+          </html>
