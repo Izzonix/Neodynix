@@ -20,6 +20,9 @@
         <label for="email">Email Address</label>  
         <input type="email" id="email" name="email" placeholder="e.g. example@domain.com" required autocomplete="email" />  
 
+        <label for="phone">Contact Phone Number</label>  
+        <input type="tel" id="phone" name="phone" placeholder="e.g. +256 123 456 789" required />  
+
         <label for="category">Select Category</label>  
         <select id="category" name="category" required>  
           <option value="">-- Select Category --</option>  
@@ -41,18 +44,6 @@
 
         <label for="socialMedia">Social Media Links (comma separated)</label>  
         <textarea id="socialMedia" name="socialMedia" placeholder="e.g. https://facebook.com/yourpage, https://twitter.com/yourhandle" rows="3"></textarea>  
-
-        <label>Preferred Contact Method</label>  
-        <div class="contact-method-choice">  
-          <label><input type="radio" name="contactMethod" value="email" checked /> Email</label>  
-          <label><input type="radio" name="contactMethod" value="phone" /> Phone</label>  
-          <label><input type="radio" name="contactMethod" value="both" /> Both</label>  
-        </div>  
-
-        <div id="phoneContainer" style="display:none;">  
-          <label for="phone">Contact Phone Number</label>  
-          <input type="tel" id="phone" name="phone" placeholder="e.g. +256 123 456 789" />  
-        </div>  
 
         <label for="purpose">Website Purpose</label>  
         <textarea id="purpose" name="purpose" placeholder="e.g. Education, E-commerce, Portfolio" rows="3"></textarea>  
@@ -247,6 +238,14 @@
           <p>Submitting...</p>  
         </div>  
       </div>  
+      <!-- Confirmation Modal -->
+      <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <p id="confirmMessage"></p>
+          <button id="confirmYes" class="btn">Yes</button>
+          <button id="confirmNo" class="btn btn-cancel">No</button>
+        </div>
+      </div>
     </section>  
   </main>  
 
