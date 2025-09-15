@@ -16,8 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const extraPagesInput = document.getElementById("extraPages");
   const themeChoiceRadios = document.querySelectorAll('input[name="themeChoice"]');
   const colorPickerContainer = document.getElementById("colorPickerContainer");
-  const contactMethodRadios = document.querySelectorAll('input[name="contactMethod"]');
-  const phoneContainer = document.getElementById("phoneContainer");
   const domainChoiceRadios = document.querySelectorAll('input[name="domainChoice"]');
   const domainNameContainer = document.getElementById("domainNameContainer");
   const customForm = document.getElementById("customForm");
@@ -133,13 +131,6 @@ document.addEventListener("DOMContentLoaded", () => {
     mobilePricePopup.style.display = isVisible ? "none" : "block";
   }
 
-  // Show/hide contact input fields
-  function updateContactFields() {
-    const selectedMethod = document.querySelector('input[name="contactMethod"]:checked')?.value;
-    phoneContainer.style.display = selectedMethod === "phone" || selectedMethod === "both" ? "block" : "none";
-    document.getElementById("phone").required = selectedMethod === "phone" || selectedMethod === "both";
-  }
-
   // Show/hide domain name input
   function updateDomainField() {
     const customDomain = document.querySelector('input[name="domainChoice"][value="custom"]').checked;
@@ -160,11 +151,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Contact method toggle
-  contactMethodRadios.forEach(radio => {
-    radio.addEventListener("change", updateContactFields);
-  });
-
   // Domain choice toggle
   domainChoiceRadios.forEach(radio => {
     radio.addEventListener("change", updateDomainField);
@@ -175,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
   calculatePrice();
   checkExtraPages();
   managePricePopup();
-  updateContactFields();
   updateDomainField();
   pagesValue.textContent = pagesSlider.value;
 
@@ -198,151 +183,14 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("scroll", managePricePopup);
   window.addEventListener("resize", managePricePopup);
 
-  // Form submission
-  customForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!confirm("Double-check everything before submission?")) return;
+  // Show confirmation modal
+  window.showConfirm = (message, callback) => {
+    const modal = document.getElementById('confirmModal');
+    const messageElement = document.getElementById('confirmMessage');
+    const yesBtn = document.getElementById('confirmYes');
+    const noBtn = document.getElementById('confirmNo');
 
-    loadingPopup.style.display = "flex";
-    submitBtn.disabled = true;
+    messageElement.textContent = message;
+    modal.style.display = 'flex';
 
-    const category = categorySelect.value;
-    const template = templateInput.value.trim();
-
-    if (!isValidTemplate(category, template)) {
-      alert("Please enter a valid template name for the selected category.");
-      templateInput.focus();
-      loadingPopup.style.display = "none";
-      submitBtn.disabled = false;
-      return;
-    }
-
-    const formData = new FormData(customForm);
-    const logoFile = formData.get("logo");
-    const mediaFiles = formData.getAll("media");
-    const otherFiles = formData.getAll("others");
-
-    // Validate media files
-    const photos = Array.from(mediaFiles).filter(file => file.type.startsWith("image/"));
-    const videos = Array.from(mediaFiles).filter(file => file.type.startsWith("video/"));
-    if (photos.length < 5 || photos.length > 10) {
-      alert("Please upload between 5 and 10 photos.");
-      loadingPopup.style.display = "none";
-      submitBtn.disabled = false;
-      return;
-    }
-    if (videos.length > 3) {
-      alert("Please upload a maximum of 3 videos.");
-      loadingPopup.style.display = "none";
-      submitBtn.disabled = false;
-      return;
-    }
-    if (otherFiles.length > 4) {
-      alert("Please upload a maximum of 4 PDF or doc files.");
-      loadingPopup.style.display = "none";
-      submitBtn.disabled = false;
-      return;
-    }
-
-    try {
-      // Upload logo
-      let logoUrl = "";
-      if (logoFile && logoFile.name) {
-        const fileName = `logo_${Date.now()}_${logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-        const { error: logoError } = await supabase.storage
-          .from("custom_requests")
-          .upload(fileName, logoFile, { contentType: logoFile.type });
-        if (logoError) throw new Error(`Logo upload failed: ${logoError.message}`);
-        logoUrl = `${supabaseUrl}/storage/v1/object/public/custom_requests/${fileName}`;
-      }
-
-      // Upload media files
-      const mediaUrls = [];
-      for (const file of mediaFiles) {
-        if (file.name) {
-          const fileName = `media_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const { error: mediaError } = await supabase.storage
-            .from("custom_requests")
-            .upload(fileName, file, { contentType: file.type });
-          if (mediaError) throw new Error(`Media upload failed: ${mediaError.message}`);
-          mediaUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${fileName}`);
-        }
-      }
-
-      // Upload other files
-      const otherUrls = [];
-      for (const file of otherFiles) {
-        if (file.name) {
-          const fileName = `other_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const { error: otherError } = await supabase.storage
-            .from("custom_requests")
-            .upload(fileName, file, { contentType: file.type });
-          if (otherError) throw new Error(`Other file upload failed: ${otherError.message}`);
-          otherUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${fileName}`);
-        }
-      }
-
-      // Prepare data for Supabase
-      const selectedTheme = document.querySelector('input[name="themeChoice"]:checked').value;
-      const selectedDomain = document.querySelector('input[name="domainChoice"]:checked').value;
-      const selectedContactMethod = document.querySelector('input[name="contactMethod"]:checked')?.value || null;
-      const data = {
-        first_name: formData.get("firstName"),
-        last_name: formData.get("lastName"),
-        email: formData.get("email"),
-        category: formData.get("category"),
-        template: formData.get("template"),
-        social_media: formData.get("socialMedia") || null,
-        phone: formData.get("phone") || null,
-        contact_method: selectedContactMethod,
-        purpose: formData.get("purpose") || null,
-        target_audience: formData.get("targetAudience") || null,
-        country: formData.get("country"),
-        domain_choice: selectedDomain,
-        domain_name: selectedDomain === "custom" ? formData.get("domainName") || null : null,
-        duration: parseInt(formData.get("duration")),
-        pages: parseInt(formData.get("pages")),
-        extra_pages: formData.get("extraPages") || null,
-        logo_url: logoUrl || null,
-        media_urls: mediaUrls.length > 0 ? mediaUrls : null,
-        other_urls: otherUrls.length > 0 ? otherUrls : null,
-        theme_color: selectedTheme === "default" ? "#4fc3f7" : formData.get("customColor") || "#4fc3f7",
-        created_at: new Date().toISOString(),
-        school_name: formData.get("schoolName") || null,
-        num_students: formData.get("numStudents") ? parseInt(formData.get("numStudents")) : null,
-        business_name: formData.get("businessName") || formData.get("businessNameEcommerce") || null,
-        services: formData.get("services") || formData.get("products") || formData.get("servicesHealthcare") || formData.get("servicesChurch") || formData.get("servicesOther") || null,
-        contact_person: formData.get("contactPersonBusiness") || formData.get("contactPersonPortfolio") || formData.get("contactPersonEcommerce") || formData.get("contactPersonCharity") || formData.get("contactPersonBlog") || formData.get("contactPersonHealthcare") || formData.get("contactPersonEvent") || formData.get("contactPersonChurch") || formData.get("contactPersonNonprofit") || formData.get("contactPersonOther") || null,
-        portfolio_url: formData.get("portfolioUrl") || null,
-        charity_name: formData.get("charityName") || null,
-        mission: formData.get("mission") || formData.get("missionNonprofit") || null,
-        blog_name: formData.get("blogName") || null,
-        topics: formData.get("topics") || null,
-        facility_name: formData.get("facilityName") || null,
-        event_name: formData.get("eventName") || null,
-        event_details: formData.get("eventDetails") || null,
-        nonprofit_name: formData.get("nonprofitName") || null,
-        other_name: formData.get("otherName") || null
-      };
-
-      // Insert into Supabase
-      const { error } = await supabase.from("custom_requests").insert([data]);
-      if (error) throw new Error(`Database insert failed: ${error.message}`);
-
-      alert("Thank you! We will review your request and send a link to your customized website to your inbox. A payment link will follow if there are no issues.");
-      customForm.reset();
-      updateCategoryFields();
-      calculatePrice();
-      checkExtraPages();
-      updateContactFields();
-      updateDomainField();
-      managePricePopup();
-    } catch (error) {
-      alert(`Submission failed: ${error.message}`);
-      console.error("Submission error:", error);
-    } finally {
-      loadingPopup.style.display = "none";
-      submitBtn.disabled = false;
-    }
-  });
-});
+    yesBtn.onclick = ()
