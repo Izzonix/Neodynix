@@ -60,7 +60,7 @@ body {
   display: block;
 }
 
-.template-upload h3, .admin-section h2, .login-section h2, .chat-requests h3, .chat-reply h3 {
+.template-upload h3, .admin-section h2, .login-section h2, .chat-requests h3, .chat-reply h3, .custom-requests h3 {
   color: #4fc3f7;
   font-size: 1.3rem;
   margin-bottom: 10px;
@@ -138,13 +138,13 @@ body {
   border-radius: 6px;
 }
 
-.template-grid, .chat-request-grid {
+.template-grid, .chat-request-grid, .custom-request-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 15px;
 }
 
-.template-card, .chat-request-card {
+.template-card, .chat-request-card, .custom-request-card {
   background: #2a2a2a;
   padding: 10px;
   border-radius: 8px;
@@ -152,18 +152,18 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.template-card h3, .chat-request-card h3 {
+.template-card h3, .chat-request-card h3, .custom-request-card h3 {
   font-size: 1rem;
   margin-bottom: 8px;
 }
 
-.template-card p, .chat-request-card p {
+.template-card p, .chat-request-card p, .custom-request-card p {
   font-size: 0.8rem;
   color: #ccc;
   margin-bottom: 8px;
 }
 
-.template-card a, .chat-request-card a {
+.template-card a, .chat-request-card a, .custom-request-card a {
   color: #4fc3f7;
   text-decoration: none;
   font-size: 0.8rem;
@@ -171,8 +171,20 @@ body {
   display: inline-block;
 }
 
-.template-card a:hover, .chat-request-card a:hover {
+.template-card a:hover, .chat-request-card a:hover, .custom-request-card a:hover {
   text-decoration: underline;
+}
+
+.custom-request-details {
+  display: none;
+  margin-top: 10px;
+  padding: 10px;
+  background: #1e1e1e;
+  border-radius: 6px;
+}
+
+.custom-request-details.active {
+  display: block;
 }
 
 .btn {
@@ -213,14 +225,25 @@ body {
   box-shadow: 0 2px 6px rgba(230, 0, 0, 0.3);
 }
 
-.btn-delete {
+.btn-delete, .btn-download {
   background: #ff4d4d;
+  margin-top: 5px;
+}
+
+.btn-download {
+  background: #4fc3f7;
 }
 
 .btn-delete:hover {
   background: #e60000;
   transform: translateY(-2px);
   box-shadow: 0 2px 6px rgba(230, 0, 0, 0.3);
+}
+
+.btn-download:hover {
+  background: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
 }
 
 /* Loading Popup */
@@ -333,7 +356,7 @@ body {
     margin-left: 0;
   }
 
-  .template-upload h3, .admin-section h2, .login-section h2, .chat-requests h3, .chat-reply h3 {
+  .template-upload h3, .admin-section h2, .login-section h2, .chat-requests h3, .chat-reply h3, .custom-requests h3 {
     font-size: 1.1rem;
   }
 
@@ -352,20 +375,20 @@ body {
     font-size: 0.8rem;
   }
 
-  .template-grid, .chat-request-grid {
+  .template-grid, .chat-request-grid, .custom-request-grid {
     grid-template-columns: 1fr;
     gap: 10px;
   }
 
-  .template-card, .chat-request-card {
+  .template-card, .chat-request-card, .custom-request-card {
     padding: 8px;
   }
 
-  .template-card h3, .chat-request-card h3 {
+  .template-card h3, .chat-request-card h3, .custom-request-card h3 {
     font-size: 0.9rem;
   }
 
-  .template-card p, .chat-request-card p, .chat-request-card a {
+  .template-card p, .chat-request-card p, .custom-request-card p, .custom-request-card a {
     font-size: 0.7rem;
   }
 
