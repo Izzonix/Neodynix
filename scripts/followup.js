@@ -193,4 +193,167 @@ document.addEventListener("DOMContentLoaded", () => {
     messageElement.textContent = message;
     modal.style.display = 'flex';
 
-    yesBtn.onclick = ()
+    yesBtn.onclick = () => {
+      callback(true);
+      modal.style.display = 'none';
+    };
+    noBtn.onclick = () => {
+      callback(false);
+      modal.style.display = 'none';
+    };
+  };
+
+  // Form submission
+  customForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    showConfirm('Are you sure you want to submit these details?', async (confirmed) => {
+      if (!confirmed) return;
+
+      loadingPopup.style.display = "block";
+      submitBtn.disabled = true;
+
+      const formData = new FormData(customForm);
+      const category = formData.get("category");
+      const template = formData.get("template");
+
+      if (!isValidTemplate(category, template)) {
+        alert("Invalid template for the selected category.");
+        loadingPopup.style.display = "none";
+        submitBtn.disabled = false;
+        return;
+      }
+
+      try {
+        const logoFile = formData.get("logo");
+        let logoUrl = null;
+        if (logoFile && logoFile.size > 0) {
+          const logoFileName = `${Date.now()}-${logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+          const { error: logoError } = await supabase.storage
+            .from("custom_requests")
+            .upload(logoFileName, logoFile);
+          if (logoError) throw new Error(`Logo upload failed: ${logoError.message}`);
+          logoUrl = `${supabaseUrl}/storage/v1/object/public/custom_requests/${logoFileName}`;
+        }
+
+        const mediaFiles = formData.getAll("media");
+        const mediaUrls = [];
+        for (const file of mediaFiles) {
+          if (file.size > 0) {
+            const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+            const { error } = await supabase.storage
+              .from("custom_requests")
+              .upload(fileName, file);
+            if (error) throw new Error(`Media upload failed: ${error.message}`);
+            mediaUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${fileName}`);
+          }
+        }
+
+        const otherFiles = formData.getAll("others");
+        const otherUrls = [];
+        for (const file of otherFiles) {
+          if (file.size > 0) {
+            const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+            const { error } = await supabase.storage
+              .from("custom_requests")
+              .upload(fileName, file);
+            if (error) throw new Error(`Other file upload failed: ${error.message}`);
+            otherUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${fileName}`);
+          }
+        }
+
+        const socialMedia = formData.get("socialMedia")?.split(",").map(url => url.trim()).filter(url => url) || null;
+        const themeColor = formData.get("themeChoice") === "custom" ? formData.get("customColor") : "default";
+        const domainChoice = formData.get("domainChoice");
+        const domainName = domainChoice === "custom" ? formData.get("domainName") : null;
+
+        const data = {
+          first_name: formData.get("firstName"),
+          last_name: formData.get("lastName"),
+          email: formData.get("email"),
+          phone: formData.get("phone"),
+          category,
+          template,
+          social_media: socialMedia,
+          purpose: formData.get("purpose") || null,
+          target_audience: formData.get("targetAudience") || null,
+          country: formData.get("country"),
+          domain_choice: domainChoice,
+          domain_name: domainName,
+          duration: parseInt(formData.get("duration")),
+          pages: parseInt(formData.get("pages")),
+          extra_pages: formData.get("extraPages") || null,
+          logo_url: logoUrl,
+          media_urls: mediaUrls.length > 0 ? mediaUrls : null,
+          other_urls: otherUrls.length > 0 ? otherUrls : null,
+          theme_color: themeColor,
+          created_at: new Date().toISOString()
+        };
+
+        // Add category-specific fields
+        if (category === "education") {
+          data.school_name = formData.get("schoolName") || null;
+          data.num_students = formData.get("numStudents") ? parseInt(formData.get("numStudents")) : null;
+        } else if (category === "business") {
+          data.business_name = formData.get("businessName") || null;
+          data.services = formData.get("services") || null;
+          data.contact_person = formData.get("contactPersonBusiness") || null;
+        } else if (category === "portfolio") {
+          data.portfolio_url = formData.get("portfolioUrl") || null;
+          data.projects = formData.get("projects") || null;
+          data.contact_person = formData.get("contactPersonPortfolio") || null;
+        } else if (category === "ecommerce") {
+          data.business_name = formData.get("businessNameEcommerce") || null;
+          data.products = formData.get("products") || null;
+          data.contact_person = formData.get("contactPersonEcommerce") || null;
+        } else if (category === "charity") {
+          data.charity_name = formData.get("charityName") || null;
+          data.mission = formData.get("mission") || null;
+          data.contact_person = formData.get("contactPersonCharity") || null;
+        } else if (category === "blog") {
+          data.blog_name = formData.get("blogName") || null;
+          data.topics = formData.get("topics") || null;
+          data.contact_person = formData.get("contactPersonBlog") || null;
+        } else if (category === "healthcare") {
+          data.facility_name = formData.get("facilityName") || null;
+          data.services = formData.get("servicesHealthcare") || null;
+          data.contact_person = formData.get("contactPersonHealthcare") || null;
+        } else if (category === "event") {
+          data.event_name = formData.get("eventName") || null;
+          data.event_details = formData.get("eventDetails") || null;
+          data.contact_person = formData.get("contactPersonEvent") || null;
+        } else if (category === "church") {
+          data.church_name = formData.get("churchName") || null;
+          data.services = formData.get("servicesChurch") || null;
+          data.contact_person = formData.get("contactPersonChurch") || null;
+        } else if (category === "nonprofit") {
+          data.nonprofit_name = formData.get("nonprofitName") || null;
+          data.mission = formData.get("missionNonprofit") || null;
+          data.contact_person = formData.get("contactPersonNonprofit") || null;
+        } else if (category === "other") {
+          data.other_name = formData.get("otherName") || null;
+          data.services = formData.get("servicesOther") || null;
+          data.contact_person = formData.get("contactPersonOther") || null;
+        }
+
+        const { error } = await supabase.from("custom_requests").insert(data);
+        if (error) throw new Error(`Database insert failed: ${error.message}`);
+
+        alert("Request submitted successfully!");
+        customForm.reset();
+        updateCategoryFields();
+        checkExtraPages();
+        calculatePrice();
+        updateDomainField();
+        colorPickerContainer.style.display = "none";
+        document.getElementById("logo-name").textContent = "No file chosen";
+        document.getElementById("media-name").textContent = "No files chosen";
+        document.getElementById("others-name").textContent = "No files chosen";
+      } catch (error) {
+        alert(`Submission failed: ${error.message}`);
+      } finally {
+        loadingPopup.style.display = "none";
+        submitBtn.disabled = false;
+      }
+    });
+  });
+});
