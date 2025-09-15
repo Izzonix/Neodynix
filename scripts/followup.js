@@ -23,31 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const loadingPopup = document.getElementById("loading-popup");
   const mobilePricePopup = document.getElementById("mobile-price-popup");
 
-  const templatesByCategory = {
-    business: ["corporate", "startup", "consulting", "small_business"],
-    portfolio: ["photographer", "designer", "developer", "artist"],
-    education: ["basic_school", "modern_school", "academy", "university"],
-    ecommerce: ["online_store", "marketplace", "retail", "shop"],
-    charity: ["donation_hub", "community_aid", "charity_impact"],
-    blog: ["personal_blog", "tech_blog", "lifestyle_blog"],
-    healthcare: ["clinic", "hospital", "wellness", "medical_center"],
-    event: ["conference", "wedding", "festival", "meetup"],
-    religion: ["community_worship", "faith_hub", "sacred_space"],
-    nonprofit: ["nonprofit_impact", "advocacy", "community_service"],
-    other: ["custom_project", "event_spotlight", "miscellaneous"]
-  };
-
-  const currencyMap = {
-    "UG": { symbol: "UGX", rate: 20 },
-    "KE": { symbol: "KSH", rate: 30 },
-    "TZ": { symbol: "TSh", rate: 25 },
-    "NG": { symbol: "NGN", rate: 35 },
-    "IN": { symbol: "₹", rate: 40 },
-    "US": { symbol: "USD", rate: 60 },
-    "GB": { symbol: "£", rate: 55 },
-    "OTHER": { symbol: "USD", rate: 50 }
-  };
-
   // Show/hide category-specific fields
   function updateCategoryFields() {
     const category = categorySelect.value;
@@ -55,12 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (category) {
       document.querySelector(`.${category}-fields`).style.display = "block";
     }
-  }
-
-  // Validate template name with category
-  function isValidTemplate(category, template) {
-    if (!category || !template) return false;
-    return templatesByCategory[category]?.includes(template.toLowerCase().replace(/\s+/g, '_'));
   }
 
   // Show or hide extraPages textarea based on number of pages
@@ -75,32 +44,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Calculate price based on inputs
-  function calculatePrice() {
-    const country = countrySelect.value || "OTHER";
-    const base = currencyMap[country] ? currencyMap[country].rate : currencyMap["OTHER"].rate;
-    const symbol = currencyMap[country] ? currencyMap[country].symbol : currencyMap["OTHER"].symbol;
-
-    const duration = parseInt(durationSlider.value);
-    const pages = parseInt(pagesSlider.value);
-
-    let surcharge = 0;
-    if (isValidTemplate(categorySelect.value, templateInput.value)) {
-      const template = templateInput.value.toLowerCase().replace(/\s+/g, '_');
-      if (["modern_school", "corporate", "designer", "community_worship", "online_store", "donation_hub", "tech_blog", "clinic", "conference"].includes(template)) {
-        surcharge = 30;
-      } else if (["academy", "consulting", "developer", "faith_hub", "marketplace", "community_aid", "lifestyle_blog", "hospital", "wedding"].includes(template)) {
-        surcharge = 40;
-      } else {
-        surcharge = 20;
-      }
+  // Fetch and display template price
+  async function fetchTemplatePrice() {
+    const category = categorySelect.value;
+    const template = templateInput.value.trim();
+    if (!category || !template) {
+      priceOutput.textContent = '0';
+      currencyOutput.textContent = 'USD';
+      mobilePriceOutput.textContent = '0';
+      mobileCurrencyOutput.textContent = 'USD';
+      return false;
     }
 
-    const price = base + duration * 1.5 + pages * 5 + surcharge;
-    priceOutput.textContent = Math.round(price);
-    currencyOutput.textContent = symbol;
-    mobilePriceOutput.textContent = Math.round(price);
-    mobileCurrencyOutput.textContent = symbol;
+    try {
+      const { data, error } = await supabase
+        .from('templates')
+        .select('price')
+        .eq('category', category)
+        .eq('name', template)
+        .single();
+      if (error || !data) {
+        priceOutput.textContent = '0';
+        currencyOutput.textContent = 'USD';
+        mobilePriceOutput.textContent = '0';
+        mobileCurrencyOutput.textContent = 'USD';
+        return false;
+      }
+      priceOutput.textContent = data.price.toFixed(2);
+      currencyOutput.textContent = 'USD';
+      mobilePriceOutput.textContent = data.price.toFixed(2);
+      mobileCurrencyOutput.textContent = 'USD';
+      return true;
+    } catch (error) {
+      priceOutput.textContent = '0';
+      currencyOutput.textContent = 'USD';
+      mobilePriceOutput.textContent = '0';
+      mobileCurrencyOutput.textContent = 'USD';
+      return false;
+    }
   }
 
   // Display selected filenames for file inputs
@@ -147,7 +128,6 @@ document.addEventListener("DOMContentLoaded", () => {
   themeChoiceRadios.forEach(radio => {
     radio.addEventListener("change", () => {
       colorPickerContainer.style.display = radio.value === "custom" && radio.checked ? "block" : "none";
-      calculatePrice();
     });
   });
 
@@ -158,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize on page load
   updateCategoryFields();
-  calculatePrice();
   checkExtraPages();
   managePricePopup();
   updateDomainField();
@@ -167,18 +146,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Event listeners
   categorySelect.addEventListener("change", () => {
     updateCategoryFields();
-    calculatePrice();
+    fetchTemplatePrice();
   });
-  templateInput.addEventListener("input", calculatePrice);
-  countrySelect.addEventListener("change", calculatePrice);
+  templateInput.addEventListener("input", fetchTemplatePrice);
   durationSlider.addEventListener("input", () => {
     durationValue.textContent = durationSlider.value;
-    calculatePrice();
   });
   pagesSlider.addEventListener("input", () => {
     pagesValue.textContent = pagesSlider.value;
     checkExtraPages();
-    calculatePrice();
   });
   window.addEventListener("scroll", managePricePopup);
   window.addEventListener("resize", managePricePopup);
@@ -216,7 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const category = formData.get("category");
       const template = formData.get("template");
 
-      if (!isValidTemplate(category, template)) {
+      const isValid = await fetchTemplatePrice();
+      if (!isValid) {
         alert("Invalid template for the selected category.");
         loadingPopup.style.display = "none";
         submitBtn.disabled = false;
@@ -342,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
         customForm.reset();
         updateCategoryFields();
         checkExtraPages();
-        calculatePrice();
+        fetchTemplatePrice();
         updateDomainField();
         colorPickerContainer.style.display = "none";
         document.getElementById("logo-name").textContent = "No file chosen";
