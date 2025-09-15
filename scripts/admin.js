@@ -46,6 +46,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  window.logout = async () => {
+    logoutBtn.click();
+  };
+
   // Initialize admin functionality
   function initAdmin() {
     // Tab switching
@@ -58,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const sectionChat = document.getElementById('sectionChat');
     const sectionCustomRequests = document.getElementById('sectionCustomRequests');
 
-    function showSection(section) {
+    window.showSection = function(section) {
       btnTemplates.classList.remove('active');
       btnSendEmail.classList.remove('active');
       btnChat.classList.remove('active');
@@ -76,16 +80,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else if (section === 'chat') {
         btnChat.classList.add('active');
         sectionChat.style.display = 'block';
-      } else if (section === 'customRequests') {
+      } else if (section === 'custom') {
         btnCustomRequests.classList.add('active');
         sectionCustomRequests.style.display = 'block';
       }
-    }
+    };
 
     btnTemplates.addEventListener('click', () => showSection('templates'));
     btnSendEmail.addEventListener('click', () => showSection('email'));
     btnChat.addEventListener('click', () => showSection('chat'));
-    btnCustomRequests.addEventListener('click', () => showSection('customRequests'));
+    btnCustomRequests.addEventListener('click', () => showSection('custom'));
 
     showSection('templates');
 
@@ -389,17 +393,96 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
 
+    // Subscribe to real-time updates
+    supabase.channel('chat_admin')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'messages', 
+        filter: 'sender=eq.user'
+      }, () => {
+        fetchChatRequests();
+      })
+      .subscribe();
+
+    // Initial load and periodic refresh
+    fetchChatRequests();
+    setInterval(fetchChatRequests, 30000);
+
+    // Select user for reply
+    window.selectUserForReply = (userId, name, email) => {
+      replyUserId.value = userId;
+      replyUserInfo.textContent = `Replying to ${name} (${email})`;
+      replyMessage.value = '';
+      chatResult.style.display = 'none';
+    };
+
+    // Send reply
+    chatReplyForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!confirm('Send reply?')) return;
+
+      loadingPopup.style.display = 'flex';
+      replyBtn.disabled = true;
+
+      const userId = replyUserId.value;
+      const message = replyMessage.value.trim();
+
+      if (!userId || !message) {
+        showChatResult('Please select a user and enter a message.', 'error');
+        loadingPopup.style.display = 'none';
+        replyBtn.disabled = false;
+        return;
+      }
+
+      try {
+        const { error } = await supabase.from('messages').insert({
+          user_id: userId,
+          content: message,
+          sender: 'support',
+          is_auto: false
+        });
+        if (error) throw error;
+
+        showChatResult('Reply sent successfully!', 'success');
+        chatReplyForm.reset();
+        replyUserInfo.textContent = '';
+        fetchChatRequests();
+      } catch (error) {
+        showChatResult(`Failed to send reply: ${error.message}`, 'error');
+      } finally {
+        loadingPopup.style.display = 'none';
+        replyBtn.disabled = false;
+      }
+    });
+
+    // Show chat result
+    function showChatResult(message, type) {
+      chatResult.textContent = message;
+      chatResult.className = type === 'success' ? 'success' : 'error';
+      chatResult.style.display = 'block';
+      setTimeout(() => chatResult.style.display = 'none', 5000);
+    }
+
+    // Show result for templates and email
+    function showResult(message, type) {
+      result.textContent = message;
+      result.className = type === 'success' ? 'success' : 'error';
+      result.style.display = 'block';
+      setTimeout(() => result.style.display = 'none', 5000);
+    }
+
     // Fetch and display custom requests
     const customRequestList = document.getElementById('customRequestList');
     async function fetchCustomRequests() {
       try {
         const { data, error } = await supabase.from('custom_requests').select('*').order('created_at', { ascending: false });
-        if (error) throw new Error(`Custom requests fetch error: ${error.message}`);
+        if (error) throw error;
 
         customRequestList.innerHTML = '';
 
         if (!data || data.length === 0) {
-          customRequestList.innerHTML = `<p>No pending custom requests.</p>`;
+          customRequestList.innerHTML = `<p>No custom requests available.</p>`;
           return;
         }
 
@@ -409,51 +492,25 @@ document.addEventListener('DOMContentLoaded', async () => {
           card.innerHTML = `
             <h3>${request.first_name} ${request.last_name}</h3>
             <p>Email: ${request.email}</p>
-            <button onclick="toggleRequestDetails('${request.id}')" class="btn">Toggle Details</button>
-            <button onclick="downloadRequestFiles('${request.id}')" class="btn btn-download">Download Files</button>
-            <button onclick="deleteRequestFiles('${request.id}')" class="btn btn-delete">Delete Files</button>
-            <div id="details-${request.id}" class="custom-request-details">
-              <p><strong>Category:</strong> ${request.category || 'N/A'}</p>
-              <p><strong>Template:</strong> ${request.template || 'N/A'}</p>
-              <p><strong>Social Media:</strong> ${request.social_media ? request.social_media.join(', ') : 'N/A'}</p>
-              <p><strong>Phone:</strong> ${request.phone || 'N/A'}</p>
-              <p><strong>Contact Method:</strong> ${request.contact_method || 'N/A'}</p>
-              <p><strong>Purpose:</strong> ${request.purpose || 'N/A'}</p>
-              <p><strong>Target Audience:</strong> ${request.target_audience || 'N/A'}</p>
-              <p><strong>Country:</strong> ${request.country || 'N/A'}</p>
-              <p><strong>Domain Choice:</strong> ${request.domain_choice || 'N/A'}</p>
-              <p><strong>Domain Name:</strong> ${request.domain_name || 'N/A'}</p>
-              <p><strong>Duration:</strong> ${request.duration} months</p>
-              <p><strong>Pages:</strong> ${request.pages}</p>
-              <p><strong>Extra Pages:</strong> ${request.extra_pages || 'N/A'}</p>
-              <p><strong>Logo URL:</strong> ${request.logo_url ? `<a href="${request.logo_url}" target="_blank">View Logo</a>` : 'N/A'}</p>
-              <p><strong>Media URLs:</strong> ${request.media_urls ? request.media_urls.map(url => `<a href="${url}" target="_blank">View Media</a>`).join(', ') : 'N/A'}</p>
-              <p><strong>Other URLs:</strong> ${request.other_urls ? request.other_urls.map(url => `<a href="${url}" target="_blank">View File</a>`).join(', ') : 'N/A'}</p>
-              <p><strong>Theme Color:</strong> ${request.theme_color || 'N/A'}</p>
-              <p><strong>Created At:</strong> ${new Date(request.created_at).toLocaleString()}</p>
-              ${request.school_name ? `<p><strong>School Name:</strong> ${request.school_name}</p>` : ''}
-              ${request.num_students ? `<p><strong>Number of Students:</strong> ${request.num_students}</p>` : ''}
-              ${request.business_name ? `<p><strong>Business Name:</strong> ${request.business_name}</p>` : ''}
-              ${request.services ? `<p><strong>Services:</strong> ${request.services}</p>` : ''}
-              ${request.contact_person ? `<p><strong>Contact Person:</strong> ${request.contact_person}</p>` : ''}
-              ${request.portfolio_url ? `<p><strong>Portfolio URL:</strong> <a href="${request.portfolio_url}" target="_blank">${request.portfolio_url}</a></p>` : ''}
-              ${request.charity_name ? `<p><strong>Charity Name:</strong> ${request.charity_name}</p>` : ''}
-              ${request.mission ? `<p><strong>Mission:</strong> ${request.mission}</p>` : ''}
-              ${request.blog_name ? `<p><strong>Blog Name:</strong> ${request.blog_name}</p>` : ''}
-              ${request.topics ? `<p><strong>Topics:</strong> ${request.topics}</p>` : ''}
-              ${request.facility_name ? `<p><strong>Facility Name:</strong> ${request.facility_name}</p>` : ''}
-              ${request.event_name ? `<p><strong>Event Name:</strong> ${request.event_name}</p>` : ''}
-              ${request.event_details ? `<p><strong>Event Details:</strong> ${request.event_details}</p>` : ''}
-              ${request.nonprofit_name ? `<p><strong>Non-profit Name:</strong> ${request.nonprofit_name}</p>` : ''}
-              ${request.other_name ? `<p><strong>Organization Name:</strong> ${request.other_name}</p>` : ''}
-            </div>
-          `;
-          customRequestList.appendChild(card);
-        });
-      } catch (error) {
-        console.error('Error fetching custom requests:', error);
-        customRequestList.innerHTML = `<p class="error">Failed to load custom requests: ${error.message}</p>`;
-      }
-    }
-
-    // Togg
+            <p>Created At: ${new Date(request.created_at).toLocaleString()}</p>
+            <button onclick="toggleDetails('${request.id}')" class="btn">Show/Hide Details</button>
+            <div id="details-${request.id}" style="display: none;">
+              <p>Category: ${request.category}</p>
+              <p>Template: ${request.template}</p>
+              <p>Social Media: ${request.social_media ? request.social_media.join(', ') : 'None'}</p>
+              <p>Phone: ${request.phone || 'None'}</p>
+              <p>Contact Method: ${request.contact_method || 'None'}</p>
+              <p>Purpose: ${request.purpose || 'None'}</p>
+              <p>Target Audience: ${request.target_audience || 'None'}</p>
+              <p>Country: ${request.country}</p>
+              <p>Domain Choice: ${request.domain_choice}</p>
+              <p>Domain Name: ${request.domain_name || 'None'}</p>
+              <p>Duration: ${request.duration} months</p>
+              <p>Pages: ${request.pages}</p>
+              <p>Extra Pages: ${request.extra_pages || 'None'}</p>
+              <p>Logo: ${request.logo_url ? `<a href="${request.logo_url}" target="_blank">View Logo</a> <button onclick="downloadFile('${request.logo_url}')">Download</button> <button onclick="deleteFile('${request.logo_url}', '${request.id}')">Delete</button>` : 'None'}</p>
+              <p>Media Files:</p>
+              <ul>
+                ${request.media_urls ? request.media_urls.map(url => `<li><a href="${url}" target="_blank">View Media</a> <button onclick="downloadFile('${url}')">Download</button> <button onclick="deleteFile('${url}', '${request.id}')">Delete</button></li>`).join('') : '<li>None</li>'}
+              </ul>
+          
