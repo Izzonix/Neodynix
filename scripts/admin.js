@@ -48,6 +48,7 @@ if (uploadForm) {
         image: imageUrl,
       },
     ]);
+
     if (error) {
       document.getElementById("result").innerText =
         "Error: " + error.message;
@@ -145,6 +146,7 @@ window.editTemplate = async function (id) {
         extra_page_usd: document.getElementById("editExtraPageUSD").value,
       })
       .eq("id", id);
+
     if (updateError) {
       alert("Error updating template: " + updateError.message);
     } else {
