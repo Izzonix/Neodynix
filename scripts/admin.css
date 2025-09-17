@@ -1,0 +1,406 @@
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #0d1117;
+  color: #ffffff;
+}
+
+.admin-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  width: 90%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+  align-items: center;
+}
+
+.tab-button {
+  padding: 8px 15px;
+  background: #4fc3f71a;
+  color: #4fc3f7;
+  border: 1px solid #4fc3f7;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.tab-button.active {
+  background: #4fc3f7;
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
+}
+
+.tab-button:hover {
+  background: #4fc3f7;
+  color: #000;
+  transform: translateY(-2px);
+}
+
+.admin-section {
+  display: none;
+}
+
+.admin-section.active {
+  display: block;
+}
+
+.template-upload h3, .admin-section h2, .login-section h2, .chat-requests h3, .chat-reply h3 {
+  color: #4fc3f7;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.template-upload form, .email-form, .login-form, .chat-reply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea, #editTemplateForm input, #editTemplateForm select {
+  padding: 10px;
+  background: #1e1e1e;
+  color: #fff;
+  border: 2px solid #4fc3f7;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-family: "Segoe UI", sans-serif;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.template-upload input:focus, .template-upload select:focus, .email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus, #editTemplateForm input:focus, #editTemplateForm select:focus {
+  outline: none;
+  border-color: #03a9f4;
+  box-shadow: 0 0 6px rgba(3, 169, 244, 0.3);
+}
+
+.chat-reply-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.file-input-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.file-input-wrapper input[type="file"] {
+  display: none;
+}
+
+.file-input-label {
+  display: block;
+  padding: 10px;
+  background: #4fc3f7;
+  color: #000;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  text-align: center;
+  font-size: 0.9rem;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.file-input-label:hover {
+  background: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
+}
+
+#imagePreview, #editImagePreview {
+  margin-top: 8px;
+}
+
+#imagePreview img, #editImagePreview img {
+  max-width: 100%;
+  border-radius: 6px;
+}
+
+.template-grid, .chat-request-grid, .custom-request-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.template-card, .chat-request-card, .custom-request-card {
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.template-card h3, .chat-request-card h3, .custom-request-card h3 {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.template-card p, .chat-request-card p, .custom-request-card p {
+  font-size: 0.8rem;
+  color: #ccc;
+  margin-bottom: 8px;
+}
+
+.template-card a, .chat-request-card a, .custom-request-card a {
+  color: #4fc3f7;
+  text-decoration: none;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.template-card a:hover, .chat-request-card a:hover, .custom-request-card a:hover {
+  text-decoration: underline;
+}
+
+.btn {
+  background: #4fc3f7;
+  color: #000;
+  padding: 10px;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.btn:hover {
+  background: #03a9f4;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
+}
+
+.btn:disabled {
+  background: #4fc3f77a;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-logout, .btn-cancel {
+  background: #ff4d4d;
+  margin-left: auto;
+  width: auto;
+}
+
+.btn-logout:hover, .btn-cancel:hover {
+  background: #e60000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(230, 0, 0, 0.3);
+}
+
+.btn-delete {
+  background: #ff4d4d;
+}
+
+.btn-delete:hover {
+  background: #e60000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(230, 0, 0, 0.3);
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content p {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.loading-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loading-content {
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.spinner {
+  border: 3px solid #4fc3f7;
+  border-top: 3px solid #03a9f4;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin: 8px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.success {
+  color: #4fc3f7;
+  font-weight: bold;
+  padding: 8px;
+  border-radius: 4px;
+  background: #4fc3f71a;
+}
+
+.error {
+  color: #ff4d4d;
+  font-weight: bold;
+  padding: 8px;
+  border-radius: 4px;
+  background: #ff4d4d1a;
+}
+
+.login-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  padding-top: 20px;
+}
+
+.login-container {
+  max-width: 400px;
+  width: 90%;
+  padding: 20px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.login-form {
+  margin-top: 15px;
+}
+
+.login-form input, .login-form button {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .login-section {
+    padding-top: 10px;
+  }
+
+  .admin-container {
+    padding: 15px;
+  }
+
+  .admin-tabs {
+    gap: 5px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tab-button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    width: 100%;
+  }
+
+  .btn-logout, .btn-cancel {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .template-upload h3, .admin-section h2, .login-section h2, .chat-requests h3, .chat-reply h3 {
+    font-size: 1.1rem;
+  }
+
+  .template-upload form, .email-form, .login-form, .chat-reply-form, #editTemplateForm {
+    gap: 8px;
+    padding: 0 5px;
+  }
+
+  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea, #editTemplateForm input, #editTemplateForm select {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .file-input-label, .btn {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .template-grid, .chat-request-grid, .custom-request-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .template-card, .chat-request-card, .custom-request-card {
+    padding: 8px;
+  }
+
+  .template-card h3, .chat-request-card h3, .custom-request-card h3 {
+    font-size: 0.9rem;
+  }
+
+  .template-card p, .chat-request-card p, .custom-request-card p {
+    font-size: 0.7rem;
+  }
+
+  .login-container {
+    padding: 15px;
+  }
+
+  .loading-content {
+    padding: 10px;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+  }
+  }
