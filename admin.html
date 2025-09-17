@@ -1,233 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Admin Panel - Neodynix</title>
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/admin.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css"/>
 </head>
 <body>
-  <header class="top-header">
-    <span class="logo">Neodynix Technologies - Admin</span>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
-    <nav id="nav-menu">
-      <a href="javascript:void(0)" onclick="showSection('templates')">Manage Templates</a>
-      <a href="javascript:void(0)" onclick="showSection('email')">Send Email</a>
-      <a href="javascript:void(0)" onclick="showSection('chat')">Chat Requests</a>
-      <a href="javascript:void(0)" onclick="showSection('custom')">Custom Requests</a>
-      <a href="javascript:void(0)" onclick="logout()">Logout</a>
-    </nav>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <button id="logout-btn" class="btn">Logout</button>
   </header>
 
-  <!-- Login section (hidden by default; your auth script can toggle) -->
-  <section id="login-section" class="login-section" style="display:none;">
-    <div class="login-container">
-      <h2>Admin Login</h2>
-      <form id="loginForm" class="login-form">
-        <input type="email" id="loginEmail" placeholder="Email" required aria-label="Email" />
-        <input type="password" id="loginPassword" placeholder="Password" required aria-label="Password" />
-        <button type="submit" class="btn">Login</button>
-      </form>
-      <p id="login-error" class="error" style="display:none;"></p>
-    </div>
-  </section>
+  <main>
+    <section id="upload-section">
+      <h2>Upload New Template</h2>
+      <form id="uploadForm">
+        <input type="text" name="name" placeholder="Template Name" required aria-label="Template Name" />
 
-  <!-- Admin container - styled by your admin.css -->
-  <section id="admin-container" class="admin-container">
-    <div class="admin-tabs">
-      <button id="btnTemplates" class="tab-button active">Manage Templates</button>
-      <button id="btnSendEmail" class="tab-button">Send Email</button>
-      <button id="btnChat" class="tab-button">Chat Requests</button>
-      <button id="btnCustomRequests" class="tab-button">Custom Requests</button>
-      <button id="logout-btn" class="btn btn-logout">Logout</button>
-    </div>
-
-    <!-- Templates management -->
-    <div id="sectionTemplates" class="admin-section active">
-      <h2>Manage Templates</h2>
-
-      <div class="template-upload">
-        <h3>Add New Template</h3>
-        <form id="uploadForm" class="upload-form">
-          <input type="text" name="name" placeholder="Template Name" required aria-label="Template Name" />
-
-          <select name="category" required aria-label="Template Category">
-            <option value="" disabled selected>Select Category</option>
-            <option value="Business">Business</option>
-            <option value="Portfolio">Portfolio</option>
-            <option value="Education">Education</option>
-            <option value="Religion">Religion</option>
-            <option value="Health">Health</option>
-            <option value="Media">Media</option>
-            <option value="NonProfit">Non-Profit</option>
-            <option value="Tech">Tech</option>
-            <option value="Industry">Industry</option>
-            <option value="Travel">Travel</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
-          <input type="url" name="link" placeholder="Preview Link (e.g. https://...)" required aria-label="Preview Link" />
-
-          <h4 style="color:#4fc3f7; text-align:left;">Template Base Prices (enter 0 if not used)</h4>
-          <input type="number" name="priceUGX" placeholder="Price (UGX)" min="0" step="1" required />
-          <input type="number" name="priceKSH" placeholder="Price (Ksh)" min="0" step="1" required />
-          <input type="number" name="priceTSH" placeholder="Price (Tsh)" min="0" step="1" required />
-          <input type="number" name="priceUSD" placeholder="Price (USD)" min="0" step="0.01" required />
-
-          <h4 style="color:#4fc3f7; text-align:left;">Extra Charges</h4>
-          <input type="number" name="extraMonthUGX" placeholder="Charge per extra month (UGX)" min="0" step="1" required />
-          <input type="number" name="extraMonthKSH" placeholder="Charge per extra month (Ksh)" min="0" step="1" required />
-          <input type="number" name="extraMonthTSH" placeholder="Charge per extra month (Tsh)" min="0" step="1" required />
-          <input type="number" name="extraMonthUSD" placeholder="Charge per extra month (USD)" min="0" step="0.01" required />
-
-          <input type="number" name="extraPageUGX" placeholder="Charge per extra page (UGX)" min="0" step="1" required />
-          <input type="number" name="extraPageKSH" placeholder="Charge per extra page (Ksh)" min="0" step="1" required />
-          <input type="number" name="extraPageTSH" placeholder="Charge per extra page (Tsh)" min="0" step="1" required />
-          <input type="number" name="extraPageUSD" placeholder="Charge per extra page (USD)" min="0" step="0.01" required />
-
-          <div class="file-input-wrapper">
-            <!-- CSS hides the actual input; label triggers it -->
-            <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required />
-            <label for="imageFile" class="file-input-label">Choose File (image/pdf)</label>
-          </div>
-
-          <div id="imagePreview"></div>
-
-          <button type="submit" id="upload-btn" class="btn">Upload Template</button>
-        </form>
-        <div id="result" style="margin-top:10px;"></div>
-      </div>
-
-      <div class="template-list" style="margin-top:20px;">
-        <h3>Existing Templates</h3>
-        <div id="templateList" class="template-grid"></div>
-      </div>
-    </div>
-
-    <!-- Send Email (keeps CSS selectors) -->
-    <div id="sectionSendEmail" class="admin-section" style="display:none;">
-      <h2>Send Custom Email</h2>
-      <form id="emailForm" class="email-form">
-        <input type="email" name="customerEmail" placeholder="Customer Email" required aria-label="Customer Email" />
-        <input type="url" name="customLink" placeholder="Custom Link" required aria-label="Custom Link" />
-        <input type="number" name="price" placeholder="Price" required aria-label="Price" />
-        <select name="currency" required aria-label="Currency">
-          <option value="" disabled selected>Select Currency</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
+        <select name="category" required aria-label="Template Category">
+          <option value="" disabled selected>Select Category</option>
+          <option value="Business">Business</option>
+          <option value="Portfolio">Portfolio</option>
+          <option value="Education">Education</option>
+          <option value="Religion">Religion</option>
+          <option value="Health">Health</option>
+          <option value="Media">Media</option>
+          <option value="NonProfit">Non-Profit</option>
+          <option value="Tech">Tech</option>
+          <option value="Industry">Industry</option>
+          <option value="Travel">Travel</option>
+          <option value="Other">Other</option>
         </select>
-        <button type="submit" id="email-btn" class="btn">Send Email</button>
+
+        <input type="text" name="description" placeholder="Template Description" required aria-label="Template Description" />
+        <input type="url" name="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
+
+        <!-- Prices -->
+        <input type="number" name="priceUGX" placeholder="Price (UGX)" min="0" step="1" required />
+        <input type="number" name="priceKSH" placeholder="Price (Ksh)" min="0" step="1" required />
+        <input type="number" name="priceTSH" placeholder="Price (Tsh)" min="0" step="1" required />
+        <input type="number" name="priceUSD" placeholder="Price (USD)" min="0" step="0.01" required />
+
+        <!-- Charges per extra month -->
+        <input type="number" name="extraMonthUGX" placeholder="Charge per extra month (UGX)" min="0" step="1" required />
+        <input type="number" name="extraMonthKSH" placeholder="Charge per extra month (Ksh)" min="0" step="1" required />
+        <input type="number" name="extraMonthTSH" placeholder="Charge per extra month (Tsh)" min="0" step="1" required />
+        <input type="number" name="extraMonthUSD" placeholder="Charge per extra month (USD)" min="0" step="0.01" required />
+
+        <!-- Charges per extra page -->
+        <input type="number" name="extraPageUGX" placeholder="Charge per extra page (UGX)" min="0" step="1" required />
+        <input type="number" name="extraPageKSH" placeholder="Charge per extra page (Ksh)" min="0" step="1" required />
+        <input type="number" name="extraPageTSH" placeholder="Charge per extra page (Tsh)" min="0" step="1" required />
+        <input type="number" name="extraPageUSD" placeholder="Charge per extra page (USD)" min="0" step="0.01" required />
+
+        <div class="file-input-wrapper">
+          <input type="file" id="imageFile" name="image" accept="image/*,.pdf" required aria-label="Template Image" />
+          <label for="imageFile" class="file-input-label">Choose File</label>
+        </div>
+        <div id="imagePreview"></div>
+        <button type="submit" id="upload-btn" class="btn">Upload Template</button>
+      </form>
+    </section>
+
+    <section id="templates-section">
+      <h2>Manage Templates</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Preview</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Prices</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="templates-list">
+          <!-- Templates load here -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeEditModal()">&times;</span>
+      <h2>Edit Template</h2>
+      <form id="editForm">
+        <input type="hidden" name="id" id="editId" />
+
+        <input type="text" id="editName" name="name" placeholder="Template Name" required />
+        <select id="editCategory" name="category" required>
+          <option value="Business">Business</option>
+          <option value="Portfolio">Portfolio</option>
+          <option value="Education">Education</option>
+          <option value="Religion">Religion</option>
+          <option value="Health">Health</option>
+          <option value="Media">Media</option>
+          <option value="NonProfit">Non-Profit</option>
+          <option value="Tech">Tech</option>
+          <option value="Industry">Industry</option>
+          <option value="Travel">Travel</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <input type="text" id="editDescription" name="description" placeholder="Template Description" required />
+        <input type="url" id="editLink" name="link" placeholder="Preview Link" required />
+
+        <!-- Prices -->
+        <input type="number" id="editPriceUGX" name="priceUGX" placeholder="Price (UGX)" min="0" step="1" required />
+        <input type="number" id="editPriceKSH" name="priceKSH" placeholder="Price (Ksh)" min="0" step="1" required />
+        <input type="number" id="editPriceTSH" name="priceTSH" placeholder="Price (Tsh)" min="0" step="1" required />
+        <input type="number" id="editPriceUSD" name="priceUSD" placeholder="Price (USD)" min="0" step="0.01" required />
+
+        <!-- Extra month charges -->
+        <input type="number" id="editExtraMonthUGX" name="extraMonthUGX" placeholder="Charge per extra month (UGX)" min="0" step="1" required />
+        <input type="number" id="editExtraMonthKSH" name="extraMonthKSH" placeholder="Charge per extra month (Ksh)" min="0" step="1" required />
+        <input type="number" id="editExtraMonthTSH" name="extraMonthTSH" placeholder="Charge per extra month (Tsh)" min="0" step="1" required />
+        <input type="number" id="editExtraMonthUSD" name="extraMonthUSD" placeholder="Charge per extra month (USD)" min="0" step="0.01" required />
+
+        <!-- Extra page charges -->
+        <input type="number" id="editExtraPageUGX" name="extraPageUGX" placeholder="Charge per extra page (UGX)" min="0" step="1" required />
+        <input type="number" id="editExtraPageKSH" name="extraPageKSH" placeholder="Charge per extra page (Ksh)" min="0" step="1" required />
+        <input type="number" id="editExtraPageTSH" name="extraPageTSH" placeholder="Charge per extra page (Tsh)" min="0" step="1" required />
+        <input type="number" id="editExtraPageUSD" name="extraPageUSD" placeholder="Charge per extra page (USD)" min="0" step="0.01" required />
+
+        <button type="submit" class="btn">Save Changes</button>
       </form>
     </div>
+  </div>
 
-    <!-- Chat Requests -->
-    <div id="sectionChat" class="admin-section" style="display:none;">
-      <h2>Chat Requests</h2>
-      <div class="chat-requests">
-        <h3>Pending Requests</h3>
-        <div id="chatRequestList" class="chat-request-grid"></div>
-      </div>
-
-      <div class="chat-reply">
-        <h3>Reply to Customer</h3>
-        <form id="chatReplyForm" class="chat-reply-form">
-          <input type="hidden" name="userId" id="replyUserId" />
-          <p id="replyUserInfo"></p>
-          <textarea name="message" id="replyMessage" placeholder="Type your reply..." required></textarea>
-          <button type="submit" id="reply-btn" class="btn">Send Reply</button>
-        </form>
-        <div id="chatResult"></div>
-      </div>
-    </div>
-
-    <!-- Custom Requests -->
-    <div id="sectionCustomRequests" class="admin-section" style="display:none;">
-      <h2>Custom Requests</h2>
-      <div id="customRequestList" class="custom-request-grid"></div>
-    </div>
-
-    <!-- Edit Template Modal (IDs must match admin.js) -->
-    <div id="editTemplateModal" class="modal" style="display:none;">
-      <div class="modal-content">
-        <h2>Edit Template</h2>
-        <form id="editTemplateForm">
-          <input type="text" id="editName" placeholder="Template Name" required />
-          <select id="editCategory" required>
-            <option value="" disabled>Select Category</option>
-            <option value="Business">Business</option>
-            <option value="Portfolio">Portfolio</option>
-            <option value="Education">Education</option>
-            <option value="Religion">Religion</option>
-            <option value="Health">Health</option>
-            <option value="Media">Media</option>
-            <option value="NonProfit">Non-Profit</option>
-            <option value="Tech">Tech</option>
-            <option value="Industry">Industry</option>
-            <option value="Travel">Travel</option>
-            <option value="Other">Other</option>
-          </select>
-
-          <input type="text" id="editDescription" placeholder="Description" required />
-          <input type="url" id="editLink" placeholder="Preview Link" required />
-
-          <h4 style="color:#4fc3f7; text-align:left;">Template Base Prices</h4>
-          <input type="number" id="editPriceUGX" placeholder="Price (UGX)" min="0" step="1" required />
-          <input type="number" id="editPriceKSH" placeholder="Price (Ksh)" min="0" step="1" required />
-          <input type="number" id="editPriceTSH" placeholder="Price (Tsh)" min="0" step="1" required />
-          <input type="number" id="editPriceUSD" placeholder="Price (USD)" min="0" step="0.01" required />
-
-          <h4 style="color:#4fc3f7; text-align:left;">Extra Charges</h4>
-          <input type="number" id="editExtraMonthUGX" placeholder="Extra month (UGX)" min="0" step="1" required />
-          <input type="number" id="editExtraMonthKSH" placeholder="Extra month (Ksh)" min="0" step="1" required />
-          <input type="number" id="editExtraMonthTSH" placeholder="Extra month (Tsh)" min="0" step="1" required />
-          <input type="number" id="editExtraMonthUSD" placeholder="Extra month (USD)" min="0" step="0.01" required />
-
-          <input type="number" id="editExtraPageUGX" placeholder="Extra page (UGX)" min="0" step="1" required />
-          <input type="number" id="editExtraPageKSH" placeholder="Extra page (Ksh)" min="0" step="1" required />
-          <input type="number" id="editExtraPageTSH" placeholder="Extra page (Tsh)" min="0" step="1" required />
-          <input type="number" id="editExtraPageUSD" placeholder="Extra page (USD)" min="0" step="0.01" required />
-
-          <div class="file-input-wrapper">
-            <input type="file" id="editImageFile" accept="image/*,.pdf" />
-            <label for="editImageFile" class="file-input-label">Choose New File (optional)</label>
-          </div>
-
-          <div id="editImagePreview"></div>
-
-          <button type="submit" class="btn">Save Changes</button>
-          <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Confirmation modal (unused by admin.js but kept for future) -->
-    <div id="confirmModal" class="modal" style="display:none;">
-      <div class="modal-content">
-        <p id="confirmMessage"></p>
-        <button id="confirmYes" class="btn">Yes</button>
-        <button id="confirmNo" class="btn btn-cancel">No</button>
-      </div>
-    </div>
-
-    <!-- Loading popup -->
-    <div id="loading-popup" class="loading-popup" style="display:none;">
-      <div class="loading-content">
-        <p>Processing...</p>
-        <div class="spinner"></div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
-  </footer>
-
-  <!-- Scripts -->
   <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/admin.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
-        </html>
+          </html>
