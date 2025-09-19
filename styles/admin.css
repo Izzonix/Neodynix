@@ -118,16 +118,21 @@ h1, .login-section h2 {
   margin-bottom: 6px;
 }
 
-.template-upload form, .email-form, .login-form, .chat-reply-form {
+.template-upload form, .email-form, .login-form, .chat-reply-form, #editTemplateForm {
   display: flex;
   flex-direction: column;
   gap: 12px;
   max-width: 500px;
   margin: 0 auto;
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .template-upload input, .template-upload select, .template-upload textarea,
-.email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
+.email-form input, .email-form select, .login-form input, .chat-reply-form textarea,
+#editTemplateForm input, #editTemplateForm select, #editTemplateForm textarea {
   padding: 10px;
   background: #2a2a2a;
   color: #ffffff;
@@ -140,13 +145,14 @@ h1, .login-section h2 {
 }
 
 .template-upload input:focus, .template-upload select:focus, .template-upload textarea:focus,
-.email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus {
+.email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus,
+#editTemplateForm input:focus, #editTemplateForm select:focus, #editTemplateForm textarea:focus {
   outline: none;
   border-color: #03a9f4;
   box-shadow: 0 0 5px rgba(3, 169, 244, 0.3);
 }
 
-.chat-reply-form textarea, .template-upload textarea {
+.chat-reply-form textarea, .template-upload textarea, #editTemplateForm textarea {
   min-height: 100px;
   resize: vertical;
 }
@@ -443,6 +449,28 @@ h1, .login-section h2 {
   margin: 0 10px;
 }
 
+/* Edit Template Modal */
+#editTemplateModal .modal-content {
+  background: #1e1e1e;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+#editTemplateModal h2 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #4fc3f7;
+  margin-bottom: 16px;
+}
+
+#editTemplateModal .btn {
+  margin: 10px auto;
+}
+
 /* Mobile Styles */
 @media (max-width: 600px) {
   body {
@@ -458,7 +486,7 @@ h1, .login-section h2 {
     font-size: 22px;
   }
 
-  .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3 {
+  .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3, #editTemplateModal h2 {
     font-size: 18px;
   }
 
@@ -477,12 +505,14 @@ h1, .login-section h2 {
     padding: 8px;
   }
 
-  .template-upload form, .email-form, .login-form, .chat-reply-form {
+  .template-upload form, .email-form, .login-form, .chat-reply-form, #editTemplateForm {
     gap: 10px;
+    padding: 16px;
   }
 
   .template-upload input, .template-upload select, .template-upload textarea,
-  .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
+  .email-form input, .email-form select, .login-form input, .chat-reply-form textarea,
+  #editTemplateForm input, #editTemplateForm select, #editTemplateForm textarea {
     padding: 8px;
     font-size: 12px;
   }
@@ -521,7 +551,7 @@ h1, .login-section h2 {
     max-width: 100%;
   }
 
-  .loading-content, .modal-content {
+  .loading-content, .modal-content, #editTemplateModal .modal-content {
     padding: 16px;
   }
 
@@ -538,4 +568,4 @@ h1, .login-section h2 {
     font-size: 11px;
     max-width: 100px;
   }
-                              }
+  }
