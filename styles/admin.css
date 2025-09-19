@@ -428,6 +428,7 @@ h1, .login-section h2 {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  overflow-y: auto;
 }
 
 .modal-content {
@@ -450,6 +451,10 @@ h1, .login-section h2 {
 }
 
 /* Edit Template Modal */
+#editTemplateModal {
+  overflow-y: auto;
+}
+
 #editTemplateModal .modal-content {
   background: #1e1e1e;
   padding: 24px;
@@ -558,6 +563,10 @@ h1, .login-section h2 {
   .spinner {
     width: 24px;
     height: 24px;
+  }
+
+  .modal, #editTemplateModal {
+    overflow-y: auto;
   }
 }
 
