@@ -144,6 +144,24 @@ h1, .login-section h2 {
   box-shadow: 0 0 5px rgba(3, 169, 244, 0.3);
 }
 
+/* Description Box */
+.template-upload textarea, #editDescription {
+  min-height: 120px;
+  resize: vertical;
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 2px solid #4fc3f7;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 13px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.template-upload textarea:focus, #editDescription:focus {
+  border-color: #03a9f4;
+  box-shadow: 0 0 5px rgba(3, 169, 244, 0.3);
+}
+
 .chat-reply-form textarea {
   min-height: 100px;
   resize: vertical;
@@ -244,10 +262,16 @@ h1, .login-section h2 {
 }
 
 /* Template Card Buttons */
+.template-card .button-container {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .template-card .btn {
-  padding: 8px;
-  font-size: 12px;
-  margin: 4px 0;
+  flex: 1;
+  max-width: 100px;
 }
 
 /* Chat and Custom Request Cards */
@@ -471,7 +495,7 @@ h1, .login-section h2 {
     gap: 10px;
   }
 
-  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
+  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea, .template-upload textarea, #editDescription {
     padding: 8px;
     font-size: 12px;
   }
@@ -502,6 +526,7 @@ h1, .login-section h2 {
   .template-card .btn {
     padding: 8px;
     font-size: 12px;
+    max-width: 100px;
   }
 
   .loading-content, .modal-content {
@@ -519,6 +544,6 @@ h1, .login-section h2 {
   .template-card .btn {
     padding: 6px;
     font-size: 11px;
-    max-width: 120px;
+    max-width: 90px;
   }
   }
