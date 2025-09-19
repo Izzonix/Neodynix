@@ -8,12 +8,12 @@ body {
 
 /* Admin Container */
 .admin-container {
-  max-width: 1100px;
-  margin: 40px auto;
+  max-width: 1080px;
+  margin: 48px auto;
   padding: 32px;
   background: #1e1e1e;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* Login Section */
@@ -21,40 +21,40 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 80px);
+  min-height: calc(100vh - 96px);
 }
 
 .login-container {
-  max-width: 480px;
+  max-width: 520px;
   width: 90%;
-  padding: 32px;
+  padding: 40px;
   background: #1e1e1e;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
   text-align: center;
 }
 
 /* Headings */
 h1, .login-section h2 {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
   color: #4fc3f7;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   text-align: center;
 }
 
 .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3 {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 500;
   color: #4fc3f7;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   text-align: left;
 }
 
 .template-card h3, .chat-request-card h3, .custom-request-card h3 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 /* Tabs */
@@ -70,7 +70,7 @@ h1, .login-section h2 {
   background: #4fc3f71a;
   color: #4fc3f7;
   border: 1px solid #4fc3f7;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 16px;
   font-weight: 500;
@@ -81,7 +81,7 @@ h1, .login-section h2 {
   background: #4fc3f7;
   color: #000;
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(79, 195, 247, 0.3);
+  box-shadow: 0 3px 10px rgba(79, 195, 247, 0.4);
 }
 
 .tab-button:hover {
@@ -106,48 +106,41 @@ h1, .login-section h2 {
 
 .form-group label {
   display: block;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: #ffffff;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .template-upload form, .email-form, .login-form, .chat-reply-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 700px;
+  gap: 20px;
+  max-width: 680px;
   margin: 0 auto;
 }
 
 .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
-  padding: 12px;
+  padding: 14px;
   background: #2a2a2a;
   color: #ffffff;
   border: 2px solid #4fc3f7;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 15px;
   transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
   box-sizing: border-box;
 }
 
-.template-upload textarea, .chat-reply-form textarea {
-  min-height: 150px;
-  resize: vertical;
-  background: #2a2a2a;
-  border: 2px solid #4fc3f7;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 14px;
-  color: #ffffff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.template-upload input:focus, .template-upload select:focus, .email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus, .template-upload textarea:focus {
+.template-upload input:focus, .template-upload select:focus, .email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus {
   outline: none;
   border-color: #03a9f4;
-  box-shadow: 0 0 6px rgba(3, 169, 244, 0.3);
+  box-shadow: 0 0 8px rgba(3, 169, 244, 0.4);
+}
+
+.chat-reply-form textarea {
+  min-height: 140px;
+  resize: vertical;
 }
 
 /* File Inputs */
@@ -162,30 +155,30 @@ h1, .login-section h2 {
 
 .file-input-label {
   display: block;
-  padding: 12px;
+  padding: 14px;
   background: #4fc3f7;
   color: #000;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
   font-weight: 600;
   text-align: center;
-  font-size: 14px;
+  font-size: 15px;
   transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .file-input-label:hover {
   background: #03a9f4;
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+  box-shadow: 0 3px 10px rgba(3, 169, 244, 0.4);
 }
 
 #imagePreview, #editImagePreview {
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
 #imagePreview img, #editImagePreview img {
   max-width: 100%;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #4fc3f7;
 }
 
@@ -193,44 +186,44 @@ h1, .login-section h2 {
 .template-grid, #templateList {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  margin-top: 24px;
+  gap: 32px;
+  margin-top: 32px;
 }
 
 .template-card {
   background: #2a2a2a;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .template-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
 }
 
 .template-card img {
   width: 100%;
   max-width: 180px;
   height: auto;
-  border-radius: 8px;
-  margin-bottom: 12px;
+  border-radius: 10px;
+  margin-bottom: 16px;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
 .template-card p {
-  font-size: 14px;
+  font-size: 15px;
   color: #cccccc;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .template-card a {
   color: #4fc3f7;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   display: inline-block;
   margin-bottom: 12px;
@@ -245,20 +238,20 @@ h1, .login-section h2 {
   background: #2a2a2a;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  margin-bottom: 24px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  margin-bottom: 32px;
 }
 
 .custom-request-card ul {
   list-style: none;
   padding: 0;
-  margin: 12px 0;
+  margin: 16px 0;
 }
 
 .custom-request-card ul li {
-  font-size: 14px;
+  font-size: 15px;
   color: #cccccc;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .custom-request-card ul li a {
@@ -272,12 +265,12 @@ h1, .login-section h2 {
 
 /* Buttons */
 .btn {
-  padding: 12px;
+  padding: 14px;
   background: #4fc3f7;
   color: #000;
   border: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 10px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
@@ -287,7 +280,7 @@ h1, .login-section h2 {
 .btn:hover {
   background: #03a9f4;
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+  box-shadow: 0 3px 10px rgba(3, 169, 244, 0.4);
 }
 
 .btn:disabled {
@@ -299,13 +292,13 @@ h1, .login-section h2 {
 .btn-logout {
   background: #ff4d4d;
   width: auto;
-  padding: 10px 24px;
+  padding: 12px 24px;
 }
 
 .btn-logout:hover {
   background: #e60000;
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(230, 0, 0, 0.3);
+  box-shadow: 0 3px 10px rgba(230, 0, 0, 0.4);
 }
 
 .btn-cancel, .btn-delete {
@@ -315,7 +308,7 @@ h1, .login-section h2 {
 .btn-cancel:hover, .btn-delete:hover {
   background: #e60000;
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(230, 0, 0, 0.3);
+  box-shadow: 0 3px 10px rgba(230, 0, 0, 0.4);
 }
 
 /* Loading Popup */
@@ -325,7 +318,7 @@ h1, .login-section h2 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -334,21 +327,21 @@ h1, .login-section h2 {
 
 .loading-content {
   background: #1e1e1e;
-  padding: 24px;
+  padding: 32px;
   border-radius: 12px;
   text-align: center;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
 }
 
 .spinner {
   border: 4px solid #4fc3f7;
   border-top: 4px solid #03a9f4;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 12px;
+  margin: 0 auto 16px;
 }
 
 @keyframes spin {
@@ -360,19 +353,19 @@ h1, .login-section h2 {
 .result.success {
   color: #4fc3f7;
   font-weight: 600;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px;
+  border-radius: 10px;
   background: #4fc3f71a;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .result.error {
   color: #ff4d4d;
   font-weight: 600;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px;
+  border-radius: 10px;
   background: #ff4d4d1a;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 /* Modal */
@@ -382,7 +375,7 @@ h1, .login-section h2 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -391,67 +384,42 @@ h1, .login-section h2 {
 
 .modal-content {
   background: #1e1e1e;
-  padding: 24px;
+  padding: 32px;
   border-radius: 12px;
-  max-width: 600px;
+  max-width: 680px;
   width: 90%;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
 }
 
 .modal-content p {
   font-size: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .modal-content button {
-  margin: 0 12px;
+  margin: 0 16px;
 }
 
-/* Desktop Styles (above 600px) */
-@media (min-width: 601px) {
-  .admin-container {
-    padding: 32px;
-  }
-
-  .template-upload form, .email-form, .login-form, .chat-reply-form {
-    max-width: 700px;
-  }
-
-  .template-grid, #templateList {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
-
-  .template-card, .chat-request-card, .custom-request-card {
-    padding: 20px;
-  }
-
-  .tab-button {
-    padding: 12px 24px;
-    font-size: 16px;
-  }
-
-  .btn, .file-input-label {
-    padding: 12px;
-    font-size: 14px;
-  }
-}
-
-/* Mobile Styles (600px and below) */
-@media (max-width: 600px) {
+/* Mobile Styles */
+@media (max-width: 768px) {
   body {
     padding: 16px;
   }
 
   .admin-container, .login-container {
-    padding: 20px;
-    margin: 20px auto;
+    padding: 24px;
+    margin: 24px auto;
   }
 
   h1, .login-section h2 {
-    font-size: 24px;
+    font-size: 28px;
   }
 
   .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3 {
+    font-size: 20px;
+  }
+
+  .template-card h3, .chat-request-card h3, .custom-request-card h3 {
     font-size: 18px;
   }
 
@@ -462,7 +430,7 @@ h1, .login-section h2 {
 
   .tab-button {
     padding: 10px 20px;
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .btn-logout {
@@ -470,11 +438,87 @@ h1, .login-section h2 {
   }
 
   .template-upload form, .email-form, .login-form, .chat-reply-form {
-    gap: 12px;
-    max-width: 100%;
+    gap: 16px;
   }
 
-  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea, .template-upload textarea {
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    font-size: 14px;
+  }
+
+  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .file-input-label, .btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .template-grid, #templateList {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .template-card, .chat-request-card, .custom-request-card {
+    padding: 16px;
+  }
+
+  .template-card img {
+    max-width: 150px;
+  }
+
+  .template-card p, .chat-request-card p, .custom-request-card p {
+    font-size: 14px;
+  }
+
+  .loading-content, .modal-content {
+    padding: 24px;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 480px) {
+  body {
+    padding: 12px;
+  }
+
+  .admin-container, .login-container {
+    padding: 16px;
+    margin: 16px auto;
+  }
+
+  h1, .login-section h2 {
+    font-size: 24px;
+  }
+
+  .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3 {
+    font-size: 18px;
+  }
+
+  .template-card h3, .chat-request-card h3, .custom-request-card h3 {
+    font-size: 16px;
+  }
+
+  .tab-button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
     padding: 10px;
     font-size: 13px;
   }
@@ -484,17 +528,8 @@ h1, .login-section h2 {
     font-size: 13px;
   }
 
-  .template-grid, #templateList {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .template-card, .chat-request-card, .custom-request-card {
-    padding: 16px;
-  }
-
-  .template-card h3, .chat-request-card h3, .custom-request-card h3 {
-    font-size: 16px;
+  .template-card img {
+    max-width: 120px;
   }
 
   .template-card p, .chat-request-card p, .custom-request-card p {
@@ -502,15 +537,11 @@ h1, .login-section h2 {
   }
 
   .loading-content, .modal-content {
-    padding: 20px;
+    padding: 16px;
   }
 
   .spinner {
-    width: 24px;
-    height: 24px;
-  }
-
-  .template-upload textarea, .chat-reply-form textarea {
-    min-height: 120px;
+    width: 28px;
+    height: 28px;
   }
   }
