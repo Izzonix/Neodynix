@@ -4,16 +4,22 @@ body {
   background: #0d1117;
   color: #ffffff;
   line-height: 1.6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 /* Admin Container */
 .admin-container {
-  max-width: 1080px;
-  margin: 48px auto;
-  padding: 32px;
+  max-width: 960px;
+  width: 90%;
+  margin: 32px auto;
+  padding: 24px;
   background: #1e1e1e;
-  border-radius: 16px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  text-align: center;
 }
 
 /* Login Section */
@@ -21,58 +27,58 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 96px);
+  min-height: calc(100vh - 64px);
+  width: 100%;
 }
 
 .login-container {
-  max-width: 520px;
+  max-width: 400px;
   width: 90%;
-  padding: 40px;
+  padding: 24px;
   background: #1e1e1e;
-  border-radius: 16px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   text-align: center;
 }
 
 /* Headings */
 h1, .login-section h2 {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 600;
   color: #4fc3f7;
-  margin-bottom: 32px;
-  text-align: center;
+  margin-bottom: 20px;
 }
 
 .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3 {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
   color: #4fc3f7;
-  margin-bottom: 24px;
-  text-align: left;
+  margin-bottom: 16px;
 }
 
 .template-card h3, .chat-request-card h3, .custom-request-card h3 {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 500;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 /* Tabs */
 .admin-tabs {
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
 .tab-button {
-  padding: 12px 24px;
+  padding: 8px 16px;
   background: #4fc3f71a;
   color: #4fc3f7;
   border: 1px solid #4fc3f7;
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
@@ -81,7 +87,7 @@ h1, .login-section h2 {
   background: #4fc3f7;
   color: #000;
   transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(79, 195, 247, 0.4);
+  box-shadow: 0 2px 6px rgba(79, 195, 247, 0.3);
 }
 
 .tab-button:hover {
@@ -101,32 +107,32 @@ h1, .login-section h2 {
 
 /* Forms */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .form-group label {
   display: block;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   color: #ffffff;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .template-upload form, .email-form, .login-form, .chat-reply-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 680px;
+  gap: 12px;
+  max-width: 500px;
   margin: 0 auto;
 }
 
 .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
-  padding: 14px;
+  padding: 10px;
   background: #2a2a2a;
   color: #ffffff;
   border: 2px solid #4fc3f7;
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: 6px;
+  font-size: 13px;
   transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
   box-sizing: border-box;
@@ -135,11 +141,11 @@ h1, .login-section h2 {
 .template-upload input:focus, .template-upload select:focus, .email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus {
   outline: none;
   border-color: #03a9f4;
-  box-shadow: 0 0 8px rgba(3, 169, 244, 0.4);
+  box-shadow: 0 0 5px rgba(3, 169, 244, 0.3);
 }
 
 .chat-reply-form textarea {
-  min-height: 140px;
+  min-height: 100px;
   resize: vertical;
 }
 
@@ -155,103 +161,118 @@ h1, .login-section h2 {
 
 .file-input-label {
   display: block;
-  padding: 14px;
+  padding: 10px;
   background: #4fc3f7;
   color: #000;
-  border-radius: 10px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
   text-align: center;
-  font-size: 15px;
+  font-size: 13px;
   transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .file-input-label:hover {
   background: #03a9f4;
   transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(3, 169, 244, 0.4);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
 }
 
 #imagePreview, #editImagePreview {
-  margin-top: 16px;
+  margin-top: 10px;
 }
 
 #imagePreview img, #editImagePreview img {
   max-width: 100%;
-  border-radius: 10px;
+  border-radius: 6px;
   border: 1px solid #4fc3f7;
 }
 
 /* Template Grid */
 .template-grid, #templateList {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 32px;
-  margin-top: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+  justify-items: center;
 }
 
 .template-card {
   background: #2a2a2a;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  max-width: 240px;
+  text-align: center;
 }
 
 .template-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
 }
 
 .template-card img {
   width: 100%;
-  max-width: 180px;
+  max-width: 120px;
   height: auto;
-  border-radius: 10px;
-  margin-bottom: 16px;
+  border-radius: 6px;
+  margin-bottom: 10px;
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
 .template-card p {
-  font-size: 15px;
+  font-size: 13px;
   color: #cccccc;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .template-card a {
   color: #4fc3f7;
   text-decoration: none;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   display: inline-block;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .template-card a:hover {
   text-decoration: underline;
 }
 
+/* Template Card Buttons */
+.template-card .btn {
+  padding: 8px;
+  font-size: 12px;
+  margin: 4px 0;
+}
+
 /* Chat and Custom Request Cards */
 .chat-request-card, .custom-request-card {
   background: #2a2a2a;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
-  margin-bottom: 32px;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .custom-request-card ul {
   list-style: none;
   padding: 0;
-  margin: 16px 0;
+  margin: 10px 0;
 }
 
 .custom-request-card ul li {
-  font-size: 15px;
+  font-size: 13px;
   color: #cccccc;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .custom-request-card ul li a {
@@ -265,22 +286,25 @@ h1, .login-section h2 {
 
 /* Buttons */
 .btn {
-  padding: 14px;
+  padding: 10px;
   background: #4fc3f7;
   color: #000;
   border: none;
-  border-radius: 10px;
-  font-size: 15px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
   width: 100%;
+  max-width: 200px;
+  margin: 0 auto;
+  display: block;
 }
 
 .btn:hover {
   background: #03a9f4;
   transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(3, 169, 244, 0.4);
+  box-shadow: 0 2px 6px rgba(3, 169, 244, 0.3);
 }
 
 .btn:disabled {
@@ -292,13 +316,15 @@ h1, .login-section h2 {
 .btn-logout {
   background: #ff4d4d;
   width: auto;
-  padding: 12px 24px;
+  padding: 8px 16px;
+  margin-left: auto;
+  display: block;
 }
 
 .btn-logout:hover {
   background: #e60000;
   transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(230, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(230, 0, 0, 0.3);
 }
 
 .btn-cancel, .btn-delete {
@@ -308,7 +334,7 @@ h1, .login-section h2 {
 .btn-cancel:hover, .btn-delete:hover {
   background: #e60000;
   transform: translateY(-2px);
-  box-shadow: 0 3px 10px rgba(230, 0, 0, 0.4);
+  box-shadow: 0 2px 6px rgba(230, 0, 0, 0.3);
 }
 
 /* Loading Popup */
@@ -318,7 +344,7 @@ h1, .login-section h2 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -327,21 +353,21 @@ h1, .login-section h2 {
 
 .loading-content {
   background: #1e1e1e;
-  padding: 32px;
-  border-radius: 12px;
+  padding: 20px;
+  border-radius: 10px;
   text-align: center;
   color: #ffffff;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 .spinner {
-  border: 4px solid #4fc3f7;
-  border-top: 4px solid #03a9f4;
+  border: 3px solid #4fc3f7;
+  border-top: 3px solid #03a9f4;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
+  margin: 0 auto 10px;
 }
 
 @keyframes spin {
@@ -353,19 +379,25 @@ h1, .login-section h2 {
 .result.success {
   color: #4fc3f7;
   font-weight: 600;
-  padding: 14px;
-  border-radius: 10px;
+  padding: 10px;
+  border-radius: 6px;
   background: #4fc3f71a;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .result.error {
   color: #ff4d4d;
   font-weight: 600;
-  padding: 14px;
-  border-radius: 10px;
+  padding: 10px;
+  border-radius: 6px;
   background: #ff4d4d1a;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Modal */
@@ -375,7 +407,7 @@ h1, .login-section h2 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -384,110 +416,25 @@ h1, .login-section h2 {
 
 .modal-content {
   background: #1e1e1e;
-  padding: 32px;
-  border-radius: 12px;
-  max-width: 680px;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
   width: 90%;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  text-align: center;
 }
 
 .modal-content p {
-  font-size: 16px;
-  margin-bottom: 32px;
+  font-size: 14px;
+  margin-bottom: 20px;
 }
 
 .modal-content button {
-  margin: 0 16px;
+  margin: 0 10px;
 }
 
 /* Mobile Styles */
-@media (max-width: 768px) {
-  body {
-    padding: 16px;
-  }
-
-  .admin-container, .login-container {
-    padding: 24px;
-    margin: 24px auto;
-  }
-
-  h1, .login-section h2 {
-    font-size: 28px;
-  }
-
-  .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3 {
-    font-size: 20px;
-  }
-
-  .template-card h3, .chat-request-card h3, .custom-request-card h3 {
-    font-size: 18px;
-  }
-
-  .admin-tabs {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .tab-button {
-    padding: 10px 20px;
-    font-size: 15px;
-  }
-
-  .btn-logout {
-    width: 100%;
-  }
-
-  .template-upload form, .email-form, .login-form, .chat-reply-form {
-    gap: 16px;
-  }
-
-  .form-group {
-    margin-bottom: 16px;
-  }
-
-  .form-group label {
-    font-size: 14px;
-  }
-
-  .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
-    padding: 12px;
-    font-size: 14px;
-  }
-
-  .file-input-label, .btn {
-    padding: 12px;
-    font-size: 14px;
-  }
-
-  .template-grid, #templateList {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
-
-  .template-card, .chat-request-card, .custom-request-card {
-    padding: 16px;
-  }
-
-  .template-card img {
-    max-width: 150px;
-  }
-
-  .template-card p, .chat-request-card p, .custom-request-card p {
-    font-size: 14px;
-  }
-
-  .loading-content, .modal-content {
-    padding: 24px;
-  }
-
-  .spinner {
-    width: 32px;
-    height: 32px;
-  }
-}
-
-/* Extra Small Devices */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   body {
     padding: 12px;
   }
@@ -498,42 +445,63 @@ h1, .login-section h2 {
   }
 
   h1, .login-section h2 {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3 {
     font-size: 18px;
   }
 
-  .template-card h3, .chat-request-card h3, .custom-request-card h3 {
-    font-size: 16px;
+  .admin-tabs {
+    flex-direction: column;
+    gap: 8px;
   }
 
   .tab-button {
-    padding: 8px 16px;
-    font-size: 14px;
+    padding: 8px 14px;
+    font-size: 13px;
   }
 
-  .form-group label {
-    font-size: 13px;
+  .btn-logout {
+    width: 100%;
+    padding: 8px;
+  }
+
+  .template-upload form, .email-form, .login-form, .chat-reply-form {
+    gap: 10px;
   }
 
   .template-upload input, .template-upload select, .email-form input, .email-form select, .login-form input, .chat-reply-form textarea {
-    padding: 10px;
-    font-size: 13px;
+    padding: 8px;
+    font-size: 12px;
   }
 
   .file-input-label, .btn {
-    padding: 10px;
-    font-size: 13px;
+    padding: 8px;
+    font-size: 12px;
   }
 
-  .template-card img {
-    max-width: 120px;
+  .template-grid, #templateList {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .template-card, .chat-request-card, .custom-request-card {
+    padding: 12px;
+    max-width: 100%;
+  }
+
+  .template-card h3, .chat-request-card h3, .custom-request-card h3 {
+    font-size: 14px;
   }
 
   .template-card p, .chat-request-card p, .custom-request-card p {
-    font-size: 13px;
+    font-size: 12px;
+  }
+
+  .template-card .btn {
+    padding: 8px;
+    font-size: 12px;
   }
 
   .loading-content, .modal-content {
@@ -541,7 +509,16 @@ h1, .login-section h2 {
   }
 
   .spinner {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* Desktop-Specific Styles */
+@media (min-width: 601px) {
+  .template-card .btn {
+    padding: 6px;
+    font-size: 11px;
+    max-width: 120px;
   }
   }
