@@ -7,96 +7,103 @@
   <link rel="stylesheet" href="styles/admin.css" />
 </head>
 <body>
-  <div id="login-section">
-    <h1>Admin Login</h1>
-    <form id="loginForm">
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required />
-      </div>
-      <div id="login-error" class="error" style="display: none;"></div>
-      <button type="submit" class="btn">Login</button>
-    </form>
+  <div id="login-section" class="login-section">
+    <div class="login-container">
+      <h2>Admin Login</h2>
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required />
+        </div>
+        <div id="login-error" class="error" style="display: none;"></div>
+        <button type="submit" class="btn">Login</button>
+      </form>
+    </div>
   </div>
 
-  <div id="admin-container" style="display: none;">
+  <div id="admin-container" class="admin-container" style="display: none;">
     <header>
       <h1>Admin Panel</h1>
-      <button id="logout-btn" class="btn">Logout</button>
+      <button id="logout-btn" class="btn btn-logout">Logout</button>
     </header>
-    <nav>
-      <button id="btnTemplates" class="btn active">Templates</button>
-      <button id="btnSendEmail" class="btn">Send Email</button>
-      <button id="btnChat" class="btn">Chat Requests</button>
-      <button id="btnCustomRequests" class="btn">Custom Requests</button>
+    <nav class="admin-tabs">
+      <button id="btnTemplates" class="tab-button active">Templates</button>
+      <button id="btnSendEmail" class="tab-button">Send Email</button>
+      <button id="btnChat" class="tab-button">Chat Requests</button>
+      <button id="btnCustomRequests" class="tab-button">Custom Requests</button>
     </nav>
     <main>
-      <section id="sectionTemplates">
-        <h2>Manage Templates</h2>
-        <form id="uploadForm">
-          <div class="form-group">
-            <label for="name">Template Name</label>
-            <input type="text" id="name" name="name" required />
-          </div>
-          <div class="form-group">
-            <label for="category">Category</label>
-            <select id="category" name="category" required>
-              <option value="">-- Select Category --</option>
-              <option value="business">Business</option>
-              <option value="portfolio">Portfolio</option>
-              <option value="education">Education</option>
-              <option value="ecommerce">E-commerce</option>
-              <option value="charity">Charity</option>
-              <option value="blog">Blog</option>
-              <option value="healthcare">Healthcare</option>
-              <option value="event">Event</option>
-              <option value="church">Church</option>
-              <option value="nonprofit">Non-profit</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" rows="4"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="link">Preview Link</label>
-            <input type="url" id="link" name="link" required />
-          </div>
-          <div class="form-group">
-            <label for="price_ugx">Price (UGX)</label>
-            <input type="number" id="price_ugx" name="price_ugx" step="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="price_ksh">Price (KSH)</label>
-            <input type="number" id="price_ksh" name="price_ksh" step="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="price_tsh">Price (TSH)</label>
-            <input type="number" id="price_tsh" name="price_tsh" step="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="price_usd">Price (USD)</label>
-            <input type="number" id="price_usd" name="price_usd" step="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="imageFile">Template Image</label>
-            <input type="file" id="imageFile" name="imageFile" accept="image/*,.pdf" required />
-            <div id="imagePreview" class="preview-container"></div>
-          </div>
-          <button type="submit" id="upload-btn" class="btn">Upload Template</button>
-        </form>
+      <section id="sectionTemplates" class="admin-section active">
+        <div class="template-upload">
+          <h2>Manage Templates</h2>
+          <form id="uploadForm">
+            <div class="form-group">
+              <label for="name">Template Name</label>
+              <input type="text" id="name" name="name" required />
+            </div>
+            <div class="form-group">
+              <label for="category">Category</label>
+              <select id="category" name="category" required>
+                <option value="">-- Select Category --</option>
+                <option value="business">Business</option>
+                <option value="portfolio">Portfolio</option>
+                <option value="education">Education</option>
+                <option value="ecommerce">E-commerce</option>
+                <option value="charity">Charity</option>
+                <option value="blog">Blog</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="event">Event</option>
+                <option value="church">Church</option>
+                <option value="nonprofit">Non-profit</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="link">Preview Link</label>
+              <input type="url" id="link" name="link" required />
+            </div>
+            <div class="form-group">
+              <label for="price_ugx">Price (UGX)</label>
+              <input type="number" id="price_ugx" name="price_ugx" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="price_ksh">Price (KSH)</label>
+              <input type="number" id="price_ksh" name="price_ksh" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="price_tsh">Price (TSH)</label>
+              <input type="number" id="price_tsh" name="price_tsh" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="price_usd">Price (USD)</label>
+              <input type="number" id="price_usd" name="price_usd" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label for="imageFile">Template Image</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="imageFile" name="imageFile" accept="image/*,.pdf" required />
+                <label for="imageFile" class="file-input-label">Choose File</label>
+              </div>
+              <div id="imagePreview"></div>
+            </div>
+            <button type="submit" id="upload-btn" class="btn">Upload Template</button>
+          </form>
+        </div>
         <div id="result" class="result"></div>
-        <div id="templateList" class="template-list"></div>
+        <div id="templateList" class="template-grid"></div>
       </section>
 
-      <section id="sectionSendEmail" style="display: none;">
+      <section id="sectionSendEmail" class="admin-section" style="display: none;">
         <h2>Send Custom Email</h2>
-        <form id="emailForm">
+        <form id="emailForm" class="email-form">
           <div class="form-group">
             <label for="customerEmail">Customer Email</label>
             <input type="email" id="customerEmail" name="customerEmail" required />
@@ -122,27 +129,29 @@
         </form>
       </section>
 
-      <section id="sectionChat" style="display: none;">
+      <section id="sectionChat" class="admin-section" style="display: none;">
         <h2>Chat Requests</h2>
-        <div id="chatRequestList"></div>
-        <form id="chatReplyForm">
-          <input type="hidden" id="replyUserId" name="replyUserId" />
-          <div class="form-group">
-            <label id="replyUserInfo"></label>
-            <textarea id="replyMessage" name="replyMessage" rows="4" required></textarea>
-          </div>
-          <button type="submit" id="reply-btn" class="btn">Send Reply</button>
-          <div id="chatResult" class="result"></div>
-        </form>
+        <div id="chatRequestList" class="chat-request-grid"></div>
+        <div class="chat-reply">
+          <form id="chatReplyForm" class="chat-reply-form">
+            <input type="hidden" id="replyUserId" name="replyUserId" />
+            <div class="form-group">
+              <label id="replyUserInfo"></label>
+              <textarea id="replyMessage" name="replyMessage" rows="4" required></textarea>
+            </div>
+            <button type="submit" id="reply-btn" class="btn">Send Reply</button>
+            <div id="chatResult" class="result"></div>
+          </form>
+        </div>
       </section>
 
-      <section id="sectionCustomRequests" style="display: none;">
+      <section id="sectionCustomRequests" class="admin-section" style="display: none;">
         <h2>Custom Website Requests</h2>
-        <div id="customRequestList"></div>
+        <div id="customRequestList" class="custom-request-grid"></div>
       </section>
     </main>
 
-    <div id="loading-popup" style="display: none;">
+    <div id="loading-popup" class="loading-popup" style="display: none;">
       <div class="loading-content">
         <div class="spinner"></div>
         <p>Processing...</p>
@@ -208,11 +217,14 @@
           </div>
           <div class="form-group">
             <label for="editImageFile">Template Image</label>
-            <input type="file" id="editImageFile" name="editImageFile" accept="image/*,.pdf" />
-            <div id="editImagePreview" class="preview-container"></div>
+            <div class="file-input-wrapper">
+              <input type="file" id="editImageFile" name="editImageFile" accept="image/*,.pdf" />
+              <label for="editImageFile" class="file-input-label">Choose File</label>
+            </div>
+            <div id="editImagePreview"></div>
           </div>
           <button type="submit" class="btn">Save Changes</button>
-          <button type="button" onclick="closeEditModal()" class="btn btn-cancel">Cancel</button>
+          <button type="button" id="cancelEdit" class="btn btn-cancel">Cancel</button>
         </form>
       </div>
     </div>
