@@ -3,236 +3,251 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Panel</title>
+  <title>Admin Panel - Neodynix</title>
+  <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/admin.css" />
 </head>
 <body>
-  <div id="login-section" class="login-section">
-    <div class="login-container">
-      <h2>Admin Login</h2>
-      <form id="loginForm" class="login-form">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" required />
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" required />
-        </div>
-        <div id="login-error" class="error" style="display: none;"></div>
-        <button type="submit" class="btn">Login</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="admin-container" class="admin-container" style="display: none;">
-    <header>
-      <h1>Admin Panel</h1>
-      <button id="logout-btn" class="btn btn-logout">Logout</button>
-    </header>
-    <nav class="admin-tabs">
-      <button id="btnTemplates" class="tab-button active">Templates</button>
-      <button id="btnSendEmail" class="tab-button">Send Email</button>
-      <button id="btnChat" class="tab-button">Chat Requests</button>
-      <button id="btnCustomRequests" class="tab-button">Custom Requests</button>
+  <header class="top-header">
+    <span class="logo">Neodynix Technologies - Admin</span>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
+    <nav id="nav-menu">
+      <a href="javascript:void(0)" onclick="showSection('templates')">Manage Templates</a>
+      <a href="javascript:void(0)" onclick="showSection('email')">Send Email</a>
+      <a href="javascript:void(0)" onclick="showSection('chat')">Chat Requests</a>
+      <a href="javascript:void(0)" onclick="showSection('custom')">Custom Requests</a>
+      <a href="javascript:void(0)" onclick="logout()">Logout</a>
     </nav>
-    <main>
-      <section id="sectionTemplates" class="admin-section active">
+  </header>
+  <main>
+    <section id="login-section" class="login-section" style="display: none;">
+      <div class="login-container">
+        <h2>Admin Login</h2>
+        <form id="loginForm" class="login-form">
+          <input type="email" id="email" placeholder="Email" required aria-label="Email" />
+          <input type="password" id="password" placeholder="Password" required aria-label="Password" />
+          <button type="submit" class="btn">Login</button>
+        </form>
+        <p id="login-error" class="error" style="display: none;"></p>
+      </div>
+    </section>
+    <section id="admin-container" class="admin-container" style="display: none;">
+      <div class="admin-tabs">
+        <button id="btnTemplates" class="tab-button active">Manage Templates</button>
+        <button id="btnSendEmail" class="tab-button">Send Email</button>
+        <button id="btnChat" class="tab-button">Chat Requests</button>
+        <button id="btnCustomRequests" class="tab-button">Custom Requests</button>
+        <button id="logout-btn" class="btn btn-logout">Logout</button>
+      </div>
+      <!-- Template Management Section -->
+      <div id="sectionTemplates" class="admin-section active">
+        <h2>Manage Templates</h2>
         <div class="template-upload">
-          <h2>Manage Templates</h2>
+          <h3>Add New Template</h3>
           <form id="uploadForm">
             <div class="form-group">
               <label for="name">Template Name</label>
-              <input type="text" id="name" name="name" required />
+              <input type="text" name="name" id="name" placeholder="Template Name" required aria-label="Template Name" />
             </div>
             <div class="form-group">
               <label for="category">Category</label>
-              <select id="category" name="category" required>
-                <option value="">-- Select Category --</option>
-                <option value="business">Business</option>
-                <option value="portfolio">Portfolio</option>
-                <option value="education">Education</option>
-                <option value="ecommerce">E-commerce</option>
-                <option value="charity">Charity</option>
-                <option value="blog">Blog</option>
-                <option value="healthcare">Healthcare</option>
-                <option value="event">Event</option>
-                <option value="church">Church</option>
-                <option value="nonprofit">Non-profit</option>
-                <option value="other">Other</option>
+              <select name="category" id="category" required aria-label="Template Category">
+                <option value="" disabled selected>Select Category</option>
+                <option value="Business">Business</option>
+                <option value="Portfolio">Portfolio</option>
+                <option value="Education">Education</option>
+                <option value="Religion">Religion</option>
+                <option value="Health">Health</option>
+                <option value="Media">Media</option>
+                <option value="NonProfit">Non-Profit</option>
+                <option value="Tech">Tech</option>
+                <option value="Industry">Industry</option>
+                <option value="Travel">Travel</option>
+                <option value="Other">Other</option>
               </select>
             </div>
             <div class="form-group">
               <label for="description">Description</label>
-              <textarea id="description" name="description" rows="4"></textarea>
+              <input type="text" name="description" id="description" placeholder="Template Description" required aria-label="Template Description" />
             </div>
             <div class="form-group">
               <label for="link">Preview Link</label>
-              <input type="url" id="link" name="link" required />
+              <input type="url" name="link" id="link" placeholder="Preview Link (e.g., https://izzonix.github.io/Template-Name)" required aria-label="Preview Link" />
             </div>
             <div class="form-group">
               <label for="price_ugx">Price (UGX)</label>
-              <input type="number" id="price_ugx" name="price_ugx" step="0.01" required />
+              <input type="number" name="price_ugx" id="price_ugx" placeholder="Price in UGX" min="0" step="0.01" required aria-label="Price in UGX" />
             </div>
             <div class="form-group">
               <label for="price_ksh">Price (KSH)</label>
-              <input type="number" id="price_ksh" name="price_ksh" step="0.01" required />
+              <input type="number" name="price_ksh" id="price_ksh" placeholder="Price in KSH" min="0" step="0.01" required aria-label="Price in KSH" />
             </div>
             <div class="form-group">
               <label for="price_tsh">Price (TSH)</label>
-              <input type="number" id="price_tsh" name="price_tsh" step="0.01" required />
+              <input type="number" name="price_tsh" id="price_tsh" placeholder="Price in TSH" min="0" step="0.01" required aria-label="Price in TSH" />
             </div>
             <div class="form-group">
               <label for="price_usd">Price (USD)</label>
-              <input type="number" id="price_usd" name="price_usd" step="0.01" required />
+              <input type="number" name="price_usd" id="price_usd" placeholder="Price in USD" min="0" step="0.01" required aria-label="Price in USD" />
             </div>
             <div class="form-group">
               <label for="imageFile">Template Image</label>
               <div class="file-input-wrapper">
-                <input type="file" id="imageFile" name="imageFile" accept="image/*,.pdf" required />
-                <label for="imageFile" class="file-input-label">Choose File</label>
+                <input type="file" id="imageFile" name="imageFile" accept="image/*" required aria-label="Template Image" />
+                <label for="imageFile" class="file-input-label">Choose Image</label>
               </div>
-              <div id="imagePreview"></div>
             </div>
+            <div id="imagePreview"></div>
             <button type="submit" id="upload-btn" class="btn">Upload Template</button>
           </form>
+          <div id="result"></div>
         </div>
-        <div id="result" class="result"></div>
-        <div id="templateList" class="template-grid"></div>
-      </section>
-
-      <section id="sectionSendEmail" class="admin-section" style="display: none;">
+        <div class="template-list">
+          <h3>Existing Templates</h3>
+          <div id="templateList" class="template-grid"></div>
+        </div>
+      </div>
+      <!-- Email Sending Section -->
+      <div id="sectionSendEmail" class="admin-section">
         <h2>Send Custom Email</h2>
         <form id="emailForm" class="email-form">
           <div class="form-group">
             <label for="customerEmail">Customer Email</label>
-            <input type="email" id="customerEmail" name="customerEmail" required />
+            <input type="email" name="customerEmail" id="customerEmail" placeholder="Customer Email" required aria-label="Customer Email" />
           </div>
           <div class="form-group">
             <label for="customLink">Custom Link</label>
-            <input type="url" id="customLink" name="customLink" required />
+            <input type="url" name="customLink" id="customLink" placeholder="Custom Link" required aria-label="Custom Link" />
           </div>
           <div class="form-group">
             <label for="price">Price</label>
-            <input type="number" id="price" name="price" step="0.01" required />
+            <input type="number" name="price" id="price" placeholder="Price" min="0" step="0.01" required aria-label="Price" />
           </div>
           <div class="form-group">
             <label for="currency">Currency</label>
-            <select id="currency" name="currency" required>
+            <select name="currency" id="currency" required aria-label="Currency">
+              <option value="" disabled selected>Select Currency</option>
               <option value="USD">USD</option>
               <option value="UGX">UGX</option>
               <option value="KSH">KSH</option>
-              <option value="TSH">TSH</option>
+              <option value="TSh">TSh</option>
             </select>
           </div>
           <button type="submit" id="email-btn" class="btn">Send Email</button>
         </form>
-      </section>
-
-      <section id="sectionChat" class="admin-section" style="display: none;">
+      </div>
+      <!-- Chat Requests Section -->
+      <div id="sectionChat" class="admin-section">
         <h2>Chat Requests</h2>
-        <div id="chatRequestList" class="chat-request-grid"></div>
+        <div class="chat-requests">
+          <h3>Pending Requests</h3>
+          <div id="chatRequestList" class="chat-request-grid"></div>
+        </div>
         <div class="chat-reply">
+          <h3>Reply to Customer</h3>
           <form id="chatReplyForm" class="chat-reply-form">
-            <input type="hidden" id="replyUserId" name="replyUserId" />
+            <input type="hidden" name="userId" id="replyUserId" />
+            <p id="replyUserInfo"></p>
             <div class="form-group">
-              <label id="replyUserInfo"></label>
-              <textarea id="replyMessage" name="replyMessage" rows="4" required></textarea>
+              <label for="replyMessage">Reply Message</label>
+              <textarea name="message" id="replyMessage" placeholder="Type your reply..." required aria-label="Reply Message"></textarea>
             </div>
             <button type="submit" id="reply-btn" class="btn">Send Reply</button>
-            <div id="chatResult" class="result"></div>
           </form>
+          <div id="chatResult"></div>
         </div>
-      </section>
-
-      <section id="sectionCustomRequests" class="admin-section" style="display: none;">
-        <h2>Custom Website Requests</h2>
+      </div>
+      <!-- Custom Requests Section -->
+      <div id="sectionCustomRequests" class="admin-section">
+        <h2>Custom Requests</h2>
         <div id="customRequestList" class="custom-request-grid"></div>
-      </section>
-    </main>
-
-    <div id="loading-popup" class="loading-popup" style="display: none;">
-      <div class="loading-content">
-        <div class="spinner"></div>
-        <p>Processing...</p>
       </div>
-    </div>
-
-    <div id="confirmModal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <p id="confirmMessage"></p>
-        <button id="confirmYes" class="btn">Yes</button>
-        <button id="confirmNo" class="btn btn-cancel">No</button>
-      </div>
-    </div>
-
-    <div id="editTemplateModal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <h2>Edit Template</h2>
-        <form id="editTemplateForm">
-          <div class="form-group">
-            <label for="editName">Template Name</label>
-            <input type="text" id="editName" name="editName" required />
-          </div>
-          <div class="form-group">
-            <label for="editCategory">Category</label>
-            <select id="editCategory" name="editCategory" required>
-              <option value="">-- Select Category --</option>
-              <option value="business">Business</option>
-              <option value="portfolio">Portfolio</option>
-              <option value="education">Education</option>
-              <option value="ecommerce">E-commerce</option>
-              <option value="charity">Charity</option>
-              <option value="blog">Blog</option>
-              <option value="healthcare">Healthcare</option>
-              <option value="event">Event</option>
-              <option value="church">Church</option>
-              <option value="nonprofit">Non-profit</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="editDescription">Description</label>
-            <textarea id="editDescription" name="editDescription" rows="4"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="editLink">Preview Link</label>
-            <input type="url" id="editLink" name="editLink" required />
-          </div>
-          <div class="form-group">
-            <label for="editPriceUgx">Price (UGX)</label>
-            <input type="number" id="editPriceUgx" name="editPriceUgx" step="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="editPriceKsh">Price (KSH)</label>
-            <input type="number" id="editPriceKsh" name="editPriceKsh" step="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="editPriceTsh">Price (TSH)</label>
-            <input type="number" id="editPriceTsh" name="editPriceTsh" step="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="editPriceUsd">Price (USD)</label>
-            <input type="number" id="editPriceUsd" name="editPriceUsd" step="0.01" required />
-          </div>
-          <div class="form-group">
-            <label for="editImageFile">Template Image</label>
-            <div class="file-input-wrapper">
-              <input type="file" id="editImageFile" name="editImageFile" accept="image/*,.pdf" />
-              <label for="editImageFile" class="file-input-label">Choose File</label>
+      <!-- Edit Template Modal -->
+      <div id="editTemplateModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <h2>Edit Template</h2>
+          <form id="editTemplateForm">
+            <div class="form-group">
+              <label for="editName">Template Name</label>
+              <input type="text" id="editName" name="editName" placeholder="Template Name" required aria-label="Template Name" />
+            </div>
+            <div class="form-group">
+              <label for="editCategory">Category</label>
+              <select id="editCategory" name="editCategory" required aria-label="Template Category">
+                <option value="" disabled>Select Category</option>
+                <option value="Business">Business</option>
+                <option value="Portfolio">Portfolio</option>
+                <option value="Education">Education</option>
+                <option value="Religion">Religion</option>
+                <option value="Health">Health</option>
+                <option value="Media">Media</option>
+                <option value="NonProfit">Non-Profit</option>
+                <option value="Tech">Tech</option>
+                <option value="Industry">Industry</option>
+                <option value="Travel">Travel</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editDescription">Description</label>
+              <input type="text" id="editDescription" name="editDescription" placeholder="Description" required aria-label="Template Description" />
+            </div>
+            <div class="form-group">
+              <label for="editLink">Preview Link</label>
+              <input type="url" id="editLink" name="editLink" placeholder="Preview Link" required aria-label="Preview Link" />
+            </div>
+            <div class="form-group">
+              <label for="editPriceUgx">Price (UGX)</label>
+              <input type="number" id="editPriceUgx" name="editPriceUgx" placeholder="Price in UGX" min="0" step="0.01" required aria-label="Price in UGX" />
+            </div>
+            <div class="form-group">
+              <label for="editPriceKsh">Price (KSH)</label>
+              <input type="number" id="editPriceKsh" name="editPriceKsh" placeholder="Price in KSH" min="0" step="0.01" required aria-label="Price in KSH" />
+            </div>
+            <div class="form-group">
+              <label for="editPriceTsh">Price (TSH)</label>
+              <input type="number" id="editPriceTsh" name="editPriceTsh" placeholder="Price in TSH" min="0" step="0.01" required aria-label="Price in TSH" />
+            </div>
+            <div class="form-group">
+              <label for="editPriceUsd">Price (USD)</label>
+              <input type="number" id="editPriceUsd" name="editPriceUsd" placeholder="Price in USD" min="0" step="0.01" required aria-label="Price in USD" />
+            </div>
+            <div class="form-group">
+              <label for="editImageFile">Template Image</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="editImageFile" name="editImageFile" accept="image/*" aria-label="Template Image" />
+                <label for="editImageFile" class="file-input-label">Choose Image</label>
+              </div>
             </div>
             <div id="editImagePreview"></div>
-          </div>
-          <button type="submit" class="btn">Save Changes</button>
-          <button type="button" id="cancelEdit" class="btn btn-cancel">Cancel</button>
-        </form>
+            <button type="submit" class="btn">Save Changes</button>
+            <button type="button" class="btn btn-cancel" id="cancelEdit">Cancel</button>
+          </form>
+        </div>
       </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+      <!-- Confirmation Modal -->
+      <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <p id="confirmMessage"></p>
+          <button id="confirmYes" class="btn">Yes</button>
+          <button id="confirmNo" class="btn btn-cancel">No</button>
+        </div>
+      </div>
+      <!-- Loading Popup -->
+      <div id="loading-popup" class="loading-popup" style="display: none;">
+        <div class="loading-content">
+          <p>Processing...</p>
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/admin.js"></script>
+  <script type="module" src="scripts/main.js"></script>
 </body>
-  </html>
+        </html>
