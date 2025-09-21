@@ -3,38 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Template Gallery</title>
+  <title>All Templates - Neodynix</title>
+  <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="template.css">
 </head>
 <body>
-  <section class="templates-gallery">
-    <h1>Template Gallery</h1>
-    <p>Explore our collection of templates to kickstart your project.</p>
-    
-    <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Search templates..." oninput="filterTemplates()">
-    </div>
-    
-    <div class="category-buttons">
-      <button class="active">All</button>
-      <button>Business</button>
-      <button>Portfolio</button>
-      <button>Blog</button>
-      <button id="more-button" onclick="toggleMoreCategories()">More</button>
-    </div>
-    
-    <div id="more-categories">
-      <button>E-commerce</button>
-      <button>Education</button>
-      <button>Non-Profit</button>
-      <button>Other</button>
-    </div>
-    
-    <div class="template-grid" id="template-container">
-      <!-- Templates will be dynamically loaded here -->
-    </div>
-  </section>
-  
+  <header class="top-header">
+    <span class="logo">Neodynix Technologies</span>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
+    <nav id="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="templates.html">Templates</a>
+      <a href="About.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="admin.html">Admin</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="templates-gallery">
+      <h1>Explore Our Templates</h1>
+      <p>Tap on a template image to preview or select to get started.</p>
+      
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search Templates..." oninput="filterTemplates()" aria-label="Search Templates">
+      </div>
+      
+      <div class="category-buttons">
+        <button class="active">All</button>
+        <button>Business</button>
+        <button>Portfolio</button>
+        <button>School</button>
+        <button>Church</button>
+        <button id="more-button" onclick="toggleMoreCategories()">More</button>
+      </div>
+      
+      <div id="more-categories">
+        <button>E-commerce</button>
+        <button>Education</button>
+        <button>Non-Profit</button>
+        <button>Other</button>
+      </div>
+      
+      <div class="template-grid" id="template-container">
+        <!-- Templates will be dynamically loaded here -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
+  </footer>
+
   <script type="module" src="template.js"></script>
 </body>
-</html>
+  </html>
