@@ -7,15 +7,19 @@ document.addEventListener('DOMContentLoaded', () => {
   closeBtn.setAttribute('aria-label', 'Close navigation menu');
   navMenu.appendChild(closeBtn);
 
+  let isMenuOpen = false;
+
   if (hamburger && navMenu) {
     hamburger.addEventListener('click', () => {
       navMenu.classList.add('show');
       hamburger.style.display = 'none';
+      isMenuOpen = true;
     });
 
     closeBtn.addEventListener('click', () => {
       navMenu.classList.remove('show');
       hamburger.style.display = 'block';
+      isMenuOpen = false;
     });
   }
 
@@ -24,14 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const header = document.querySelector('.top-header');
   window.addEventListener('scroll', () => {
     let currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-    if (currentScroll > lastScrollTop) {
-      header.style.transform = 'translateY(-100%)';
-      header.style.opacity = '0';
-      navMenu.classList.remove('show');
-      hamburger.style.display = 'block';
-    } else {
-      header.style.transform = 'translateY(0)';
-      header.style.opacity = '1';
+    if (!isMenuOpen) {
+      if (currentScroll > lastScrollTop) {
+        header.style.transform = 'translateY(-100%)';
+        header.style.opacity = '0';
+      } else {
+        header.style.transform = 'translateY(0)';
+        header.style.opacity = '1';
+      }
     }
     lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
   });
