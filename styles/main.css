@@ -52,7 +52,7 @@ nav a:hover {
 /* Hamburger menu button */
 .hamburger {
   display: none;
-  font-size: 36px; /* Increased size */
+  font-size: 36px;
   background: none;
   border: none;
   color: #4fc3f7;
@@ -60,12 +60,30 @@ nav a:hover {
   padding: 10px;
   border-radius: 8px;
   transition: background-color 0.3s, transform 0.3s;
-  z-index: 1100;
 }
 
 .hamburger:hover {
   background-color: #4fc3f71a;
   transform: scale(1.1);
+}
+
+/* Close button */
+.close-btn {
+  display: none;
+  font-size: 32px;
+  background: none;
+  border: none;
+  color: #4fc3f7;
+  cursor: pointer;
+  padding: 10px;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  transition: transform 0.3s;
+}
+
+.close-btn:hover {
+  transform: rotate(90deg);
 }
 
 /* Mobile navigation menu */
@@ -74,28 +92,27 @@ nav a:hover {
     display: none;
     position: fixed;
     top: 0;
-    left: -300px; /* Start off-screen to the left */
-    width: 250px;
+    right: -300px;
+    width: 300px;
     height: 100%;
     flex-direction: column;
     background: #1e1e1e;
-    padding: 20px;
-    border-right: 2px solid #4fc3f7;
-    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.5);
-    transition: left 0.3s ease-in-out;
+    padding: 60px 20px 20px;
+    border-left: 2px solid #4fc3f733;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.5);
+    transition: right 0.3s ease-in-out;
     z-index: 1000;
   }
 
   nav.show {
     display: flex;
-    left: 0; /* Slide in from the left */
-    gap: 20px;
+    right: 0;
   }
 
   nav a {
     padding: 15px;
     font-size: 1.2rem;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid #2c2c2c;
     transition: background-color 0.3s, transform 0.3s;
   }
@@ -111,18 +128,6 @@ nav a:hover {
 
   .close-btn {
     display: block;
-    background: none;
-    border: none;
-    color: #4fc3f7;
-    font-size: 30px;
-    cursor: pointer;
-    padding: 10px;
-    text-align: right;
-    transition: color 0.3s;
-  }
-
-  .close-btn:hover {
-    color: #03a9f4;
   }
 }
 
@@ -188,4 +193,4 @@ footer p {
   footer {
     padding: 30px 15px;
   }
-    }
+      }
