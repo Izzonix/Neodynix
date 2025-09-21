@@ -16,7 +16,7 @@ main {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
+  padding: 0;
 }
 
 /* Login Section */
@@ -513,7 +513,7 @@ main {
   }
 
   main {
-    padding: 12px;
+    padding: 0;
   }
 
   .admin-container, .login-container {
