@@ -58,7 +58,6 @@ nav a:hover {
   color: #4fc3f7;
   cursor: pointer;
   padding: 10px 15px;
-  border-radius: 8px;
   transition: background-color 0.3s, transform 0.3s;
 }
 
