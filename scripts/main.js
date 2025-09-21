@@ -1,19 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.getElementById('hamburger');
-  const closeBtn = document.getElementById('close-btn');
   const navMenu = document.getElementById('nav-menu');
-  
-  if (hamburger && navMenu && closeBtn) {
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'close-btn';
+  closeBtn.innerHTML = '✕';
+  closeBtn.setAttribute('aria-label', 'Close navigation menu');
+  navMenu.appendChild(closeBtn);
+
+  if (hamburger && navMenu) {
     hamburger.addEventListener('click', () => {
       navMenu.classList.add('show');
       hamburger.style.display = 'none';
-      closeBtn.style.display = 'block';
     });
 
     closeBtn.addEventListener('click', () => {
       navMenu.classList.remove('show');
       hamburger.style.display = 'block';
-      closeBtn.style.display = 'none';
     });
   }
 
@@ -27,11 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
       header.style.opacity = '0';
       navMenu.classList.remove('show');
       hamburger.style.display = 'block';
-      closeBtn.style.display = 'none';
     } else {
       header.style.transform = 'translateY(0)';
       header.style.opacity = '1';
     }
     lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
   });
+
+  // Update footer year
+  const footerYear = document.querySelector('footer p');
+  if (footerYear) {
+    footerYear.textContent = `© ${new Date().getFullYear()} Neodynix Technologies. All rights reserved.`;
+  }
 });
