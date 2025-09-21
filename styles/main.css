@@ -55,9 +55,12 @@ nav a:hover {
   display: none;
   font-size: 36px;
   background: none;
+  border: none;
   color: #4fc3f7;
   cursor: pointer;
   padding: 10px 15px;
+  border-radius: 8px;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
 .hamburger:hover {
@@ -72,10 +75,17 @@ nav a:hover {
   top: 10px;
   right: 10px;
   background: none;
+  border: none;
   color: #4fc3f7;
   font-size: 24px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(79, 195, 247, 0.5);
   cursor: pointer;
   padding: 5px 10px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
 }
 
 .close-btn:hover {
@@ -188,4 +198,4 @@ footer p {
   footer {
     padding: 30px 15px;
   }
-  }
+    }
