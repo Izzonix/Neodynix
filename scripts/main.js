@@ -1,9 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.getElementById('hamburger');
   const navMenu = document.getElementById('nav-menu');
+  const closeBtn = document.createElement('button');
+  closeBtn.classList.add('close-btn');
+  closeBtn.innerHTML = '✕';
+  closeBtn.setAttribute('aria-label', 'Close navigation menu');
+  navMenu.prepend(closeBtn);
+
   if (hamburger && navMenu) {
     hamburger.addEventListener('click', () => {
       navMenu.classList.toggle('show');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      navMenu.classList.remove('show');
     });
   }
 
