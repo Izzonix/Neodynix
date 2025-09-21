@@ -58,7 +58,6 @@ nav a:hover {
   color: #4fc3f7;
   cursor: pointer;
   padding: 10px 15px;
-  transition: background-color 0.3s, transform 0.3s;
 }
 
 .hamburger:hover {
@@ -77,7 +76,6 @@ nav a:hover {
   font-size: 24px;
   cursor: pointer;
   padding: 5px 10px;
-  transition: background-color 0.3s;
 }
 
 .close-btn:hover {
