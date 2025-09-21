@@ -1,19 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
   const hamburger = document.getElementById('hamburger');
+  const closeBtn = document.getElementById('close-btn');
   const navMenu = document.getElementById('nav-menu');
-  const closeBtn = document.createElement('button');
-  closeBtn.classList.add('close-btn');
-  closeBtn.innerHTML = '✕';
-  closeBtn.setAttribute('aria-label', 'Close navigation menu');
-  navMenu.prepend(closeBtn);
-
-  if (hamburger && navMenu) {
+  
+  if (hamburger && navMenu && closeBtn) {
     hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('show');
+      navMenu.classList.add('show');
+      hamburger.style.display = 'none';
+      closeBtn.style.display = 'block';
     });
 
     closeBtn.addEventListener('click', () => {
       navMenu.classList.remove('show');
+      hamburger.style.display = 'block';
+      closeBtn.style.display = 'none';
     });
   }
 
@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
       header.style.transform = 'translateY(-100%)';
       header.style.opacity = '0';
       navMenu.classList.remove('show');
+      hamburger.style.display = 'block';
+      closeBtn.style.display = 'none';
     } else {
       header.style.transform = 'translateY(0)';
       header.style.opacity = '1';
