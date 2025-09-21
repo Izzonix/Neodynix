@@ -509,7 +509,7 @@ main {
 /* Mobile Styles */
 @media (max-width: 600px) {
   body {
-    padding: 12px;
+    padding: 0;
   }
 
   main {
