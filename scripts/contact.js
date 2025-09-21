@@ -9,33 +9,37 @@ let user = null;
 let selectedTopic = '';
 const VAPID_PUBLIC_KEY = 'B03rZz8NEfC6w8aKYNC2WVKXqkaHK1Gsp8i0LBanfhLjcR4S0eZvA57sYXRmTehshsAxjpDvgeOQfiRaAW6xbbA';
 
-async function showUserInfoModal() {
+async function showStartChatPopup() {
   return new Promise(resolve => {
-    const modal = document.createElement('div');
-    modal.className = 'user-info-modal';
-    modal.innerHTML = `
-      <h3>Start Your Chat</h3>
-      <input type="email" id="userEmail" placeholder="Enter your email" required>
-      <input type="text" id="userName" placeholder="Enter your name" required>
-      <select id="topicSelect" required>
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: #1e1e2f; padding: 20px; border-radius: 10px; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5); color: #eee; text-align: center;
+      width: 80%; max-width: 400px;
+    `;
+    popup.innerHTML = `
+      <h3 style="margin-bottom: 15px;">Start Chat</h3>
+      <input type="email" id="emailInput" placeholder="Enter your email" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;">
+      <select id="topicSelect" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;">
         <option value="" disabled selected>Select a topic</option>
         <option value="Templates">Templates</option>
         <option value="Pricing">Pricing</option>
         <option value="Support">Support</option>
         <option value="Other">Other</option>
       </select>
-      <button id="startChat">Start Chat</button>
+      <input type="text" id="nameInput" placeholder="Enter your name" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;">
+      <button id="submitInfo" style="padding: 10px 20px; background: #4fc3f7; border: none; border-radius: 5px; color: #000; cursor: pointer;">Start Chat</button>
     `;
-    document.body.appendChild(modal);
+    document.body.appendChild(popup);
 
-    document.getElementById('startChat').addEventListener('click', async () => {
-      const email = document.getElementById('userEmail').value.trim();
-      const name = document.getElementById('userName').value.trim();
-      selectedTopic = document.getElementById('topicSelect').value;
-
-      if (email && name && selectedTopic) {
-        modal.remove();
-        resolve({ email, name, topic: selectedTopic });
+    document.getElementById('submitInfo').addEventListener('click', () => {
+      const email = document.getElementById('emailInput').value.trim();
+      const topic = document.getElementById('topicSelect').value;
+      const name = document.getElementById('nameInput').value.trim();
+      if (email && topic && name) {
+        popup.remove();
+        resolve({ email, topic, name });
       }
     });
   });
@@ -66,9 +70,10 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function startChat() {
-  const { email, name, topic } = await showUserInfoModal();
-  if (!email || !name || !topic) return;
+  const userInfo = await showStartChatPopup();
+  if (!userInfo) return;
 
+  const { email, topic, name } = userInfo;
   selectedTopic = topic;
 
   const { data } = await supabase.from('users').select().eq('email', email).single();
