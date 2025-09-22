@@ -299,6 +299,9 @@ main {
   font-size: 13px;
   color: #cccccc;
   margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .custom-request-card ul li a {
@@ -459,6 +462,7 @@ main {
 /* Edit Template Modal */
 #editTemplateModal {
   overflow-y: auto;
+  max-height: 90vh;
 }
 
 #editTemplateModal .modal-content {
@@ -468,6 +472,8 @@ main {
   max-width: 500px;
   width: 90%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 #editTemplateModal h2 {
@@ -475,6 +481,11 @@ main {
   font-weight: 500;
   color: #4fc3f7;
   margin-bottom: 20px;
+}
+
+#editTemplateForm {
+  max-height: none;
+  overflow: visible;
 }
 
 #editTemplateForm .form-group {
@@ -600,6 +611,12 @@ main {
   }
 
   .modal, #editTemplateModal {
+    overflow-y: auto;
+  }
+
+  #editTemplateModal .modal-content {
+    padding: 16px;
+    max-height: 85vh;
     overflow-y: auto;
   }
 }
