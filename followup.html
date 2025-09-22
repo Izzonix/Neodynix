@@ -1,64 +1,260 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>All Templates - Neodynix</title>
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/template.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Website Customization Form</title>
+  <link rel="stylesheet" href="styles/followup.css" />
 </head>
 <body>
-  <header class="top-header">
-    <span class="logo">Neodynix Technologies</span>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
-    <nav id="nav-menu">
-      <a href="index.html">Home</a>
-      <a href="templates.html">Templates</a>
-      <a href="About.html">About</a>
-      <a href="contact.html">Contact</a>
-      <a href="admin.html">Admin</a>
-    </nav>
-  </header>
-
   <main>
-    <section class="templates-gallery">
-      <h1>Explore Our Templates</h1>
-      <p>Tap on a template image to preview or select to get started.</p>
-      
-      <div class="search-bar">
-        <input type="text" id="search-input" placeholder="Search Templates..." oninput="filterTemplates()" aria-label="Search Templates">
+    <section class="form-section">
+      <h1>Customize Your Website</h1>
+      <form id="customForm" enctype="multipart/form-data">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" name="firstName" placeholder="e.g. John" required autocomplete="given-name" />
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" name="lastName" placeholder="e.g. Doe" required autocomplete="family-name" />
+
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="email" placeholder="e.g. example@domain.com" required autocomplete="email" />
+
+        <label for="phone">Contact Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="e.g. +256 123 456 789" required />
+
+        <label for="category">Select Category</label>
+        <select id="category" name="category" required>
+          <option value="">-- Select Category --</option>
+          <option value="business">Business</option>
+          <option value="portfolio">Portfolio</option>
+          <option value="education">Education</option>
+          <option value="ecommerce">E-commerce</option>
+          <option value="charity">Charity</option>
+          <option value="blog">Blog</option>
+          <option value="healthcare">Healthcare</option>
+          <option value="event">Event</option>
+          <option value="church">Church</option>
+          <option value="nonprofit">Non-profit</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label for="template">Type Template Name</label>
+        <input type="text" id="template" name="template" placeholder="Type template name here" required autocomplete="off" />
+
+        <label for="socialMedia">Social Media Links (comma separated)</label>
+        <textarea id="socialMedia" name="socialMedia" placeholder="e.g. https://facebook.com/yourpage, https://twitter.com/yourhandle" rows="3"></textarea>
+
+        <label for="purpose">Website Purpose</label>
+        <textarea id="purpose" name="purpose" placeholder="e.g. Education, E-commerce, Portfolio" rows="3"></textarea>
+
+        <label for="targetAudience">Target Audience</label>
+        <input type="text" id="targetAudience" name="targetAudience" placeholder="e.g. Students, Professionals" />
+
+        <label for="country">Your Country</label>
+        <select id="country" name="country" required>
+          <option value="">-- Select Your Country --</option>
+          <option value="UG">🇺🇬 Uganda</option>
+          <option value="KE">🇰🇪 Kenya</option>
+          <option value="TZ">🇹🇿 Tanzania</option>
+          <option value="NG">🇳🇬 Nigeria</option>
+          <option value="GH">🇬🇭 Ghana</option>
+          <option value="ZA">🇿🇦 South Africa</option>
+          <option value="US">🇺🇸 USA</option>
+          <option value="GB">🇬🇧 United Kingdom</option>
+          <option value="IN">🇮🇳 India</option>
+          <option value="CA">🇨🇦 Canada</option>
+          <option value="OTHER">🌐 Other</option>
+        </select>
+
+        <label>Domain Name Preference</label>
+        <div class="domain-choice">
+          <label><input type="radio" name="domainChoice" value="setup" checked /> Let us set up the domain</label>
+          <label><input type="radio" name="domainChoice" value="custom" /> I will provide a domain name</label>
+        </div>
+
+        <div id="domainNameContainer" style="display:none;">
+          <label for="domainName">Preferred Domain Name</label>
+          <input type="text" id="domainName" name="domainName" placeholder="e.g. mywebsite.com" />
+        </div>
+
+        <div class="range-group">
+          <label for="duration">Hosting Duration (months): <span id="duration-value">12</span></label>
+          <input type="range" id="duration" name="duration" min="1" max="60" value="12" />
+        </div>
+
+        <div class="range-group">
+          <label for="pages">Number of Web Pages: <span id="pages-value">5</span></label>
+          <input type="range" id="pages" name="pages" min="5" max="20" value="5" />
+        </div>
+
+        <div id="extraPagesContainer" style="display:none;">
+          <label for="extraPages">Specify Extra Pages (if more than 5)</label>
+          <textarea id="extraPages" name="extraPages" placeholder="List page names separated by commas" rows="3"></textarea>
+        </div>
+
+        <div class="category-fields education-fields" style="display:none;">
+          <label for="schoolName">School Name</label>
+          <input type="text" id="schoolName" name="schoolName" />
+          <label for="numStudents">Number of Students</label>
+          <input type="number" id="numStudents" name="numStudents" />
+        </div>
+
+        <div class="category-fields business-fields" style="display:none;">
+          <label for="businessName">Business Name</label>
+          <input type="text" id="businessName" name="businessName" />
+          <label for="services">Services Offered</label>
+          <textarea id="services" name="services"></textarea>
+          <label for="contactPersonBusiness">Contact Person</label>
+          <input type="text" id="contactPersonBusiness" name="contactPersonBusiness" />
+        </div>
+
+        <div class="category-fields portfolio-fields" style="display:none;">
+          <label for="portfolioUrl">Portfolio URL</label>
+          <input type="url" id="portfolioUrl" name="portfolioUrl" />
+          <label for="projects">Projects</label>
+          <textarea id="projects" name="projects"></textarea>
+          <label for="contactPersonPortfolio">Contact Person</label>
+          <input type="text" id="contactPersonPortfolio" name="contactPersonPortfolio" />
+        </div>
+
+        <div class="category-fields ecommerce-fields" style="display:none;">
+          <label for="businessName">Business Name</label>
+          <input type="text" id="businessNameEcommerce" name="businessName" />
+          <label for="products">Products Offered</label>
+          <textarea id="products" name="products"></textarea>
+          <label for="contactPersonEcommerce">Contact Person</label>
+          <input type="text" id="contactPersonEcommerce" name="contactPersonEcommerce" />
+        </div>
+
+        <div class="category-fields charity-fields" style="display:none;">
+          <label for="charityName">Charity Name</label>
+          <input type="text" id="charityName" name="charityName" />
+          <label for="mission">Mission Statement</label>
+          <textarea id="mission" name="mission"></textarea>
+          <label for="contactPersonCharity">Contact Person</label>
+          <input type="text" id="contactPersonCharity" name="contactPersonCharity" />
+        </div>
+
+        <div class="category-fields blog-fields" style="display:none;">
+          <label for="blogName">Blog Name</label>
+          <input type="text" id="blogName" name="blogName" />
+          <label for="topics">Blog Topics</label>
+          <textarea id="topics" name="topics"></textarea>
+          <label for="contactPersonBlog">Contact Person</label>
+          <input type="text" id="contactPersonBlog" name="contactPersonBlog" />
+        </div>
+
+        <div class="category-fields healthcare-fields" style="display:none;">
+          <label for="facilityName">Facility Name</label>
+          <input type="text" id="facilityName" name="facilityName" />
+          <label for="services">Medical Services</label>
+          <textarea id="servicesHealthcare" name="services"></textarea>
+          <label for="contactPersonHealthcare">Contact Person</label>
+          <input type="text" id="contactPersonHealthcare" name="contactPersonHealthcare" />
+        </div>
+
+        <div class="category-fields event-fields" style="display:none;">
+          <label for="eventName">Event Name</label>
+          <input type="text" id="eventName" name="eventName" />
+          <label for="eventDetails">Event Details</label>
+          <textarea id="eventDetails" name="eventDetails"></textarea>
+          <label for="contactPersonEvent">Contact Person</label>
+          <input type="text" id="contactPersonEvent" name="contactPersonEvent" />
+        </div>
+
+        <div class="category-fields church-fields" style="display:none;">
+          <label for="churchName">Church Name</label>
+          <input type="text" id="churchName" name="churchName" />
+          <label for="services">Services/Events</label>
+          <textarea id="servicesChurch" name="services"></textarea>
+          <label for="contactPersonChurch">Contact Person</label>
+          <input type="text" id="contactPersonChurch" name="contactPersonChurch" />
+        </div>
+
+        <div class="category-fields nonprofit-fields" style="display:none;">
+          <label for="nonprofitName">Non-profit Name</label>
+          <input type="text" id="nonprofitName" name="nonprofitName" />
+          <label for="mission">Mission Statement</label>
+          <textarea id="missionNonprofit" name="mission"></textarea>
+          <label for="contactPersonNonprofit">Contact Person</label>
+          <input type="text" id="contactPersonNonprofit" name="contactPersonNonprofit" />
+        </div>
+
+        <div class="category-fields other-fields" style="display:none;">
+          <label for="otherName">Organization Name</label>
+          <input type="text" id="otherName" name="otherName" />
+          <label for="services">Services/Products</label>
+          <textarea id="servicesOther" name="services"></textarea>
+          <label for="contactPersonOther">Contact Person</label>
+          <input type="text" id="contactPersonOther" name="contactPersonOther" />
+        </div>
+
+        <div class="file-upload">
+          <label for="logo">Upload Logo</label>
+          <div class="custom-upload">
+            <input type="file" id="logo" name="logo" accept="image/*" />
+            <span class="file-name" id="logo-name">No file chosen</span>
+            <button type="button" onclick="document.getElementById('logo').click()">Choose File</button>
+          </div>
+        </div>
+
+        <div class="file-upload">
+          <label for="media">Upload Photos or Videos (5-10 photos, max 3 videos)</label>
+          <div class="custom-upload">
+            <input type="file" id="media" name="media" multiple accept="image/*,video/*" />
+            <span class="file-name" id="media-name">No files chosen</span>
+            <button type="button" onclick="document.getElementById('media').click()">Choose Files</button>
+          </div>
+        </div>
+
+        <div class="file-upload">
+          <label for="others">Other Files (PDF or docs, max 4)</label>
+          <div class="custom-upload">
+            <input type="file" id="others" name="others" multiple accept=".pdf,.doc,.docx,.txt" />
+            <span class="file-name" id="others-name">No files chosen</span>
+            <button type="button" onclick="document.getElementById('others').click()">Choose Files</button>
+          </div>
+        </div>
+
+        <label>Keep default theme colors?</label>
+        <div class="theme-choice">
+          <label><input type="radio" name="themeChoice" value="default" checked /> Yes, keep default</label>
+          <label><input type="radio" name="themeChoice" value="custom" /> No, I want to pick a color</label>
+        </div>
+
+        <div id="colorPickerContainer" style="display:none; margin-top:10px;">
+          <label for="customColor">Choose your theme color:</label>
+          <input type="color" id="customColor" name="customColor" value="#4fc3f7" />
+        </div>
+
+        <div class="price-box">
+          Estimated Price: <span id="price">0</span> <span id="currency"></span>
+        </div>
+
+        <button type="submit" class="btn btn-request">Submit Details</button>
+      </form>
+
+      <div id="loading-popup" style="display: none;">
+        <div class="loading-content">
+          <div class="spinner"></div>
+          <p>Submitting...</p>
+        </div>
       </div>
-      
-      <div class="category-buttons">
-        <button class="active">All</button>
-        <button>Business</button>
-        <button>Portfolio</button>
-        <button>Education</button>
-        <button>E-commerce</button>
-        <button id="more-button" onclick="toggleMoreCategories()">More</button>
-      </div>
-      
-      <div id="more-categories">
-        <button>Charity</button>
-        <button>Blog</button>
-        <button>Healthcare</button>
-        <button>Event</button>
-        <button>Church</button>
-        <button>Non-profit</button>
-        <button>Other</button>
-      </div>
-      
-      <div class="template-grid" id="template-container">
-        <!-- Templates will be dynamically loaded here -->
+      <!-- Confirmation Modal -->
+      <div id="confirmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <p id="confirmMessage"></p>
+          <button id="confirmYes" class="btn">Yes</button>
+          <button id="confirmNo" class="btn btn-cancel">No</button>
+        </div>
       </div>
     </section>
   </main>
-
-  <footer>
-    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
-  </footer>
-
-  <script type="module" src="scripts/main.js"></script>
-  <script type="module" src="scripts/template.js"></script>
+  <div id="mobile-price-popup" class="mobile-price-popup" style="display: none;">
+    <p>Estimated Price: <span id="mobile-price">0</span> <span id="mobile-currency"></span></p>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script type="module" src="scripts/supabase-config.js"></script>
+  <script type="module" src="scripts/followup.js"></script>
 </body>
-</html>
+          </html>
