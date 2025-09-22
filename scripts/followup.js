@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const currencyOutput = document.getElementById('currency');
   const mobilePriceOutput = document.getElementById('mobile-price');
   const mobileCurrencyOutput = document.getElementById('mobile-currency');
+  const mobilePricePopup = document.getElementById('mobile-price-popup');
   const customForm = document.getElementById('customForm');
   const loadingPopup = document.getElementById('loading-popup');
   const themeChoiceRadios = document.getElementsByName('themeChoice');
@@ -31,17 +32,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Toggle mobile price popup based on visibility of price box
+  function toggleMobilePricePopup() {
+    const priceBox = document.querySelector('.price-box');
+    const rect = priceBox.getBoundingClientRect();
+    const isVisible = (rect.top >= 0 && rect.bottom <= window.innerHeight);
+    mobilePricePopup.style.display = isVisible ? 'none' : 'block';
+  }
+
   // Fetch and display template price
   async function updatePrice() {
     const category = categorySelect.value;
     const templateName = templateInput.value.trim();
     const country = countrySelect.value;
 
-    if (!category || !templateName) {
+    if (!category || !templateName || !country) {
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
       mobilePriceOutput.textContent = '0';
       mobileCurrencyOutput.textContent = '';
+      mobilePricePopup.style.display = 'none';
       return;
     }
 
@@ -58,33 +68,40 @@ document.addEventListener('DOMContentLoaded', () => {
         currencyOutput.textContent = '';
         mobilePriceOutput.textContent = '0';
         mobileCurrencyOutput.textContent = '';
+        mobilePricePopup.style.display = 'none';
         return;
       }
 
       let price, currency;
-      if (country === 'UG') {
-        price = data.price_ugx.toFixed(2);
-        currency = 'UGX';
-      } else if (country === 'KE') {
-        price = data.price_ksh.toFixed(2);
-        currency = 'KSH';
-      } else if (country === 'TZ') {
-        price = data.price_tsh.toFixed(2);
-        currency = 'TSH';
-      } else {
-        price = data.price_usd.toFixed(2);
-        currency = 'USD';
+      switch (country) {
+        case 'UG':
+          price = data.price_ugx.toFixed(2);
+          currency = 'UGX';
+          break;
+        case 'KE':
+          price = data.price_ksh.toFixed(2);
+          currency = 'KSH';
+          break;
+        case 'TZ':
+          price = data.price_tsh.toFixed(2);
+          currency = 'TSH';
+          break;
+        default:
+          price = data.price_usd.toFixed(2);
+          currency = 'USD';
       }
 
       priceOutput.textContent = price;
       currencyOutput.textContent = currency;
       mobilePriceOutput.textContent = price;
       mobileCurrencyOutput.textContent = currency;
+      toggleMobilePricePopup();
     } catch (error) {
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
       mobilePriceOutput.textContent = '0';
       mobileCurrencyOutput.textContent = '';
+      mobilePricePopup.style.display = 'none';
     }
   }
 
@@ -135,8 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleExtraPagesField();
   });
 
-  durationInput.addEventListener('input', () => {
-    document.getElementById('duration-value').textContent = durationInput.value;
+  document.getElementById('duration').addEventListener('input', () => {
+    document.getElementById('duration-value').textContent = document.getElementById('duration').value;
   });
 
   themeChoiceRadios.forEach(radio => {
@@ -146,6 +163,10 @@ document.addEventListener('DOMContentLoaded', () => {
   logoInput.addEventListener('change', () => updateFileLabel(logoInput, logoName));
   mediaInput.addEventListener('change', () => updateFileLabel(mediaInput, mediaName));
   othersInput.addEventListener('change', () => updateFileLabel(othersInput, othersName));
+
+  // Scroll and resize listener for mobile price popup
+  window.addEventListener('scroll', toggleMobilePricePopup);
+  window.addEventListener('resize', toggleMobilePricePopup);
 
   // Form submission
   customForm.addEventListener('submit', async (e) => {
