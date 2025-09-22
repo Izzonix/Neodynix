@@ -211,12 +211,11 @@ main {
 }
 
 .chat-input button {
-  background: #4fc3f71a;
-  border: 1px solid #4fc3f7;
+  background: transparent;
   padding: clamp(8px, 2vw, 12px);
   cursor: pointer;
   border-radius: 10px;
-  transition: background 0.3s, transform 0.2s;
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
   margin-left: 10px;
   display: flex;
   align-items: center;
@@ -226,11 +225,17 @@ main {
 .chat-input button img {
   width: 24px;
   height: 24px;
+  filter: brightness(1) saturate(1);
 }
 
 .chat-input button:hover {
   background: #4fc3f7;
   transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+}
+
+.chat-input button:hover img {
+  filter: brightness(0) saturate(0);
 }
 
 .chat-input button:active {
@@ -291,4 +296,4 @@ footer {
     flex-direction: column;
     gap: 8px;
   }
-}
+  }
