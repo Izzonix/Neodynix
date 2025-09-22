@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mediaName = document.getElementById('media-name');
   const othersName = document.getElementById('others-name');
   const mobilePricePopup = document.getElementById('mobile-price-popup');
+  const durationInput = document.getElementById('duration');
 
   // Toggle category-specific fields
   function toggleCategoryFields() {
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const priceBox = document.querySelector('.price-box');
     const rect = priceBox.getBoundingClientRect();
     const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
-    mobilePricePopup.style.display = isVisible ? 'none' : 'block';
+    mobilePricePopup.style.display = priceOutput.textContent !== '0' && !isVisible ? 'block' : 'none';
   }
 
   // Fetch and display template price
@@ -64,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .single();
 
       if (error || !data) {
+        console.error('Price fetch error:', error?.message || 'No data found');
         priceOutput.textContent = '0';
         currencyOutput.textContent = '';
         mobilePriceOutput.textContent = '0';
@@ -75,19 +77,19 @@ document.addEventListener('DOMContentLoaded', () => {
       let price, currency;
       switch (country) {
         case 'UG':
-          price = data.price_ugx.toFixed(2);
+          price = data.price_ugx?.toFixed(2) || '0';
           currency = 'UGX';
           break;
         case 'KE':
-          price = data.price_ksh.toFixed(2);
+          price = data.price_ksh?.toFixed(2) || '0';
           currency = 'KSH';
           break;
         case 'TZ':
-          price = data.price_tsh.toFixed(2);
+          price = data.price_tsh?.toFixed(2) || '0';
           currency = 'TSH';
           break;
         default:
-          price = data.price_usd.toFixed(2);
+          price = data.price_usd?.toFixed(2) || '0';
           currency = 'USD';
       }
 
@@ -97,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mobileCurrencyOutput.textContent = currency;
       toggleMobilePricePopup();
     } catch (error) {
+      console.error('Price fetch exception:', error.message);
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
       mobilePriceOutput.textContent = '0';
@@ -130,8 +133,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Toggle color picker
   function toggleColorPicker() {
-    const themeChoice = document.querySelector('input[name="themeChoice"]:checked').value;
+    const themeChoice = document.querySelector('input[name="themeChoice"]:checked')?.value;
     colorPickerContainer.style.display = themeChoice === 'custom' ? 'block' : 'none';
+  }
+
+  // Show confirmation modal
+  function showConfirm(message, callback) {
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+
+    confirmMessage.textContent = message;
+    confirmModal.style.display = 'block';
+
+    const yesHandler = () => {
+      callback(true);
+      confirmModal.style.display = 'none';
+      confirmYes.removeEventListener('click', yesHandler);
+      confirmNo.removeEventListener('click', noHandler);
+    };
+    const noHandler = () => {
+      callback(false);
+      confirmModal.style.display = 'none';
+      confirmYes.removeEventListener('click', yesHandler);
+      confirmNo.removeEventListener('click', noHandler);
+    };
+
+    confirmYes.addEventListener('click', yesHandler);
+    confirmNo.addEventListener('click', noHandler);
   }
 
   // Event listeners
