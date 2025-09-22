@@ -15,7 +15,7 @@ body {
   width: 100%;
   padding: 20px;
   text-align: center;
-  flex-grow: 1;
+  flex: 1;
 }
 
 .contact-section h1 {
@@ -53,7 +53,7 @@ body {
   padding: 20px;
   font-size: clamp(1.2rem, 3vw, 1.5rem);
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid rgba(255,255,255,0.1);
   border: 1px solid #4fc3f7;
@@ -147,36 +147,36 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  border-top: 1px solid #333;
 }
 
 .file-preview-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: #2a2a2a;
+  gap: 8px;
+  background: #4fc3f71a;
   padding: 8px 12px;
   border-radius: 8px;
-}
-
-.file-preview-item span {
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
+  border: 1px solid #4fc3f7;
   color: #ccc;
 }
 
 .delete-file {
-  background: #ff4444;
+  background: #ff5555;
   border: none;
   color: #fff;
-  font-size: 0.8rem;
-  padding: 5px 8px;
-  border-radius: 50%;
+  font-weight: bold;
   cursor: pointer;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: background 0.3s;
 }
 
 .delete-file:hover {
-  background: #cc3333;
+  background: #ff3333;
 }
 
 .chat-input {
@@ -207,7 +207,7 @@ body {
 .chat-input button {
   background: #4fc3f71a;
   border: 1px solid #4fc3f7;
-  padding: clamp(10px, 2vw, 14px);
+  padding: clamp(8px, 2vw, 12px);
   cursor: pointer;
   border-radius: 10px;
   transition: background 0.3s, transform 0.2s;
@@ -218,17 +218,13 @@ body {
 }
 
 .chat-input button img {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 .chat-input button:hover {
   background: #4fc3f7;
   transform: translateY(-2px);
-}
-
-.chat-input button:hover img {
-  filter: brightness(0) invert(1);
 }
 
 .chat-input button:active {
@@ -259,11 +255,12 @@ body {
   }
 
   .chat-input button {
-    padding: 10px;
+    padding: 8px;
   }
 
-  .file-preview-item {
-    padding: 6px 10px;
+  .chat-input button img {
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -280,4 +277,4 @@ body {
     flex-direction: column;
     gap: 8px;
   }
-  }
+    }
