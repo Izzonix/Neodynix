@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const currencyOutput = document.getElementById('currency');
   const mobilePriceOutput = document.getElementById('mobile-price');
   const mobileCurrencyOutput = document.getElementById('mobile-currency');
-  const mobilePricePopup = document.getElementById('mobile-price-popup');
   const customForm = document.getElementById('customForm');
   const loadingPopup = document.getElementById('loading-popup');
   const themeChoiceRadios = document.getElementsByName('themeChoice');
@@ -23,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoName = document.getElementById('logo-name');
   const mediaName = document.getElementById('media-name');
   const othersName = document.getElementById('others-name');
+  const mobilePricePopup = document.getElementById('mobile-price-popup');
 
   // Toggle category-specific fields
   function toggleCategoryFields() {
@@ -32,11 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Toggle mobile price popup based on visibility of price box
+  // Toggle mobile price popup based on price box visibility
   function toggleMobilePricePopup() {
     const priceBox = document.querySelector('.price-box');
     const rect = priceBox.getBoundingClientRect();
-    const isVisible = (rect.top >= 0 && rect.bottom <= window.innerHeight);
+    const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
     mobilePricePopup.style.display = isVisible ? 'none' : 'block';
   }
 
@@ -142,6 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   templateInput.addEventListener('input', updatePrice);
   countrySelect.addEventListener('change', updatePrice);
+  window.addEventListener('scroll', toggleMobilePricePopup);
+  window.addEventListener('resize', toggleMobilePricePopup);
 
   domainChoiceRadios.forEach(radio => {
     radio.addEventListener('change', toggleDomainNameField);
@@ -152,8 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleExtraPagesField();
   });
 
-  document.getElementById('duration').addEventListener('input', () => {
-    document.getElementById('duration-value').textContent = document.getElementById('duration').value;
+  durationInput.addEventListener('input', () => {
+    document.getElementById('duration-value').textContent = durationInput.value;
   });
 
   themeChoiceRadios.forEach(radio => {
@@ -163,10 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
   logoInput.addEventListener('change', () => updateFileLabel(logoInput, logoName));
   mediaInput.addEventListener('change', () => updateFileLabel(mediaInput, mediaName));
   othersInput.addEventListener('change', () => updateFileLabel(othersInput, othersName));
-
-  // Scroll and resize listener for mobile price popup
-  window.addEventListener('scroll', toggleMobilePricePopup);
-  window.addEventListener('resize', toggleMobilePricePopup);
 
   // Form submission
   customForm.addEventListener('submit', async (e) => {
