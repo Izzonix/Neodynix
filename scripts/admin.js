@@ -86,6 +86,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 5000);
   }
 
+  window.showSection = (section) => {
+    document.querySelectorAll('.admin-section').forEach(sec => sec.style.display = 'none');
+    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+    const sectionMap = {
+      templates: { id: 'sectionTemplates', btn: 'btnTemplates', fetch: fetchTemplates },
+      email: { id: 'sectionSendEmail', btn: 'btnSendEmail' },
+      chat: { id: 'sectionChat', btn: 'btnChat', fetch: fetchChatRequests },
+      custom: { id: 'sectionCustomRequests', btn: 'btnCustomRequests', fetch: fetchCustomRequests }
+    };
+    const target = sectionMap[section];
+    if (target) {
+      document.getElementById(target.id).style.display = 'block';
+      document.getElementById(target.btn).classList.add('active');
+      if (target.fetch) target.fetch();
+    }
+  };
+
   async function fetchTemplates() {
     try {
       templateList.innerHTML = '';
@@ -253,13 +270,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  window.logout = async () => {
-    loadingPopup.style.display = 'flex';
-    await supabase.auth.signOut();
-    loadingPopup.style.display = 'none';
-    loginSection.style.display = 'block';
-    adminContainer.style.display = 'none';
-  };
+  cancelEditBtn.addEventListener('click', () => {
+    editTemplateModal.style.display = 'none';
+    document.body.style.overflow = '';
+    editTemplateForm.reset();
+    document.getElementById('editImagePreview').innerHTML = '';
+  });
 
   async function fetchChatRequests() {
     try {
@@ -401,19 +417,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  window.showSection = (sectionId) => {
-    document.querySelectorAll('.admin-section').forEach(section => section.style.display = 'none');
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    const section = document.getElementById(`section${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}`);
-    const button = document.getElementById(`btn${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}`);
-    if (section && button) {
-      section.style.display = 'block';
-      button.classList.add('active');
-      if (sectionId === 'templates') fetchTemplates();
-      else if (sectionId === 'chat') fetchChatRequests();
-      else if (sectionId === 'custom') fetchCustomRequests();
-    }
-  };
+  document.getElementById('btnTemplates').addEventListener('click', () => {
+    showSection('templates');
+  });
+
+  document.getElementById('btnSendEmail').addEventListener('click', () => {
+    showSection('email');
+  });
+
+  document.getElementById('btnChat').addEventListener('click', () => {
+    showSection('chat');
+  });
+
+  document.getElementById('btnCustomRequests').addEventListener('click', () => {
+    showSection('custom');
+  });
 
   uploadForm.addEventListener('submit', uploadTemplate);
 
