@@ -3,10 +3,12 @@ import { supabase } from './supabase-config.js';
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
 const fileInput = document.getElementById('fileInput');
+const filePreview = document.getElementById('filePreview');
 const sendChat = document.getElementById('sendChat');
 const attachFile = document.getElementById('attachFile');
 let user = null;
 let selectedTopic = '';
+let hasSentFirstMessage = false;
 const VAPID_PUBLIC_KEY = 'B03rZz8NEfC6w8aKYNC2WVKXqkaHK1Gsp8i0LBanfhLjcR4S0eZvA57sYXRmTehshsAxjpDvgeOQfiRaAW6xbbA';
 
 async function showStartChatPopup() {
@@ -123,6 +125,20 @@ function addLocalMessage(content, sender = 'user') {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+async function sendDefaultMessage() {
+  if (!hasSentFirstMessage && user) {
+    hasSentFirstMessage = true;
+    const defaultMessage = `Hello ${user.name}, thank you for reaching out! Our team will attend to you shortly. Please check back soon for a response.`;
+    addLocalMessage(defaultMessage, 'support');
+    await supabase.from('messages').insert({
+      user_id: user.id,
+      content: defaultMessage,
+      sender: 'support',
+      is_auto: true
+    });
+  }
+}
+
 window.onload = async () => {
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
@@ -168,6 +184,7 @@ sendChat.addEventListener('click', async () => {
     const { error } = await supabase.from('messages').insert({ user_id: user.id, content: text, sender: 'user' });
     if (!error) {
       chatInput.value = '';
+      await sendDefaultMessage();
     }
   }
 });
@@ -176,7 +193,25 @@ attachFile.addEventListener('click', () => {
   fileInput.click();
 });
 
-fileInput.addEventListener('change', async () => {
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (file) {
+    filePreview.innerHTML = `
+      <div class="file-preview-item">
+        <span>${file.name}</span>
+        <button class="delete-file" title="Remove File">✖</button>
+      </div>
+    `;
+    const deleteButton = filePreview.querySelector('.delete-file');
+    deleteButton.addEventListener('click', () => {
+      fileInput.value = '';
+      filePreview.innerHTML = '';
+    });
+  }
+});
+
+filePreview.addEventListener('click', async (event) => {
+  if (event.target.classList.contains('delete-file')) return;
   const file = fileInput.files[0];
   if (file && user) {
     const { data } = await supabase.storage.from('chat-files').upload(`${user.id}/${file.name}`, file);
@@ -194,6 +229,8 @@ fileInput.addEventListener('change', async () => {
     });
     if (!error) {
       fileInput.value = '';
+      filePreview.innerHTML = '';
+      await sendDefaultMessage();
     }
   }
 });
