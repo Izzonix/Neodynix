@@ -206,8 +206,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (uploadError) throw uploadError;
             imageUrl = supabase.storage.from('templates').getPublicUrl(uploadData.path).data.publicUrl;
             if (template.image) {
-              const oldPath = template.image.split('/').pop();
-              await supabase.storage.from('templates').remove([`images/${oldPath}`]);
+              const oldPath = template.image.split('/').slice(-2).join('/');
+              await supabase.storage.from('templates').remove([oldPath]);
             }
           }
           const { error } = await supabase.from('templates').update({ ...updatedData, image: imageUrl }).eq('id', id);
@@ -253,12 +253,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  cancelEditBtn.addEventListener('click', () => {
-    editTemplateModal.style.display = 'none';
-    document.body.style.overflow = '';
-    editTemplateForm.reset();
-    document.getElementById('editImagePreview').innerHTML = '';
-  });
+  window.logout = async () => {
+    loadingPopup.style.display = 'flex';
+    await supabase.auth.signOut();
+    loadingPopup.style.display = 'none';
+    loginSection.style.display = 'block';
+    adminContainer.style.display = 'none';
+  };
 
   async function fetchChatRequests() {
     try {
@@ -400,36 +401,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  document.getElementById('btnTemplates').addEventListener('click', () => {
+  window.showSection = (sectionId) => {
     document.querySelectorAll('.admin-section').forEach(section => section.style.display = 'none');
-    document.getElementById('sectionTemplates').style.display = 'block';
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('btnTemplates').classList.add('active');
-    fetchTemplates();
-  });
-
-  document.getElementById('btnSendEmail').addEventListener('click', () => {
-    document.querySelectorAll('.admin-section').forEach(section => section.style.display = 'none');
-    document.getElementById('sectionSendEmail').style.display = 'block';
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('btnSendEmail').classList.add('active');
-  });
-
-  document.getElementById('btnChat').addEventListener('click', () => {
-    document.querySelectorAll('.admin-section').forEach(section => section.style.display = 'none');
-    document.getElementById('sectionChat').style.display = 'block';
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('btnChat').classList.add('active');
-    fetchChatRequests();
-  });
-
-  document.getElementById('btnCustomRequests').addEventListener('click', () => {
-    document.querySelectorAll('.admin-section').forEach(section => section.style.display = 'none');
-    document.getElementById('sectionCustomRequests').style.display = 'block';
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    document.getElementById('btnCustomRequests').classList.add('active');
-    fetchCustomRequests();
-  });
+    const section = document.getElementById(`section${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}`);
+    const button = document.getElementById(`btn${sectionId.charAt(0).toUpperCase() + sectionId.slice(1)}`);
+    if (section && button) {
+      section.style.display = 'block';
+      button.classList.add('active');
+      if (sectionId === 'templates') fetchTemplates();
+      else if (sectionId === 'chat') fetchChatRequests();
+      else if (sectionId === 'custom') fetchCustomRequests();
+    }
+  };
 
   uploadForm.addEventListener('submit', uploadTemplate);
 
