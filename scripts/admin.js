@@ -162,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.editTemplate = async (id) => {
     try {
-      // Ensure scrolling is enabled
       document.body.style.overflow = '';
       const { data, error } = await supabase.from('templates').select('*').eq('id', id).single();
       if (error || !data) {
@@ -172,17 +171,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const template = data;
       templates = templates.filter(t => t.id !== id).concat(template);
-      editTemplateForm.editName.value = template.name;
-      editTemplateForm.editCategory.value = template.category;
+      editTemplateForm.editName.value = template.name || '';
+      editTemplateForm.editCategory.value = template.category || '';
       editTemplateForm.editDescription.value = template.description || '';
-      editTemplateForm.editLink.value = template.link;
-      editTemplateForm.editPriceUgx.value = template.price_ugx;
-      editTemplateForm.editPriceKsh.value = template.price_ksh;
-      editTemplateForm.editPriceTsh.value = template.price_tsh;
-      editTemplateForm.editPriceUsd.value = template.price_usd;
+      editTemplateForm.editLink.value = template.link || '';
+      editTemplateForm.editPriceUgx.value = template.price_ugx || 0;
+      editTemplateForm.editPriceKsh.value = template.price_ksh || 0;
+      editTemplateForm.editPriceTsh.value = template.price_tsh || 0;
+      editTemplateForm.editPriceUsd.value = template.price_usd || 0;
       document.getElementById('editImagePreview').innerHTML = template.image ? `<img src="${template.image}" alt="Current Image">` : '';
       editTemplateModal.style.display = 'flex';
-      // Remove any existing submit handlers to prevent duplicates
       editTemplateForm.replaceWith(editTemplateForm.cloneNode(true));
       const newEditTemplateForm = document.getElementById('editTemplateForm');
       newEditTemplateForm.addEventListener('submit', async (e) => {
@@ -239,8 +237,8 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const template = templates.find(t => t.id === id);
         if (template && template.image) {
-          const path = template.image.split('/').pop();
-          await supabase.storage.from('templates').remove([`images/${path}`]);
+          const path = template.image.split('/').slice(-2).join('/');
+          await supabase.storage.from('templates').remove([path]);
         }
         const { error } = await supabase.from('templates').delete().eq('id', id);
         if (error) throw error;
@@ -284,8 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     } catch (error) {
       console.error('Error fetching messages:', error);
-      chartResult.className = 'result error';
-      chartResult.textContent = 'Failed to load messages: ' + error.message;
+      chatResult.className = 'result error';
+      chatResult.textContent = 'Failed to load messages: ' + error.message;
     }
   }
 
@@ -308,13 +306,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (error) throw error;
       chatReplyForm.reset();
       document.getElementById('replyUserInfo').textContent = '';
-      chartResult.className = 'result success';
-      chartResult.textContent = 'Reply sent successfully!';
+      chatResult.className = 'result success';
+      chatResult.textContent = 'Reply sent successfully!';
       fetchChatRequests();
     } catch (error) {
       console.error('Error sending reply:', error);
-      chartResult.className = 'result error';
-      chartResult.textContent = 'Failed to send reply: ' + error.message;
+      chatResult.className = 'result error';
+      chatResult.textContent = 'Failed to send reply: ' + error.message;
     } finally {
       loadingPopup.style.display = 'none';
     }
@@ -332,7 +330,12 @@ document.addEventListener('DOMContentLoaded', () => {
       data.forEach(request => {
         const card = document.createElement('div');
         card.className = 'custom-request-card';
-        const fileList = request.files ? request.files.map(file => `<li><a href="${file}" target="_blank">${file.split('/').pop()}</a></li>`).join('') : '';
+        const fileList = request.files ? request.files.map(file => `
+          <li>
+            <a href="${file}" download="${file.split('/').pop()}" target="_blank">${file.split('/').pop()}</a>
+            <button class="btn btn-delete" onclick="deleteFile('${request.id}', '${file}')">Delete File</button>
+          </li>
+        `).join('') : '';
         card.innerHTML = `
           <h3>${request.name}</h3>
           <p>Email: ${request.email}</p>
@@ -349,6 +352,29 @@ document.addEventListener('DOMContentLoaded', () => {
       customRequestList.innerHTML = '<p class="error">Failed to load custom requests: ' + error.message + '</p>';
     }
   }
+
+  window.deleteFile = async (requestId, fileUrl) => {
+    showConfirm('Are you sure you want to delete this file?', async () => {
+      loadingPopup.style.display = 'flex';
+      try {
+        const path = fileUrl.split('/').slice(-2).join('/');
+        const { error: storageError } = await supabase.storage.from('custom_requests').remove([path]);
+        if (storageError) throw storageError;
+        const { data: request, error: fetchError } = await supabase.from('custom_requests').select('files').eq('id', requestId).single();
+        if (fetchError) throw fetchError;
+        const updatedFiles = request.files.filter(file => file !== fileUrl);
+        const { error: updateError } = await supabase.from('custom_requests').update({ files: updatedFiles }).eq('id', requestId);
+        if (updateError) throw updateError;
+        showResult('File deleted successfully!', true);
+        fetchCustomRequests();
+      } catch (error) {
+        console.error('Error deleting file:', error);
+        showResult('Failed to delete file: ' + error.message, false);
+      } finally {
+        loadingPopup.style.display = 'none';
+      }
+    });
+  };
 
   emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
