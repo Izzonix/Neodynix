@@ -47,16 +47,6 @@ async function showStartChatPopup() {
   });
 }
 
-async function signInAnonymously() {
-  const { error } = await supabase.auth.signInAnonymously();
-  if (error) {
-    console.error('Anonymous sign-in failed:', error.message);
-    return null;
-  }
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
-
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
@@ -82,23 +72,17 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function startChat() {
-  const authUser = await signInAnonymously();
-  if (!authUser) {
-    alert('Failed to authenticate. Please try again.');
-    return;
-  }
-
   const userInfo = await showStartChatPopup();
   if (!userInfo) return;
 
   const { email, topic, name } = userInfo;
   selectedTopic = topic;
 
-  // Check for existing user by email
+  // Check if user exists by email
   const { data, error } = await supabase.from('users').select().eq('email', email).single();
   if (error && error.code !== 'PGRST116') { // PGRST116: No rows found
     console.error('Error fetching user:', error.message);
-    alert('Error checking user data. Please try again.');
+    alert('Failed to fetch user data. Please try again.');
     return;
   }
 
@@ -107,8 +91,8 @@ async function startChat() {
 
   if (data) {
     user = data;
-    // Update user details if needed
-    if (user.name !== name || user.push_subscription !== JSON.stringify(subscription)) {
+    // Update user if necessary
+    if (subscription && user.push_subscription !== JSON.stringify(subscription) || user.name !== name) {
       const { error: updateError } = await supabase.from('users').update({
         name,
         push_subscription: subscription ? JSON.stringify(subscription) : null,
@@ -116,12 +100,14 @@ async function startChat() {
       }).eq('id', user.id);
       if (updateError) {
         console.error('Error updating user:', updateError.message);
-        alert('Error updating user data. Please try again.');
+        alert('Failed to update user data. Please try again.');
       }
     }
   } else {
+    // Generate a UUID for the new user
+    const newUserId = crypto.randomUUID();
     const { data: newUser, error: insertError } = await supabase.from('users').insert({
-      id: authUser.id,
+      id: newUserId,
       name,
       email,
       notification_permission: permission === 'granted',
@@ -129,13 +115,16 @@ async function startChat() {
     }).select().single();
     if (insertError) {
       console.error('Error inserting user:', insertError.message);
-      alert('Error creating user. Please try again.');
+      alert('Failed to create user. Please try again.');
       return;
     }
     user = newUser;
   }
 
-  localStorage.setItem('chat_user_email', email); // Store email instead of user_id
+  // Store email in localStorage for session continuity
+  localStorage.setItem('chat_user_email', email);
+  // Set user_id for RLS policies
+  await supabase.rpc('set_user_id', { user_id: user.id });
   loadMessages(user.id);
   subscribeToMessages();
 }
@@ -151,7 +140,7 @@ async function loadMessages(userId) {
     .order('created_at');
   if (error) {
     console.error('Error loading messages:', error.message);
-    alert('Error loading messages. Please try again.');
+    alert('Failed to load messages. Please try again.');
     return;
   }
   chatMessages.innerHTML = '';
@@ -185,20 +174,15 @@ async function sendDefaultMessage() {
     });
     if (error) {
       console.error('Error sending default message:', error.message);
-      alert('Error sending default message. Please try again.');
+      alert('Failed to send default message. Please try again.');
     }
   }
 }
 
 window.onload = async () => {
-  const storedEmail = localStorage.getItem('chat_user_email');
-  if (storedEmail) {
-    const authUser = await signInAnonymously();
-    if (!authUser) {
-      alert('Failed to authenticate. Please try again.');
-      return;
-    }
-    const { data, error } = await supabase.from('users').select().eq('email', storedEmail).single();
+  const userEmail = localStorage.getItem('chat_user_email');
+  if (userEmail) {
+    const { data, error } = await supabase.from('users').select().eq('email', userEmail).single();
     if (error && error.code !== 'PGRST116') {
       console.error('Error fetching user from localStorage:', error.message);
       localStorage.removeItem('chat_user_email');
@@ -207,6 +191,7 @@ window.onload = async () => {
     }
     if (data) {
       user = data;
+      await supabase.rpc('set_user_id', { user_id: user.id });
       loadMessages(user.id);
       subscribeToMessages();
     } else {
