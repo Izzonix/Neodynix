@@ -58,14 +58,16 @@ async function startChat() {
     const { email, topic, name } = userInfo;
     selectedTopic = topic;
 
-    // Generate a unique ID for the user based on email (simple hash for demo)
-    const userId = btoa(email).substring(0, 36); // Truncate to fit UUID-like length
+    // Generate a consistent userId from email (hex-encoded for simplicity)
+    const userId = Array.from(email).reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0).toString(16);
+
     localStorage.setItem('chat_user_id', userId);
 
+    // Check if user exists
     const { data, error } = await supabase.from('users').select().eq('email', email).single();
-    if (error && error.code !== 'PGRST116') {
+    if (error && error.code !== 'PGRST116') { // PGRST116: no rows found
       console.error('Error fetching user:', error.message, error.code);
-      alert('Error fetching user data. Please try again.');
+      alert(`Error fetching user data: ${error.message}`);
       return;
     }
 
@@ -78,6 +80,8 @@ async function startChat() {
         }).eq('id', user.id);
         if (updateError) {
           console.error('Error updating user:', updateError.message);
+          alert(`Error updating user data: ${updateError.message}`);
+          return;
         }
       }
     } else {
@@ -88,8 +92,8 @@ async function startChat() {
         topic
       }).select().single();
       if (insertError) {
-        console.error('Error inserting user:', insertError.message);
-        alert('Error saving user data. Please try again.');
+        console.error('Error inserting user:', insertError.message, insertError.code);
+        alert(`Error saving user data: ${insertError.message}`);
         return;
       }
       user = newUser;
