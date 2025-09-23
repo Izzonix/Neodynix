@@ -197,7 +197,7 @@ main {
   box-sizing: border-box;
   gap: 6px;
   flex-wrap: nowrap;
-  overflow-x: auto;
+  overflow: hidden;
 }
 
 .chat-input input[type="text"] {
@@ -205,7 +205,7 @@ main {
   padding: 12px;
   border: none;
   outline: none;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
   background: transparent;
   color: #eee;
   border-radius: 8px;
@@ -228,8 +228,8 @@ main {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
 }
 
 .chat-input button img {
@@ -287,13 +287,13 @@ footer {
 
   .chat-input input[type="text"] {
     padding: 10px;
-    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
   }
 
   .chat-input button {
     padding: 6px;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
   }
 
   .chat-input button img {
@@ -312,29 +312,28 @@ footer {
   }
 
   .chat-header {
-    padding: 10px;
     flex-direction: column;
     gap: 6px;
+    padding: 10px;
   }
 
   .chat-input {
-    padding: 5px 6px;
+    padding: 4px 6px;
     gap: 3px;
   }
 
   .chat-input input[type="text"] {
     padding: 8px;
-    font-size: clamp(0.7rem, 2vw, 0.8rem);
+    font-size: clamp(0.6rem, 1.8vw, 0.8rem);
   }
 
   .chat-input button {
-    padding: 5px;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   .chat-input button img {
     width: 16px;
     height: 16px;
   }
-                                }
+  }
