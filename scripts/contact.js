@@ -47,6 +47,16 @@ async function showStartChatPopup() {
   });
 }
 
+async function signInAnonymously() {
+  const { error } = await supabase.auth.signInAnonymously();
+  if (error) {
+    console.error('Anonymous sign-in failed:', error.message);
+    return null;
+  }
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
 async function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     try {
@@ -72,41 +82,65 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function startChat() {
+  const authUser = await signInAnonymously();
+  if (!authUser) {
+    alert('Failed to authenticate. Please try again.');
+    return;
+  }
+
   const userInfo = await showStartChatPopup();
   if (!userInfo) return;
 
   const { email, topic, name } = userInfo;
   selectedTopic = topic;
 
-  const { data } = await supabase.from('users').select().eq('email', email).single();
+  const { data, error } = await supabase.from('users').select().eq('email', email).single();
+  if (error && error.code !== 'PGRST116') { // PGRST116: No rows found
+    console.error('Error fetching user:', error.message);
+    return;
+  }
+
   const permission = await Notification.requestPermission();
   const subscription = await registerServiceWorker();
 
   if (data) {
     user = data;
     if (subscription && user.push_subscription !== JSON.stringify(subscription)) {
-      await supabase.from('users').update({
+      const { error: updateError } = await supabase.from('users').update({
         push_subscription: JSON.stringify(subscription),
         notification_permission: permission === 'granted'
       }).eq('id', user.id);
+      if (updateError) {
+        console.error('Error updating user:', updateError.message);
+      }
     }
     localStorage.setItem('chat_user_id', user.id);
     loadMessages(user.id);
   } else {
-    const { data: newUser } = await supabase.from('users').insert({
+    const { data: newUser, error: insertError } = await supabase.from('users').insert({
+      id: authUser.id, // Set id to auth.uid()
       name,
       email,
       notification_permission: permission === 'granted',
       push_subscription: subscription ? JSON.stringify(subscription) : null
     }).select().single();
+    if (insertError) {
+      console.error('Error inserting user:', insertError.message);
+      return;
+    }
     user = newUser;
     localStorage.setItem('chat_user_id', user.id);
     loadMessages(user.id);
   }
+  subscribeToMessages();
 }
 
 async function loadMessages(userId) {
-  const { data } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
+  const { data, error } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
+  if (error) {
+    console.error('Error loading messages:', error.message);
+    return;
+  }
   chatMessages.innerHTML = '';
   data.forEach(msg => {
     const div = document.createElement('div');
@@ -120,7 +154,7 @@ async function loadMessages(userId) {
 function addLocalMessage(content, sender = 'user') {
   const div = document.createElement('div');
   div.classList.add('msg', sender === 'support' ? 'support-msg' : 'user-msg');
-  div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+  div.innerHTML = `<span class="msg-content">${msg.content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -130,19 +164,28 @@ async function sendDefaultMessage() {
     hasSentFirstMessage = true;
     const defaultMessage = `Hello ${user.name}, thank you for reaching out! Our team will attend to you shortly. Please check back soon for a response.`;
     addLocalMessage(defaultMessage, 'support');
-    await supabase.from('messages').insert({
+    const { error } = await supabase.from('messages').insert({
       user_id: user.id,
       content: defaultMessage,
       sender: 'support',
       is_auto: true
     });
+    if (error) {
+      console.error('Error sending default message:', error.message);
+    }
   }
 }
 
 window.onload = async () => {
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
-    const { data } = await supabase.from('users').select().eq('id', userId).single();
+    const { data, error } = await supabase.from('users').select().eq('id', userId).single();
+    if (error) {
+      console.error('Error fetching user from localStorage:', error.message);
+      localStorage.removeItem('chat_user_id');
+      startChat();
+      return;
+    }
     if (data) {
       user = data;
       loadMessages(userId);
@@ -181,11 +224,18 @@ sendChat.addEventListener('click', async () => {
       selectedTopic = '';
     }
     addLocalMessage(text);
-    const { error } = await supabase.from('messages').insert({ user_id: user.id, content: text, sender: 'user' });
-    if (!error) {
-      chatInput.value = '';
-      await sendDefaultMessage();
+    const { error } = await supabase.from('messages').insert({ 
+      user_id: user.id, 
+      content: text, 
+      sender: 'user' 
+    });
+    if (error) {
+      console.error('Error sending message:', error.message);
+      alert('Failed to send message. Please try again.');
+      return;
     }
+    chatInput.value = '';
+    await sendDefaultMessage();
   }
 });
 
@@ -214,7 +264,12 @@ filePreview.addEventListener('click', async (event) => {
   if (event.target.classList.contains('delete-file')) return;
   const file = fileInput.files[0];
   if (file && user) {
-    const { data } = await supabase.storage.from('chat-files').upload(`${user.id}/${file.name}`, file);
+    const { data, error: uploadError } = await supabase.storage.from('chat-files').upload(`${user.id}/${file.name}`, file);
+    if (uploadError) {
+      console.error('Error uploading file:', uploadError.message);
+      alert('Failed to upload file. Please try again.');
+      return;
+    }
     const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
     let content = `📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
     if (selectedTopic) {
@@ -227,11 +282,14 @@ filePreview.addEventListener('click', async (event) => {
       content, 
       sender: 'user' 
     });
-    if (!error) {
-      fileInput.value = '';
-      filePreview.innerHTML = '';
-      await sendDefaultMessage();
+    if (error) {
+      console.error('Error saving file message:', error.message);
+      alert('Failed to save file message. Please try again.');
+      return;
     }
+    fileInput.value = '';
+    filePreview.innerHTML = '';
+    await sendDefaultMessage();
   }
 });
 
