@@ -9,17 +9,17 @@ const attachFile = document.getElementById('attachFile');
 let user = null;
 let selectedTopic = '';
 let hasSentFirstMessage = false;
-const VAPID_PUBLIC_KEY = 'B03rZz8NEfC6w8aKYNC2WVKXqkaHK1Gsp8i0LBanfhLjcR4S0eZvA57sYXRmTehshsAxjpDvgeOQfiRaAW6xbbA';
 
 async function showStartChatPopup() {
+  console.log('Showing start chat popup');
   return new Promise(resolve => {
     const popup = document.createElement('div');
     popup.id = 'startChatPopup';
     popup.style.cssText = `
-      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      background: #1e1e2f; padding: 20px; border-radius: 10px; z-index: 1000;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5); color: #eee; text-align: center;
-      width: 80%; max-width: 400px;
+      position: fixed !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important;
+      background: #1e1e2f !important; padding: 20px !important; border-radius: 10px !important; z-index: 1000 !important;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important; color: #eee !important; text-align: center !important;
+      width: 80% !important; max-width: 400px !important;
     `;
     popup.innerHTML = `
       <h3 style="margin-bottom: 15px;">Start Chat</h3>
@@ -50,66 +50,18 @@ async function showStartChatPopup() {
   });
 }
 
-async function signInAnonymously() {
-  try {
-    const { data, error } = await supabase.auth.signInAnonymously();
-    if (error) {
-      console.error('Anonymous sign-in failed:', error.message, error.code);
-      alert(`Authentication failed: ${error.message}`);
-      return null;
-    }
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError) {
-      console.error('Failed to fetch user:', userError.message, userError.code);
-      alert(`Failed to fetch user: ${userError.message}`);
-      return null;
-    }
-    console.log('Authenticated user:', user);
-    return user;
-  } catch (err) {
-    console.error('Unexpected error during sign-in:', err);
-    alert('Unexpected authentication error. Please try again.');
-    return null;
-  }
-}
-
-async function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    try {
-      const registration = await navigator.serviceWorker.register('/service-worker.js');
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-      });
-      return subscription;
-    } catch (error) {
-      console.error('Service worker registration failed:', error);
-      return null;
-    }
-  }
-  return null;
-}
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = atob(base64);
-  return Uint8Array.from([...rawData].map(char => char.charCodeAt(0)));
-}
-
 async function startChat() {
-  const authUser = await signInAnonymously();
-  if (!authUser) {
-    return; // Alert already shown in signInAnonymously
-  }
-
-  const userInfo = await showStartChatPopup();
-  if (!userInfo) return;
-
-  const { email, topic, name } = userInfo;
-  selectedTopic = topic;
-
   try {
+    const userInfo = await showStartChatPopup();
+    if (!userInfo) return;
+
+    const { email, topic, name } = userInfo;
+    selectedTopic = topic;
+
+    // Generate a unique ID for the user based on email (simple hash for demo)
+    const userId = btoa(email).substring(0, 36); // Truncate to fit UUID-like length
+    localStorage.setItem('chat_user_id', userId);
+
     const { data, error } = await supabase.from('users').select().eq('email', email).single();
     if (error && error.code !== 'PGRST116') {
       console.error('Error fetching user:', error.message, error.code);
@@ -117,15 +69,10 @@ async function startChat() {
       return;
     }
 
-    const permission = await Notification.requestPermission();
-    const subscription = await registerServiceWorker();
-
     if (data) {
       user = data;
-      if (subscription && user.push_subscription !== JSON.stringify(subscription)) {
+      if (user.name !== name || user.topic !== topic) {
         const { error: updateError } = await supabase.from('users').update({
-          push_subscription: JSON.stringify(subscription),
-          notification_permission: permission === 'granted',
           name,
           topic
         }).eq('id', user.id);
@@ -133,16 +80,12 @@ async function startChat() {
           console.error('Error updating user:', updateError.message);
         }
       }
-      localStorage.setItem('chat_user_id', user.id);
-      loadMessages(user.id);
     } else {
       const { data: newUser, error: insertError } = await supabase.from('users').insert({
-        id: authUser.id,
+        id: userId,
         name,
         email,
-        topic,
-        notification_permission: permission === 'granted',
-        push_subscription: subscription ? JSON.stringify(subscription) : null
+        topic
       }).select().single();
       if (insertError) {
         console.error('Error inserting user:', insertError.message);
@@ -150,9 +93,9 @@ async function startChat() {
         return;
       }
       user = newUser;
-      localStorage.setItem('chat_user_id', user.id);
-      loadMessages(user.id);
     }
+
+    loadMessages(user.id);
     subscribeToMessages();
     await sendDefaultMessage();
   } catch (err) {
@@ -347,9 +290,4 @@ filePreview.addEventListener('click', async (event) => {
       alert('Unexpected error uploading file. Please try again.');
     }
   }
-});
-
-navigator.serviceWorker.addEventListener('message', event => {
-  const { title, body } = event.data;
-  addLocalMessage(body, 'support');
 });
