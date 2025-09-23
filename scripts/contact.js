@@ -22,15 +22,15 @@ async function showStartChatPopup() {
     `;
     popup.innerHTML = `
       <h3 style="margin-bottom: 15px;">Start Chat</h3>
-      <input type="email" id="emailInput" placeholder="Enter your email" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;">
-      <select id="topicSelect" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;">
+      <input type="email" id="emailInput" placeholder="Enter your email" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;" required>
+      <select id="topicSelect" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;" required>
         <option value="" disabled selected>Select a topic</option>
         <option value="Templates">Templates</option>
         <option value="Pricing">Pricing</option>
         <option value="Support">Support</option>
         <option value="Other">Other</option>
       </select>
-      <input type="text" id="nameInput" placeholder="Enter your name" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;">
+      <input type="text" id="nameInput" placeholder="Enter your name" style="padding: 10px; width: 100%; border-radius: 5px; margin-bottom: 15px; border: 1px solid #4fc3f7; background: #1e1e1e; color: #fff;" required>
       <button id="submitInfo" style="padding: 10px 20px; background: #4fc3f7; border: none; border-radius: 5px; color: #000; cursor: pointer;">Start Chat</button>
     `;
     document.body.appendChild(popup);
@@ -42,6 +42,8 @@ async function showStartChatPopup() {
       if (email && topic && name) {
         popup.remove();
         resolve({ email, topic, name });
+      } else {
+        alert('Please fill in all fields.');
       }
     });
   });
@@ -95,8 +97,9 @@ async function startChat() {
   selectedTopic = topic;
 
   const { data, error } = await supabase.from('users').select().eq('email', email).single();
-  if (error && error.code !== 'PGRST116') { // PGRST116: No rows found
+  if (error && error.code !== 'PGRST116') {
     console.error('Error fetching user:', error.message);
+    alert('Error fetching user data. Please try again.');
     return;
   }
 
@@ -108,7 +111,9 @@ async function startChat() {
     if (subscription && user.push_subscription !== JSON.stringify(subscription)) {
       const { error: updateError } = await supabase.from('users').update({
         push_subscription: JSON.stringify(subscription),
-        notification_permission: permission === 'granted'
+        notification_permission: permission === 'granted',
+        name,
+        topic
       }).eq('id', user.id);
       if (updateError) {
         console.error('Error updating user:', updateError.message);
@@ -118,14 +123,16 @@ async function startChat() {
     loadMessages(user.id);
   } else {
     const { data: newUser, error: insertError } = await supabase.from('users').insert({
-      id: authUser.id, // Set id to auth.uid()
+      id: authUser.id,
       name,
       email,
+      topic,
       notification_permission: permission === 'granted',
       push_subscription: subscription ? JSON.stringify(subscription) : null
     }).select().single();
     if (insertError) {
       console.error('Error inserting user:', insertError.message);
+      alert('Error saving user data. Please try again.');
       return;
     }
     user = newUser;
@@ -139,6 +146,7 @@ async function loadMessages(userId) {
   const { data, error } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
   if (error) {
     console.error('Error loading messages:', error.message);
+    alert('Failed to load messages. Please try again.');
     return;
   }
   chatMessages.innerHTML = '';
@@ -154,7 +162,7 @@ async function loadMessages(userId) {
 function addLocalMessage(content, sender = 'user') {
   const div = document.createElement('div');
   div.classList.add('msg', sender === 'support' ? 'support-msg' : 'user-msg');
-  div.innerHTML = `<span class="msg-content">${msg.content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+  div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -162,7 +170,7 @@ function addLocalMessage(content, sender = 'user') {
 async function sendDefaultMessage() {
   if (!hasSentFirstMessage && user) {
     hasSentFirstMessage = true;
-    const defaultMessage = `Hello ${user.name}, thank you for reaching out! Our team will attend to you shortly. Please check back soon for a response.`;
+    const defaultMessage = `Hello ${user.name}, thank you for reaching out about ${user.topic}! Our team will attend to you shortly. Please check back soon for a response.`;
     addLocalMessage(defaultMessage, 'support');
     const { error } = await supabase.from('messages').insert({
       user_id: user.id,
@@ -188,8 +196,10 @@ window.onload = async () => {
     }
     if (data) {
       user = data;
+      selectedTopic = data.topic || '';
       loadMessages(userId);
       subscribeToMessages();
+      await sendDefaultMessage();
     } else {
       localStorage.removeItem('chat_user_id');
       startChat();
@@ -219,14 +229,11 @@ async function subscribeToMessages() {
 sendChat.addEventListener('click', async () => {
   let text = chatInput.value.trim();
   if (text && user) {
-    if (selectedTopic) {
-      text = `[Topic: ${selectedTopic}] ${text}`;
-      selectedTopic = '';
-    }
-    addLocalMessage(text);
+    let content = selectedTopic ? `[Topic: ${selectedTopic}] ${text}` : text;
+    addLocalMessage(content);
     const { error } = await supabase.from('messages').insert({ 
       user_id: user.id, 
-      content: text, 
+      content, 
       sender: 'user' 
     });
     if (error) {
@@ -235,7 +242,7 @@ sendChat.addEventListener('click', async () => {
       return;
     }
     chatInput.value = '';
-    await sendDefaultMessage();
+    if (!hasSentFirstMessage) await sendDefaultMessage();
   }
 });
 
@@ -264,7 +271,7 @@ filePreview.addEventListener('click', async (event) => {
   if (event.target.classList.contains('delete-file')) return;
   const file = fileInput.files[0];
   if (file && user) {
-    const { data, error: uploadError } = await supabase.storage.from('chat-files').upload(`${user.id}/${file.name}`, file);
+    const { data, error: uploadError } = await supabase.storage.from('chat-files').upload(`${user.id}/${Date.now()}_${file.name}`, file);
     if (uploadError) {
       console.error('Error uploading file:', uploadError.message);
       alert('Failed to upload file. Please try again.');
@@ -280,7 +287,8 @@ filePreview.addEventListener('click', async (event) => {
     const { error } = await supabase.from('messages').insert({ 
       user_id: user.id, 
       content, 
-      sender: 'user' 
+      sender: 'user',
+      file_url: url
     });
     if (error) {
       console.error('Error saving file message:', error.message);
@@ -289,7 +297,7 @@ filePreview.addEventListener('click', async (event) => {
     }
     fileInput.value = '';
     filePreview.innerHTML = '';
-    await sendDefaultMessage();
+    if (!hasSentFirstMessage) await sendDefaultMessage();
   }
 });
 
