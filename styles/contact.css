@@ -17,9 +17,10 @@ main {
 }
 
 .contact-section {
-  max-width: 90%;
   width: 100%;
-  padding: 20px;
+  max-width: 1200px; /* Matches template.css for consistency */
+  margin: 0 auto;
+  padding: 20px 15px;
   text-align: center;
   flex: 1;
 }
@@ -43,7 +44,7 @@ main {
   background: #1e1e1e;
   border-radius: 20px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.1);
-  max-width: 800px;
+  max-width: 100%; /* Ensure it fits within parent */
   width: 100%;
   margin: 0 auto;
   display: flex;
@@ -296,4 +297,4 @@ footer {
     flex-direction: column;
     gap: 8px;
   }
-  }
+}
