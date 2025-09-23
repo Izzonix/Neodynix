@@ -17,12 +17,13 @@ main {
 }
 
 .contact-section {
-  width: 100%;
-  max-width: 1200px; /* Matches template.css for consistency */
+  max-width: 800px;
+  width: calc(100% - 40px);
   margin: 0 auto;
-  padding: 20px 15px;
+  padding: 20px;
   text-align: center;
   flex: 1;
+  box-sizing: border-box;
 }
 
 .contact-section h1 {
@@ -44,13 +45,14 @@ main {
   background: #1e1e1e;
   border-radius: 20px;
   box-shadow: 0 15px 40px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.1);
-  max-width: 100%; /* Ensure it fits within parent */
   width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .chat-header {
@@ -255,6 +257,7 @@ footer {
 @media (max-width: 600px) {
   .contact-section {
     padding: 15px;
+    width: calc(100% - 30px);
   }
 
   .chat-widget {
@@ -297,4 +300,4 @@ footer {
     flex-direction: column;
     gap: 8px;
   }
-}
+  }
