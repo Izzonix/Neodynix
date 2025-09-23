@@ -17,7 +17,7 @@ main {
 }
 
 .contact-section {
-  max-width: 800px;
+  max-width: 900px;
   width: calc(100% - 40px);
   margin: 0 auto;
   padding: 20px;
@@ -27,7 +27,7 @@ main {
 }
 
 .contact-section h1 {
-  font-size: clamp(1.8rem, 5vw, 2.5rem);
+  font-size: clamp(2rem, 5vw, 2.8rem);
   font-weight: 700;
   color: #4fc3f7;
   margin-bottom: 10px;
@@ -35,7 +35,7 @@ main {
 }
 
 .intro-text {
-  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-size: clamp(1.1rem, 3vw, 1.3rem);
   color: #ccc;
   margin-bottom: 30px;
 }
@@ -53,6 +53,7 @@ main {
   overflow: hidden;
   transition: all 0.3s ease;
   box-sizing: border-box;
+  min-height: 500px;
 }
 
 .chat-header {
@@ -60,7 +61,7 @@ main {
   color: #4fc3f7;
   font-weight: 500;
   padding: 20px;
-  font-size: clamp(1.2rem, 3vw, 1.5rem);
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -76,9 +77,9 @@ main {
 
 .chat-messages {
   flex: 1;
-  padding: 25px;
+  padding: 30px;
   background: #1e1e1e;
-  height: clamp(300px, 50vh, 450px);
+  height: clamp(350px, 60vh, 500px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -105,8 +106,8 @@ main {
   flex-direction: column;
   padding: 15px 20px;
   border-radius: 12px;
-  max-width: 80%;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
+  max-width: 85%;
+  font-size: clamp(1rem, 2.5vw, 1.1rem);
   line-height: 1.5;
   animation: fadeIn 0.3s ease-in;
 }
@@ -144,7 +145,7 @@ main {
 }
 
 .msg-timestamp {
-  font-size: clamp(0.6rem, 1.5vw, 0.8rem);
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
   color: #aaa;
   margin-top: 6px;
   align-self: flex-end;
@@ -269,15 +270,17 @@ footer {
 
   .chat-widget {
     border-radius: 12px;
+    min-height: 450px;
   }
 
   .chat-header {
     padding: 12px;
+    font-size: clamp(1.2rem, 2.5vw, 1.4rem);
   }
 
   .chat-messages {
-    padding: 12px;
-    height: 60vh;
+    padding: 15px;
+    height: clamp(300px, 55vh, 400px);
   }
 
   .chat-input {
@@ -311,10 +314,19 @@ footer {
     font-size: 0.9rem;
   }
 
+  .chat-widget {
+    min-height: 400px;
+  }
+
   .chat-header {
     flex-direction: column;
     gap: 6px;
     padding: 10px;
+  }
+
+  .chat-messages {
+    padding: 12px;
+    height: clamp(250px, 50vh, 350px);
   }
 
   .chat-input {
