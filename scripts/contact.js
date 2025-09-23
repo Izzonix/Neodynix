@@ -94,9 +94,11 @@ async function startChat() {
   const { email, topic, name } = userInfo;
   selectedTopic = topic;
 
+  // Check for existing user by email
   const { data, error } = await supabase.from('users').select().eq('email', email).single();
   if (error && error.code !== 'PGRST116') { // PGRST116: No rows found
     console.error('Error fetching user:', error.message);
+    alert('Error checking user data. Please try again.');
     return;
   }
 
@@ -105,20 +107,21 @@ async function startChat() {
 
   if (data) {
     user = data;
-    if (subscription && user.push_subscription !== JSON.stringify(subscription)) {
+    // Update user details if needed
+    if (user.name !== name || user.push_subscription !== JSON.stringify(subscription)) {
       const { error: updateError } = await supabase.from('users').update({
-        push_subscription: JSON.stringify(subscription),
+        name,
+        push_subscription: subscription ? JSON.stringify(subscription) : null,
         notification_permission: permission === 'granted'
       }).eq('id', user.id);
       if (updateError) {
         console.error('Error updating user:', updateError.message);
+        alert('Error updating user data. Please try again.');
       }
     }
-    localStorage.setItem('chat_user_id', user.id);
-    loadMessages(user.id);
   } else {
     const { data: newUser, error: insertError } = await supabase.from('users').insert({
-      id: authUser.id, // Set id to auth.uid()
+      id: authUser.id,
       name,
       email,
       notification_permission: permission === 'granted',
@@ -126,19 +129,29 @@ async function startChat() {
     }).select().single();
     if (insertError) {
       console.error('Error inserting user:', insertError.message);
+      alert('Error creating user. Please try again.');
       return;
     }
     user = newUser;
-    localStorage.setItem('chat_user_id', user.id);
-    loadMessages(user.id);
   }
+
+  localStorage.setItem('chat_user_email', email); // Store email instead of user_id
+  loadMessages(user.id);
   subscribeToMessages();
 }
 
 async function loadMessages(userId) {
-  const { data, error } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
+  // Load messages from the last 24 hours
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await supabase
+    .from('messages')
+    .select()
+    .eq('user_id', userId)
+    .gte('created_at', twentyFourHoursAgo)
+    .order('created_at');
   if (error) {
     console.error('Error loading messages:', error.message);
+    alert('Error loading messages. Please try again.');
     return;
   }
   chatMessages.innerHTML = '';
@@ -154,7 +167,7 @@ async function loadMessages(userId) {
 function addLocalMessage(content, sender = 'user') {
   const div = document.createElement('div');
   div.classList.add('msg', sender === 'support' ? 'support-msg' : 'user-msg');
-  div.innerHTML = `<span class="msg-content">${msg.content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+  div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -172,26 +185,32 @@ async function sendDefaultMessage() {
     });
     if (error) {
       console.error('Error sending default message:', error.message);
+      alert('Error sending default message. Please try again.');
     }
   }
 }
 
 window.onload = async () => {
-  const userId = localStorage.getItem('chat_user_id');
-  if (userId) {
-    const { data, error } = await supabase.from('users').select().eq('id', userId).single();
-    if (error) {
+  const storedEmail = localStorage.getItem('chat_user_email');
+  if (storedEmail) {
+    const authUser = await signInAnonymously();
+    if (!authUser) {
+      alert('Failed to authenticate. Please try again.');
+      return;
+    }
+    const { data, error } = await supabase.from('users').select().eq('email', storedEmail).single();
+    if (error && error.code !== 'PGRST116') {
       console.error('Error fetching user from localStorage:', error.message);
-      localStorage.removeItem('chat_user_id');
+      localStorage.removeItem('chat_user_email');
       startChat();
       return;
     }
     if (data) {
       user = data;
-      loadMessages(userId);
+      loadMessages(user.id);
       subscribeToMessages();
     } else {
-      localStorage.removeItem('chat_user_id');
+      localStorage.removeItem('chat_user_email');
       startChat();
     }
   } else {
