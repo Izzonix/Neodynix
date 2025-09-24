@@ -275,31 +275,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchChatRequests() {
     try {
-      const { data, error } = await supabase.from('messages').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id, name, email, message, created_at, replied')
+        .order('created_at', { ascending: false });
       if (error) throw error;
       chatRequestList.innerHTML = '';
       if (data.length === 0) {
         chatRequestList.innerHTML = '<p>No messages available.</p>';
         return;
       }
-      data.forEach(request => {
+      const users = [...new Set(data.map(msg => msg.email))];
+      for (const email of users) {
+        const userMessages = data.filter(msg => msg.email === email).slice(0, 5);
+        const userName = userMessages[0].name;
         const card = document.createElement('div');
         card.className = 'chat-request-card';
+        const messagesHtml = userMessages.map(msg => `
+          <p>Message (${new Date(msg.created_at).toLocaleString()}): ${msg.message} ${msg.replied ? '(Replied)' : ''}</p>
+        `).join('');
         card.innerHTML = `
-          <h3>${request.name}</h3>
-          <p>Email: ${request.email}</p>
-          <p>Message: ${request.message}</p>
-          <p>Status: ${request.replied ? 'Replied' : 'Pending'}</p>
-          <button class="btn" onclick="replyToChat('${request.id}', '${request.name}', '${request.email}')" ${request.replied ? 'disabled' : ''}>Reply</button>
+          <h3>${userName}</h3>
+          <p>Email: ${email}</p>
+          ${messagesHtml}
+          <button class="btn" onclick="replyToChat('${userMessages[0].id}', '${userName}', '${email}')" ${userMessages[0].replied ? 'disabled' : ''}>Reply</button>
+          <button class="btn btn-delete" onclick="deleteChat('${email}')">Delete Chat</button>
         `;
         chatRequestList.appendChild(card);
-      });
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
       chatResult.className = 'result error';
       chatResult.textContent = 'Failed to load messages.';
     }
   }
+
+  window.deleteChat = (email) => {
+    showConfirm(`Are you sure you want to delete all messages for ${email}?`, async () => {
+      loadingPopup.style.display = 'flex';
+      try {
+        const { error } = await supabase.from('messages').delete().eq('email', email);
+        if (error) throw error;
+        chatResult.className = 'result success';
+        chatResult.textContent = 'Chat deleted successfully!';
+        fetchChatRequests();
+      } catch (error) {
+        console.error('Error deleting chat:', error);
+        chatResult.className = 'result error';
+        chatResult.textContent = 'Failed to delete chat.';
+      } finally {
+        loadingPopup.style.display = 'none';
+      }
+    });
+  };
 
   window.replyToChat = (id, name, email) => {
     document.getElementById('replyUserId').value = id;
@@ -318,11 +346,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadingPopup.style.display = 'flex';
     try {
-      // Replace with your EmailJS service ID, template ID, and user ID
       await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
         to_email: document.getElementById('replyUserInfo').textContent.split('(')[1].slice(0, -1),
         message: message,
-        reply_to: 'YOUR_ADMIN_EMAIL' // Add your admin email
+        reply_to: 'YOUR_ADMIN_EMAIL'
       }, 'YOUR_EMAILJS_USER_ID');
       const { error } = await supabase.from('messages').update({ replied: true }).eq('id', userId);
       if (error) throw error;
@@ -410,13 +437,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadingPopup.style.display = 'flex';
     try {
-      // Replace with your EmailJS service ID, template ID, and user ID
       await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', {
         to_email: email,
         custom_link: link,
         price: price.toFixed(2),
         currency: currency,
-        reply_to: 'YOUR_ADMIN_EMAIL' // Add your admin email
+        reply_to: 'YOUR_ADMIN_EMAIL'
       }, 'YOUR_EMAILJS_USER_ID');
       emailForm.reset();
       showResult('Email sent successfully!', true);
@@ -447,15 +473,4 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('editImageFile').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        document.getElementById('editImagePreview').innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  checkAuth();
-});
+    const
