@@ -295,76 +295,84 @@ fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
   if (file) {
     filePreview.innerHTML = `
-      <div class="file-preview-item">
+      <div class="file-preview-item" style="display: flex; align-items: center; gap: 10px;">
         <span>${file.name}</span>
         <button class="delete-file" title="Remove File">✖</button>
+        <button class="send-file" style="padding: 5px 10px; background: #4fc3f7; border: none; border-radius: 5px; color: #000; cursor: pointer;">Send File</button>
+        <span class="loading-spinner" style="display: none; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #4fc3f7; border-radius: 50%; animation: spin 1s linear infinite;"></span>
       </div>
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
     `;
     const deleteButton = filePreview.querySelector('.delete-file');
     deleteButton.addEventListener('click', () => {
       fileInput.value = '';
       filePreview.innerHTML = '';
     });
-  }
-});
 
-filePreview.addEventListener('click', async (event) => {
-  if (event.target.classList.contains('delete-file')) return;
-  const file = fileInput.files[0];
-  if (file && user) {
-    filePreview.querySelector('.file-preview-item').style.pointerEvents = 'none';
-    sendChat.disabled = true;
-    try {
-      // Sanitize file name to avoid invalid characters
-      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
-      const { data, error: uploadError } = await supabase.storage
-        .from('chat-files')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
+    const sendFileButton = filePreview.querySelector('.send-file');
+    sendFileButton.addEventListener('click', async () => {
+      if (!user) return;
+      sendFileButton.disabled = true;
+      filePreview.style.pointerEvents = 'none';
+      sendChat.disabled = true;
+      const spinner = filePreview.querySelector('.loading-spinner');
+      spinner.style.display = 'inline-block';
+
+      try {
+        // Sanitize file name to avoid invalid characters
+        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
+        const { data, error: uploadError } = await supabase.storage
+          .from('chat-files')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        if (uploadError) {
+          console.error('File upload error:', {
+            message: uploadError.message,
+            status: uploadError.status,
+            details: uploadError
+          });
+          alert(`Failed to upload file: ${uploadError.message}`);
+          return;
+        }
+        const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
+        let content = `📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
+        if (selectedTopic) {
+          content = `[Topic: ${selectedTopic}] ${content}`;
+          selectedTopic = '';
+        }
+        addLocalMessage(content);
+        const { error } = await supabase.from('messages').insert({ 
+          user_id: user.id, 
+          content, 
+          sender: 'user',
+          is_auto: false,
+          file_url: url
         });
-      if (uploadError) {
-        console.error('File upload error:', {
-          message: uploadError.message,
-          status: uploadError.status,
-          details: uploadError
-        });
-        alert(`Failed to upload file: ${uploadError.message}`);
-        filePreview.querySelector('.file-preview-item').style.pointerEvents = 'auto';
+        if (error) {
+          console.error('Error saving file message:', error.message, error.code);
+          alert(`Failed to save file message: ${error.message}`);
+          return;
+        }
+        fileInput.value = '';
+        filePreview.innerHTML = '';
+        await sendSecondAutoReply();
+      } catch (err) {
+        console.error('Unexpected error uploading file:', err);
+        alert('Unexpected error uploading file. Please try again.');
+      } finally {
+        sendFileButton.disabled = false;
+        filePreview.style.pointerEvents = 'auto';
         sendChat.disabled = false;
-        return;
+        spinner.style.display = 'none';
       }
-      const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
-      let content = `📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
-      if (selectedTopic) {
-        content = `[Topic: ${selectedTopic}] ${content}`;
-        selectedTopic = '';
-      }
-      addLocalMessage(content);
-      const { error } = await supabase.from('messages').insert({ 
-        user_id: user.id, 
-        content, 
-        sender: 'user',
-        is_auto: false,
-        file_url: url
-      });
-      if (error) {
-        console.error('Error saving file message:', error.message, error.code);
-        alert(`Failed to save file message: ${error.message}`);
-        filePreview.querySelector('.file-preview-item').style.pointerEvents = 'auto';
-        sendChat.disabled = false;
-        return;
-      }
-      fileInput.value = '';
-      filePreview.innerHTML = '';
-      await sendSecondAutoReply();
-    } catch (err) {
-      console.error('Unexpected error uploading file:', err);
-      alert('Unexpected error uploading file. Please try again.');
-    } finally {
-      filePreview.querySelector('.file-preview-item') && (filePreview.querySelector('.file-preview-item').style.pointerEvents = 'auto');
-      sendChat.disabled = false;
-    }
+    });
   }
 });
