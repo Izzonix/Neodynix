@@ -98,14 +98,10 @@ async function startChat() {
       user = newUser;
     }
 
-    loadMessages(user.id);
-    subscribeToMessages();
-
     // Send first auto-reply if not already sent
     const autoReplySent = localStorage.getItem('autoReplySent');
     if (!autoReplySent) {
       const autoReplyMessage = `Thank you for contacting us about ${topic}. Please specify your issue or question related to this topic.`;
-      addLocalMessage(autoReplyMessage, 'auto');
       const { error } = await supabase.from('messages').insert({
         user_id: user.id,
         content: autoReplyMessage,
@@ -113,12 +109,17 @@ async function startChat() {
         is_auto: true
       });
       if (error) {
-        console.error('Error sending first auto-reply:', error.message);
+        console.error('Error sending first auto-reply:', error.message, error.code);
         alert('Failed to send auto-reply.');
       } else {
         localStorage.setItem('autoReplySent', 'true');
+        addLocalMessage(autoReplyMessage, 'auto');
       }
     }
+
+    // Load messages and subscribe after auto-reply
+    await loadMessages(user.id);
+    subscribeToMessages();
   } catch (err) {
     console.error('Unexpected error in startChat:', err);
     alert('Unexpected error starting chat. Please try again.');
@@ -129,7 +130,7 @@ async function loadMessages(userId) {
   try {
     const { data, error } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
     if (error) {
-      console.error('Error loading messages:', error.message);
+      console.error('Error loading messages:', error.message, error.code);
       alert('Failed to load messages. Please try again.');
       return;
     }
@@ -172,10 +173,50 @@ async function subscribeToMessages() {
           addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender);
         }
       })
-      .subscribe();
+      .subscribe((status, err) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Real-time subscription active for messages');
+        } else if (err) {
+          console.error('Error subscribing to messages:', err);
+          alert('Error setting up real-time updates.');
+        }
+      });
   } catch (err) {
     console.error('Error subscribing to messages:', err);
     alert('Error setting up real-time updates.');
+  }
+}
+
+async function sendSecondAutoReply() {
+  const secondAutoReplySent = localStorage.getItem('secondAutoReplySent');
+  if (!secondAutoReplySent) {
+    const { data: messages, error: messagesError } = await supabase
+      .from('messages')
+      .select('is_auto, sender')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true });
+    if (messagesError) {
+      console.error('Error checking messages for second auto-reply:', messagesError.message, messagesError.code);
+      return;
+    }
+    const hasFirstAutoReply = messages.some(m => m.is_auto);
+    const userMessages = messages.filter(m => !m.is_auto && m.sender === 'user');
+    if (hasFirstAutoReply && userMessages.length === 1) {
+      const secondAutoReplyMessage = 'Thank you for providing details. Our team will review your issue and reply soon. Please check back for updates.';
+      const { error } = await supabase.from('messages').insert({
+        user_id: user.id,
+        content: secondAutoReplyMessage,
+        sender: 'support',
+        is_auto: true
+      });
+      if (error) {
+        console.error('Error sending second auto-reply:', error.message, error.code);
+        alert('Failed to send auto-reply.');
+      } else {
+        localStorage.setItem('secondAutoReplySent', 'true');
+        addLocalMessage(secondAutoReplyMessage, 'auto');
+      }
+    }
   }
 }
 
@@ -185,7 +226,7 @@ window.onload = async () => {
     try {
       const { data, error } = await supabase.from('users').select().eq('id', userId).single();
       if (error) {
-        console.error('Error fetching user from localStorage:', error.message);
+        console.error('Error fetching user from localStorage:', error.message, error.code);
         localStorage.removeItem('chat_user_id');
         localStorage.removeItem('autoReplySent');
         localStorage.removeItem('secondAutoReplySent');
@@ -195,7 +236,7 @@ window.onload = async () => {
       if (data) {
         user = data;
         selectedTopic = data.topic || '';
-        loadMessages(userId);
+        await loadMessages(userId);
         subscribeToMessages();
       } else {
         localStorage.removeItem('chat_user_id');
@@ -215,39 +256,6 @@ window.onload = async () => {
   }
 };
 
-async function sendSecondAutoReply() {
-  const secondAutoReplySent = localStorage.getItem('secondAutoReplySent');
-  if (!secondAutoReplySent) {
-    const { data: messages, error: messagesError } = await supabase
-      .from('messages')
-      .select('is_auto, sender')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: true });
-    if (messagesError) {
-      console.error('Error checking messages for second auto-reply:', messagesError.message);
-      return;
-    }
-    const hasFirstAutoReply = messages.some(m => m.is_auto);
-    const userMessages = messages.filter(m => !m.is_auto && m.sender === 'user');
-    if (hasFirstAutoReply && userMessages.length === 1) {
-      const secondAutoReplyMessage = 'Thank you for providing details. Our team will review your issue and reply soon. Please check back for updates.';
-      addLocalMessage(secondAutoReplyMessage, 'auto');
-      const { error } = await supabase.from('messages').insert({
-        user_id: user.id,
-        content: secondAutoReplyMessage,
-        sender: 'support',
-        is_auto: true
-      });
-      if (error) {
-        console.error('Error sending second auto-reply:', error.message);
-        alert('Failed to send auto-reply.');
-      } else {
-        localStorage.setItem('secondAutoReplySent', 'true');
-      }
-    }
-  }
-}
-
 sendChat.addEventListener('click', async () => {
   let text = chatInput.value.trim();
   if (text && user) {
@@ -262,7 +270,7 @@ sendChat.addEventListener('click', async () => {
         is_auto: false
       });
       if (error) {
-        console.error('Error sending message:', error.message);
+        console.error('Error sending message:', error.message, error.code);
         alert('Failed to send message. Please try again.');
         sendChat.disabled = false;
         return;
@@ -307,10 +315,22 @@ filePreview.addEventListener('click', async (event) => {
     filePreview.querySelector('.file-preview-item').style.pointerEvents = 'none';
     sendChat.disabled = true;
     try {
-      const { data, error: uploadError } = await supabase.storage.from('chat-files').upload(`${user.id}/${Date.now()}_${file.name}`, file);
+      // Sanitize file name to avoid invalid characters
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
+      const { data, error: uploadError } = await supabase.storage
+        .from('chat-files')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
       if (uploadError) {
-        console.error('Error uploading file:', uploadError.message);
-        alert('Failed to upload file. Please try again.');
+        console.error('File upload error:', {
+          message: uploadError.message,
+          status: uploadError.status,
+          details: uploadError
+        });
+        alert(`Failed to upload file: ${uploadError.message}`);
         filePreview.querySelector('.file-preview-item').style.pointerEvents = 'auto';
         sendChat.disabled = false;
         return;
@@ -330,8 +350,8 @@ filePreview.addEventListener('click', async (event) => {
         file_url: url
       });
       if (error) {
-        console.error('Error saving file message:', error.message);
-        alert('Failed to save file message. Please try again.');
+        console.error('Error saving file message:', error.message, error.code);
+        alert(`Failed to save file message: ${error.message}`);
         filePreview.querySelector('.file-preview-item').style.pointerEvents = 'auto';
         sendChat.disabled = false;
         return;
