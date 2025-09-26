@@ -8,7 +8,6 @@ const sendChat = document.getElementById('sendChat');
 const attachFile = document.getElementById('attachFile');
 let user = null;
 let selectedTopic = '';
-let hasSentFirstMessage = false;
 
 async function showStartChatPopup() {
   return new Promise(resolve => {
@@ -106,7 +105,7 @@ async function startChat() {
     const autoReplySent = localStorage.getItem('autoReplySent');
     if (!autoReplySent) {
       const autoReplyMessage = `Thank you for contacting us about ${topic}. Please specify your issue or question related to this topic.`;
-      addLocalMessage(autoReplyMessage, 'support');
+      addLocalMessage(autoReplyMessage, 'auto');
       const { error } = await supabase.from('messages').insert({
         user_id: user.id,
         content: autoReplyMessage,
@@ -115,6 +114,7 @@ async function startChat() {
       });
       if (error) {
         console.error('Error sending first auto-reply:', error.message);
+        alert('Failed to send auto-reply.');
       } else {
         localStorage.setItem('autoReplySent', 'true');
       }
@@ -165,48 +165,17 @@ async function subscribeToMessages() {
         schema: 'public', 
         table: 'messages', 
         filter: `user_id=eq.${user.id}`
-      }, async payload => {
+      }, payload => {
         const msg = payload.new;
         if (msg.user_id === user.id) {
-          addLocalMessage(msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content, msg.is_auto ? 'auto' : msg.sender);
-          
-          // Check for second auto-reply
-          if (!msg.is_auto && msg.sender === 'user') {
-            const secondAutoReplySent = localStorage.getItem('secondAutoReplySent');
-            if (!secondAutoReplySent) {
-              const { data: messages, error: messagesError } = await supabase
-                .from('messages')
-                .select('is_auto')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: true });
-              if (messagesError) {
-                console.error('Error checking messages for second auto-reply:', messagesError.message);
-                return;
-              }
-              const hasFirstAutoReply = messages.some(m => m.is_auto);
-              const userMessages = messages.filter(m => !m.is_auto && m.sender === 'user');
-              if (hasFirstAutoReply && userMessages.length === 1) {
-                const secondAutoReplyMessage = 'Thank you for providing details. Our team will review your issue and reply soon. Please check back for updates.';
-                addLocalMessage(secondAutoReplyMessage, 'auto');
-                const { error } = await supabase.from('messages').insert({
-                  user_id: user.id,
-                  content: secondAutoReplyMessage,
-                  sender: 'support',
-                  is_auto: true
-                });
-                if (error) {
-                  console.error('Error sending second auto-reply:', error.message);
-                } else {
-                  localStorage.setItem('secondAutoReplySent', 'true');
-                }
-              }
-            }
-          }
+          const content = msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content;
+          addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender);
         }
       })
       .subscribe();
   } catch (err) {
     console.error('Error subscribing to messages:', err);
+    alert('Error setting up real-time updates.');
   }
 }
 
@@ -246,9 +215,43 @@ window.onload = async () => {
   }
 };
 
+async function sendSecondAutoReply() {
+  const secondAutoReplySent = localStorage.getItem('secondAutoReplySent');
+  if (!secondAutoReplySent) {
+    const { data: messages, error: messagesError } = await supabase
+      .from('messages')
+      .select('is_auto, sender')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true });
+    if (messagesError) {
+      console.error('Error checking messages for second auto-reply:', messagesError.message);
+      return;
+    }
+    const hasFirstAutoReply = messages.some(m => m.is_auto);
+    const userMessages = messages.filter(m => !m.is_auto && m.sender === 'user');
+    if (hasFirstAutoReply && userMessages.length === 1) {
+      const secondAutoReplyMessage = 'Thank you for providing details. Our team will review your issue and reply soon. Please check back for updates.';
+      addLocalMessage(secondAutoReplyMessage, 'auto');
+      const { error } = await supabase.from('messages').insert({
+        user_id: user.id,
+        content: secondAutoReplyMessage,
+        sender: 'support',
+        is_auto: true
+      });
+      if (error) {
+        console.error('Error sending second auto-reply:', error.message);
+        alert('Failed to send auto-reply.');
+      } else {
+        localStorage.setItem('secondAutoReplySent', 'true');
+      }
+    }
+  }
+}
+
 sendChat.addEventListener('click', async () => {
   let text = chatInput.value.trim();
   if (text && user) {
+    sendChat.disabled = true;
     let content = selectedTopic ? `[Topic: ${selectedTopic}] ${text}` : text;
     addLocalMessage(content);
     try {
@@ -261,14 +264,17 @@ sendChat.addEventListener('click', async () => {
       if (error) {
         console.error('Error sending message:', error.message);
         alert('Failed to send message. Please try again.');
+        sendChat.disabled = false;
         return;
       }
       chatInput.value = '';
-      selectedTopic = ''; // Clear topic after first message
-      hasSentFirstMessage = true;
+      selectedTopic = '';
+      await sendSecondAutoReply();
     } catch (err) {
       console.error('Unexpected error sending message:', err);
       alert('Unexpected error sending message. Please try again.');
+    } finally {
+      sendChat.disabled = false;
     }
   }
 });
@@ -298,11 +304,15 @@ filePreview.addEventListener('click', async (event) => {
   if (event.target.classList.contains('delete-file')) return;
   const file = fileInput.files[0];
   if (file && user) {
+    filePreview.querySelector('.file-preview-item').style.pointerEvents = 'none';
+    sendChat.disabled = true;
     try {
       const { data, error: uploadError } = await supabase.storage.from('chat-files').upload(`${user.id}/${Date.now()}_${file.name}`, file);
       if (uploadError) {
         console.error('Error uploading file:', uploadError.message);
         alert('Failed to upload file. Please try again.');
+        filePreview.querySelector('.file-preview-item').style.pointerEvents = 'auto';
+        sendChat.disabled = false;
         return;
       }
       const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
@@ -322,14 +332,19 @@ filePreview.addEventListener('click', async (event) => {
       if (error) {
         console.error('Error saving file message:', error.message);
         alert('Failed to save file message. Please try again.');
+        filePreview.querySelector('.file-preview-item').style.pointerEvents = 'auto';
+        sendChat.disabled = false;
         return;
       }
       fileInput.value = '';
       filePreview.innerHTML = '';
-      hasSentFirstMessage = true;
+      await sendSecondAutoReply();
     } catch (err) {
       console.error('Unexpected error uploading file:', err);
       alert('Unexpected error uploading file. Please try again.');
+    } finally {
+      filePreview.querySelector('.file-preview-item') && (filePreview.querySelector('.file-preview-item').style.pointerEvents = 'auto');
+      sendChat.disabled = false;
     }
   }
 });
