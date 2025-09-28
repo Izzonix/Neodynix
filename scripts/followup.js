@@ -46,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const category = categorySelect.value;
     const templateName = templateInput.value.trim();
     const country = countrySelect.value;
+    const duration = parseInt(durationInput.value) || 12;
+    const pages = parseInt(pagesInput.value) || 5;
 
     if (!category || !templateName || !country) {
       priceOutput.textContent = '0';
@@ -59,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const { data, error } = await supabase
         .from('templates')
-        .select('price_ugx, price_ksh, price_tsh, price_usd')
+        .select('price_ugx, price_ksh, price_tsh, price_usd, rate_per_month, rate_per_page')
         .eq('category', category)
         .eq('name', templateName)
         .single();
@@ -74,28 +76,32 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      let price, currency;
+      let basePrice, currency;
       switch (country) {
         case 'UG':
-          price = data.price_ugx?.toFixed(2) || '0';
+          basePrice = data.price_ugx || 0;
           currency = 'UGX';
           break;
         case 'KE':
-          price = data.price_ksh?.toFixed(2) || '0';
+          basePrice = data.price_ksh || 0;
           currency = 'KSH';
           break;
         case 'TZ':
-          price = data.price_tsh?.toFixed(2) || '0';
+          basePrice = data.price_tsh || 0;
           currency = 'TSH';
           break;
         default:
-          price = data.price_usd?.toFixed(2) || '0';
+          basePrice = data.price_usd || 0;
           currency = 'USD';
       }
 
-      priceOutput.textContent = price;
+      const ratePerMonth = data.rate_per_month || 0;
+      const ratePerPage = data.rate_per_page || 0;
+      const adjustedPrice = basePrice + (ratePerMonth * duration) + (ratePerPage * pages);
+
+      priceOutput.textContent = adjustedPrice.toFixed(2);
       currencyOutput.textContent = currency;
-      mobilePriceOutput.textContent = price;
+      mobilePriceOutput.textContent = adjustedPrice.toFixed(2);
       mobileCurrencyOutput.textContent = currency;
       toggleMobilePricePopup();
     } catch (error) {
@@ -172,20 +178,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   templateInput.addEventListener('input', updatePrice);
   countrySelect.addEventListener('change', updatePrice);
+  durationInput.addEventListener('input', () => {
+    document.getElementById('duration-value').textContent = durationInput.value;
+    updatePrice();
+  });
+  pagesInput.addEventListener('input', () => {
+    document.getElementById('pages-value').textContent = pagesInput.value;
+    toggleExtraPagesField();
+    updatePrice();
+  });
   window.addEventListener('scroll', toggleMobilePricePopup);
   window.addEventListener('resize', toggleMobilePricePopup);
 
   domainChoiceRadios.forEach(radio => {
     radio.addEventListener('change', toggleDomainNameField);
-  });
-
-  pagesInput.addEventListener('input', () => {
-    document.getElementById('pages-value').textContent = pagesInput.value;
-    toggleExtraPagesField();
-  });
-
-  durationInput.addEventListener('input', () => {
-    document.getElementById('duration-value').textContent = durationInput.value;
   });
 
   themeChoiceRadios.forEach(radio => {
