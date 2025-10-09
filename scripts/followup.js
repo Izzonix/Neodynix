@@ -2,7 +2,7 @@ import { supabase, supabaseUrl } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const categorySelect = document.getElementById('category');
-  const templateInput = document.getElementById('template');
+  const templateSelect = document.getElementById('templateSelect');
   const countrySelect = document.getElementById('country');
   const priceOutput = document.getElementById('price');
   const currencyOutput = document.getElementById('currency');
@@ -41,16 +41,46 @@ document.addEventListener('DOMContentLoaded', () => {
     mobilePricePopup.style.display = priceOutput.textContent !== '0' && !isVisible ? 'block' : 'none';
   }
 
+  // Fetch templates for the selected category
+  async function fetchTemplates() {
+    const category = categorySelect.value;
+    templateSelect.innerHTML = '<option value="">-- Select Template --</option>';
+    if (!category) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('templates')
+        .select('id, name')
+        .eq('category', category)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        data.forEach(template => {
+          const option = document.createElement('option');
+          option.value = template.id;
+          option.textContent = template.name;
+          templateSelect.appendChild(option);
+        });
+      } else {
+        templateSelect.innerHTML = '<option value="">No templates available</option>';
+      }
+    } catch (error) {
+      console.error('Error fetching templates:', error.message);
+      templateSelect.innerHTML = '<option value="">Error loading templates</option>';
+    }
+  }
+
   // Fetch and display template price
   async function updatePrice() {
-    const category = categorySelect.value;
-    const templateName = templateInput.value.trim();
+    const templateId = templateSelect.value;
     const country = countrySelect.value;
     const duration = parseInt(durationInput.value) || 12;
     const pages = parseInt(pagesInput.value) || 5;
 
     // Reset price if required fields are missing
-    if (!category || !templateName || !country) {
+    if (!templateId || !country) {
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
       mobilePriceOutput.textContent = '0';
@@ -63,8 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const { data, error } = await supabase
         .from('templates')
         .select('price_ugx, price_ksh, price_tsh, price_usd, rate_per_month, rate_per_page')
-        .eq('category', category)
-        .eq('name', templateName)
+        .eq('id', templateId)
         .single();
 
       if (error || !data) {
@@ -174,10 +203,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event listeners
   categorySelect.addEventListener('change', () => {
     toggleCategoryFields();
+    fetchTemplates();
     updatePrice();
   });
 
-  templateInput.addEventListener('input', updatePrice);
+  templateSelect.addEventListener('change', updatePrice);
   countrySelect.addEventListener('change', updatePrice);
   durationInput.addEventListener('input', () => {
     document.getElementById('duration-value').textContent = durationInput.value;
@@ -218,24 +248,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const mediaFiles = Array.from(mediaInput.files);
         const otherFiles = Array.from(othersInput.files);
         const category = formData.get('category');
-        const templateName = formData.get('template');
+        const templateId = formData.get('template');
         const country = formData.get('country');
         const duration = parseInt(formData.get('duration')) || 12;
         const pages = parseInt(formData.get('pages')) || 5;
 
-        // Fetch price for submission
+        // Fetch template details for submission
         let price = 0;
         let currency = '';
-        if (category && templateName && country) {
+        let templateName = '';
+        if (templateId && country) {
           const { data, error } = await supabase
             .from('templates')
-            .select('price_ugx, price_ksh, price_tsh, price_usd, rate_per_month, rate_per_page')
-            .eq('category', category)
-            .eq('name', templateName)
+            .select('name, price_ugx, price_ksh, price_tsh, price_usd, rate_per_month, rate_per_page')
+            .eq('id', templateId)
             .single();
 
           if (error || !data) throw new Error('Template not found');
 
+          templateName = data.name;
           let basePrice;
           switch (country) {
             case 'UG':
@@ -299,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
           email: formData.get('email'),
           phone: formData.get('phone'),
           category: formData.get('category'),
-          template: formData.get('template'),
+          template: templateName,
           price: price.toFixed(2),
           currency: currency,
           message: formData.get('purpose') || formData.get('extraPages') || '',
@@ -372,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
           toggleDomainNameField();
           toggleExtraPagesField();
           toggleColorPicker();
+          fetchTemplates();
           updatePrice();
           updateFileLabel(logoInput, logoName);
           updateFileLabel(mediaInput, mediaName);
@@ -391,5 +423,6 @@ document.addEventListener('DOMContentLoaded', () => {
   toggleDomainNameField();
   toggleExtraPagesField();
   toggleColorPicker();
+  fetchTemplates();
   updatePrice();
 });
