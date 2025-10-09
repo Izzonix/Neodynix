@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const ratePerMonth = (data.rate_per_month || 0) / 100; // Convert percentage to decimal
       const ratePerPage = (data.rate_per_page || 0) / 100; // Convert percentage to decimal
-      const totalPrice = basePrice * (1 + ratePerMonth * duration + ratePerPage * pages);
+      const totalPrice = basePrice * Math.pow(1 + ratePerMonth, duration) * Math.pow(1 + ratePerPage, pages);
 
       priceOutput.textContent = totalPrice.toFixed(2);
       currencyOutput.textContent = currency;
@@ -287,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           const ratePerMonth = (data.rate_per_month || 0) / 100; // Convert percentage to decimal
           const ratePerPage = (data.rate_per_page || 0) / 100; // Convert percentage to decimal
-          price = basePrice * (1 + ratePerMonth * duration + ratePerPage * pages);
+          price = basePrice * Math.pow(1 + ratePerMonth, duration) * Math.pow(1 + ratePerPage, pages);
         }
 
         // Upload logo
