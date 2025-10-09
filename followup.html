@@ -38,8 +38,10 @@
           <option value="other">Other</option>
         </select>
 
-        <label for="template">Type Template Name</label>
-        <input type="text" id="template" name="template" placeholder="Type template name here" required autocomplete="off" />
+        <label for="templateSelect">Select Template</label>
+        <select id="templateSelect" name="template" required>
+          <option value="">-- Select Template --</option>
+        </select>
 
         <label for="socialMedia">Social Media Links (comma separated)</label>
         <textarea id="socialMedia" name="socialMedia" placeholder="e.g. https://facebook.com/yourpage, https://twitter.com/yourhandle" rows="3"></textarea>
@@ -258,4 +260,4 @@
   <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/followup.js"></script>
 </body>
-          </html>
+</html>
