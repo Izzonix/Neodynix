@@ -49,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const duration = parseInt(durationInput.value) || 12;
     const pages = parseInt(pagesInput.value) || 5;
 
+    // Reset price if required fields are missing
     if (!category || !templateName || !country) {
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
@@ -67,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .single();
 
       if (error || !data) {
-        console.error('Price fetch error:', error?.message || 'No data found');
+        console.error('Price fetch error:', error?.message || 'Template not found');
         priceOutput.textContent = '0';
         currencyOutput.textContent = '';
         mobilePriceOutput.textContent = '0';
@@ -97,11 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const ratePerMonth = data.rate_per_month || 0;
       const ratePerPage = data.rate_per_page || 0;
-      const adjustedPrice = basePrice + (ratePerMonth * duration) + (ratePerPage * pages);
+      const totalPrice = basePrice + (ratePerMonth * duration) + (ratePerPage * pages);
 
-      priceOutput.textContent = adjustedPrice.toFixed(2);
+      priceOutput.textContent = totalPrice.toFixed(2);
       currencyOutput.textContent = currency;
-      mobilePriceOutput.textContent = adjustedPrice.toFixed(2);
+      mobilePriceOutput.textContent = totalPrice.toFixed(2);
       mobileCurrencyOutput.textContent = currency;
       toggleMobilePricePopup();
     } catch (error) {
@@ -216,6 +217,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const logoFile = logoInput.files[0];
         const mediaFiles = Array.from(mediaInput.files);
         const otherFiles = Array.from(othersInput.files);
+        const category = formData.get('category');
+        const templateName = formData.get('template');
+        const country = formData.get('country');
+        const duration = parseInt(formData.get('duration')) || 12;
+        const pages = parseInt(formData.get('pages')) || 5;
+
+        // Fetch price for submission
+        let price = 0;
+        let currency = '';
+        if (category && templateName && country) {
+          const { data, error } = await supabase
+            .from('templates')
+            .select('price_ugx, price_ksh, price_tsh, price_usd, rate_per_month, rate_per_page')
+            .eq('category', category)
+            .eq('name', templateName)
+            .single();
+
+          if (error || !data) throw new Error('Template not found');
+
+          let basePrice;
+          switch (country) {
+            case 'UG':
+              basePrice = data.price_ugx || 0;
+              currency = 'UGX';
+              break;
+            case 'KE':
+              basePrice = data.price_ksh || 0;
+              currency = 'KSH';
+              break;
+            case 'TZ':
+              basePrice = data.price_tsh || 0;
+              currency = 'TSH';
+              break;
+            default:
+              basePrice = data.price_usd || 0;
+              currency = 'USD';
+          }
+          price = basePrice + (data.rate_per_month || 0) * duration + (data.rate_per_page || 0) * pages;
+        }
 
         // Upload logo
         let logoUrl = null;
@@ -250,16 +290,21 @@ document.addEventListener('DOMContentLoaded', () => {
           otherUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`);
         }
 
+        // Combine all file URLs
+        const allFiles = [...(logoUrl ? [logoUrl] : []), ...mediaUrls, ...otherUrls];
+
         // Prepare form data
         const data = {
-          first_name: formData.get('firstName'),
-          last_name: formData.get('lastName'),
+          name: `${formData.get('firstName')} ${formData.get('lastName')}`,
           email: formData.get('email'),
           phone: formData.get('phone'),
           category: formData.get('category'),
           template: formData.get('template'),
+          price: price.toFixed(2),
+          currency: currency,
+          message: formData.get('purpose') || formData.get('extraPages') || '',
+          files: allFiles,
           social_media: formData.get('socialMedia') ? formData.get('socialMedia').split(',').map(s => s.trim()) : [],
-          purpose: formData.get('purpose'),
           target_audience: formData.get('targetAudience'),
           country: formData.get('country'),
           domain_choice: formData.get('domainChoice'),
@@ -267,9 +312,6 @@ document.addEventListener('DOMContentLoaded', () => {
           duration: parseInt(formData.get('duration')),
           pages: parseInt(formData.get('pages')),
           extra_pages: formData.get('extraPages'),
-          logo_url: logoUrl,
-          media_urls: mediaUrls,
-          other_urls: otherUrls,
           theme_color: formData.get('themeChoice') === 'custom' ? formData.get('customColor') : 'default',
           created_at: new Date().toISOString()
         };
