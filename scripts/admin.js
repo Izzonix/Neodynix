@@ -389,7 +389,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadingPopup.style.display = 'flex';
     try {
-      // Fetch the user_id for the message
       const { data: messageData, error: fetchError } = await supabase
         .from('messages')
         .select('user_id')
@@ -397,8 +396,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .single();
       if (fetchError || !messageData) throw new Error('Message not found');
       const userId = messageData.user_id;
-
-      // Insert the admin reply into the messages table
       const { error: insertError } = await supabase.from('messages').insert({
         user_id: userId,
         content: message,
@@ -406,11 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
         is_auto: false
       });
       if (insertError) throw insertError;
-
-      // Update the original message's replied status
       const { error: updateError } = await supabase.from('messages').update({ replied: true }).eq('id', messageId);
       if (updateError) throw updateError;
-
       chatReplyForm.reset();
       document.getElementById('replyUserId').value = '';
       document.getElementById('replyUserInfo').textContent = '';
@@ -428,7 +422,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchCustomRequests() {
     try {
-      const { data, error } = await supabase.from('custom_requests').select('*').order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('custom_requests')
+        .select('id, name, email, category, template, price, currency, message, files, created_at')
+        .order('created_at', { ascending: false });
       if (error) throw error;
       customRequestList.innerHTML = '';
       if (data.length === 0) {
