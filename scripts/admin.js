@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const customRequestList = document.getElementById('customRequestList');
   let templates = [];
 
+  // Valid categories matching the templates table CHECK constraint
+  const validCategories = ['business', 'portfolio', 'education', 'ecommerce', 'charity', 'blog', 'healthcare', 'event', 'church', 'nonprofit', 'other'];
+
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -146,10 +149,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function uploadTemplate(e) {
     e.preventDefault();
-    const name = uploadForm.name.value;
-    const category = uploadForm.category.value;
-    const description = uploadForm.description.value;
-    const link = uploadForm.link.value;
+    const name = uploadForm.name.value.trim();
+    const category = uploadForm.category.value.trim().toLowerCase();
+    const description = uploadForm.description.value.trim();
+    const link = uploadForm.link.value.trim();
     const price_ugx = parseFloat(uploadForm.price_ugx.value) || 0;
     const price_ksh = parseFloat(uploadForm.price_ksh.value) || 0;
     const price_tsh = parseFloat(uploadForm.price_tsh.value) || 0;
@@ -157,46 +160,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const rate_per_month = parseFloat(uploadForm.rate_per_month.value) || 0;
     const rate_per_page = parseFloat(uploadForm.rate_per_page.value) || 0;
     const imageFile = uploadForm.imageFile.files[0];
+
+    // Validate inputs
+    if (!name) {
+      showResult('Template name is required.', false);
+      return;
+    }
+    if (!validCategories.includes(category)) {
+      showResult(`Invalid category. Must be one of: ${validCategories.join(', ')}`, false);
+      return;
+    }
     if (!imageFile) {
       showResult('Please select an image file.', false);
       return;
     }
+    if (price_ugx < 0 || price_ksh < 0 || price_tsh < 0 || price_usd < 0 || rate_per_month < 0 || rate_per_page < 0) {
+      showResult('Prices and rates must be non-negative.', false);
+      return;
+    }
+
     loadingPopup.style.display = 'flex';
     try {
-      // Upload image to storage
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
+      // Upload image to Supabase storage
+      const fileName = `images/${Date.now()}_${imageFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('templates')
-        .upload(`images/${fileName}`, imageFile, {
-          cacheControl: '3600',
-          upsert: false,
-          contentType: imageFile.type
-        });
-      if (uploadError) throw uploadError;
+        .upload(fileName, imageFile, { cacheControl: '3600', upsert: false, contentType: imageFile.type });
+      if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Get public URL for the uploaded image
+      const { data: publicUrlData } = supabase.storage
         .from('templates')
-        .getPublicUrl(uploadData.path);
+        .getPublicUrl(fileName);
+      if (!publicUrlData.publicUrl) throw new Error('Failed to get public URL for image');
 
-      // Insert template data
+      // Insert template data into Supabase
       const { error: insertError } = await supabase.from('templates').insert([
-        { 
-          name, 
-          category, 
-          description, 
-          link, 
-          price_ugx, 
-          price_ksh, 
-          price_tsh, 
-          price_usd, 
-          rate_per_month, 
-          rate_per_page, 
-          image: publicUrl 
+        {
+          name,
+          category,
+          description,
+          link,
+          price_ugx,
+          price_ksh,
+          price_tsh,
+          price_usd,
+          rate_per_month,
+          rate_per_page,
+          image: publicUrlData.publicUrl
         }
       ]);
-      if (insertError) throw insertError;
+      if (insertError) throw new Error(`Database insert failed: ${insertError.message}`);
 
       uploadForm.reset();
       document.getElementById('imagePreview').innerHTML = '';
@@ -232,10 +246,10 @@ document.addEventListener('DOMContentLoaded', () => {
       newEditTemplateForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const updatedData = {
-          name: newEditTemplateForm.editName.value,
-          category: newEditTemplateForm.editCategory.value,
-          description: newEditTemplateForm.editDescription.value,
-          link: newEditTemplateForm.editLink.value,
+          name: newEditTemplateForm.editName.value.trim(),
+          category: newEditTemplateForm.editCategory.value.trim().toLowerCase(),
+          description: newEditTemplateForm.editDescription.value.trim(),
+          link: newEditTemplateForm.editLink.value.trim(),
           price_ugx: parseFloat(newEditTemplateForm.editPriceUgx.value) || 0,
           price_ksh: parseFloat(newEditTemplateForm.editPriceKsh.value) || 0,
           price_tsh: parseFloat(newEditTemplateForm.editPriceTsh.value) || 0,
@@ -243,31 +257,39 @@ document.addEventListener('DOMContentLoaded', () => {
           rate_per_month: parseFloat(newEditTemplateForm.editRatePerMonth.value) || 0,
           rate_per_page: parseFloat(newEditTemplateForm.editRatePerPage.value) || 0
         };
+        if (!updatedData.name) {
+          showResult('Template name is required.', false);
+          return;
+        }
+        if (!validCategories.includes(updatedData.category)) {
+          showResult(`Invalid category. Must be one of: ${validCategories.join(', ')}`, false);
+          return;
+        }
+        if (updatedData.price_ugx < 0 || updatedData.price_ksh < 0 || updatedData.price_tsh < 0 || updatedData.price_usd < 0 || updatedData.rate_per_month < 0 || updatedData.rate_per_page < 0) {
+          showResult('Prices and rates must be non-negative.', false);
+          return;
+        }
         let imageUrl = template.image;
         const newImage = newEditTemplateForm.editImageFile.files[0];
         loadingPopup.style.display = 'flex';
         try {
           if (newImage) {
-            const fileExt = newImage.name.split('.').pop();
-            const fileName = `${Date.now()}.${fileExt}`;
+            const fileName = `images/${Date.now()}_${newImage.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('templates')
-              .upload(`images/${fileName}`, newImage, {
-                cacheControl: '3600',
-                upsert: false,
-                contentType: newImage.type
-              });
-            if (uploadError) throw uploadError;
-            imageUrl = supabase.storage
+              .upload(fileName, newImage, { cacheControl: '3600', upsert: false, contentType: newImage.type });
+            if (uploadError) throw new Error(`Image upload failed: ${uploadError.message}`);
+            const { data: publicUrlData } = supabase.storage
               .from('templates')
-              .getPublicUrl(uploadData.path).data.publicUrl;
+              .getPublicUrl(fileName);
+            imageUrl = publicUrlData.publicUrl;
             if (template.image) {
               const oldPath = template.image.split('/').slice(-2).join('/');
               await supabase.storage.from('templates').remove([oldPath]);
             }
           }
           const { error } = await supabase.from('templates').update({ ...updatedData, image: imageUrl }).eq('id', id);
-          if (error) throw error;
+          if (error) throw new Error(`Database update failed: ${error.message}`);
           newEditTemplateForm.reset();
           editTemplateModal.style.display = 'none';
           document.getElementById('editImagePreview').innerHTML = '';
@@ -296,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
           await supabase.storage.from('templates').remove([path]);
         }
         const { error } = await supabase.from('templates').delete().eq('id', id);
-        if (error) throw error;
+        if (error) throw new Error(`Database delete failed: ${error.message}`);
         showResult('Template deleted successfully!', true);
         fetchTemplates();
       } catch (error) {
