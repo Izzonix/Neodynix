@@ -125,9 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
           currency = 'USD';
       }
 
-      const ratePerMonth = data.rate_per_month || 0;
-      const ratePerPage = data.rate_per_page || 0;
-      const totalPrice = basePrice + (ratePerMonth * duration) + (ratePerPage * pages);
+      const ratePerMonth = (data.rate_per_month || 0) / 100; // Convert percentage to decimal
+      const ratePerPage = (data.rate_per_page || 0) / 100; // Convert percentage to decimal
+      const totalPrice = basePrice * (1 + ratePerMonth * duration + ratePerPage * pages);
 
       priceOutput.textContent = totalPrice.toFixed(2);
       currencyOutput.textContent = currency;
@@ -285,7 +285,9 @@ document.addEventListener('DOMContentLoaded', () => {
               basePrice = data.price_usd || 0;
               currency = 'USD';
           }
-          price = basePrice + (data.rate_per_month || 0) * duration + (data.rate_per_page || 0) * pages;
+          const ratePerMonth = (data.rate_per_month || 0) / 100; // Convert percentage to decimal
+          const ratePerPage = (data.rate_per_page || 0) / 100; // Convert percentage to decimal
+          price = basePrice * (1 + ratePerMonth * duration + ratePerPage * pages);
         }
 
         // Upload logo
