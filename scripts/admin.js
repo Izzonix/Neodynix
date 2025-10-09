@@ -163,22 +163,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadingPopup.style.display = 'flex';
     try {
+      // Upload image to storage
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('templates')
-        .upload(`images/${Date.now()}_${imageFile.name}`, imageFile);
+        .upload(`images/${fileName}`, imageFile, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: imageFile.type
+        });
       if (uploadError) throw uploadError;
-      const { publicUrl } = supabase.storage.from('templates').getPublicUrl(uploadData.path).data;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('templates')
+        .getPublicUrl(uploadData.path);
+
+      // Insert template data
       const { error: insertError } = await supabase.from('templates').insert([
-        { name, category, description, link, price_ugx, price_ksh, price_tsh, price_usd, rate_per_month, rate_per_page, image: publicUrl }
+        { 
+          name, 
+          category, 
+          description, 
+          link, 
+          price_ugx, 
+          price_ksh, 
+          price_tsh, 
+          price_usd, 
+          rate_per_month, 
+          rate_per_page, 
+          image: publicUrl 
+        }
       ]);
       if (insertError) throw insertError;
+
       uploadForm.reset();
       document.getElementById('imagePreview').innerHTML = '';
       showResult('Template uploaded successfully!', true);
       fetchTemplates();
     } catch (error) {
       console.error('Error uploading template:', error);
-      showResult('Failed to upload template.', false);
+      showResult(`Failed to upload template: ${error.message}`, false);
     } finally {
       loadingPopup.style.display = 'none';
     }
@@ -222,11 +248,19 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingPopup.style.display = 'flex';
         try {
           if (newImage) {
+            const fileExt = newImage.name.split('.').pop();
+            const fileName = `${Date.now()}.${fileExt}`;
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('templates')
-              .upload(`images/${Date.now()}_${newImage.name}`, newImage);
+              .upload(`images/${fileName}`, newImage, {
+                cacheControl: '3600',
+                upsert: false,
+                contentType: newImage.type
+              });
             if (uploadError) throw uploadError;
-            imageUrl = supabase.storage.from('templates').getPublicUrl(uploadData.path).data.publicUrl;
+            imageUrl = supabase.storage
+              .from('templates')
+              .getPublicUrl(uploadData.path).data.publicUrl;
             if (template.image) {
               const oldPath = template.image.split('/').slice(-2).join('/');
               await supabase.storage.from('templates').remove([oldPath]);
@@ -241,14 +275,14 @@ document.addEventListener('DOMContentLoaded', () => {
           fetchTemplates();
         } catch (error) {
           console.error('Error updating template:', error);
-          showResult('Failed to update template.', false);
+          showResult(`Failed to update template: ${error.message}`, false);
         } finally {
           loadingPopup.style.display = 'none';
         }
       });
     } catch (error) {
       console.error('Error in editTemplate:', error);
-      showResult('Failed to load template.', false);
+      showResult(`Failed to load template: ${error.message}`, false);
     }
   };
 
@@ -267,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchTemplates();
       } catch (error) {
         console.error('Error deleting template:', error);
-        showResult('Failed to delete template.', false);
+        showResult(`Failed to delete template: ${error.message}`, false);
       } finally {
         loadingPopup.style.display = 'none';
       }
@@ -474,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchCustomRequests();
       } catch (error) {
         console.error('Error deleting file:', error);
-        showResult('Failed to delete file.', false);
+        showResult(`Failed to delete file: ${error.message}`, false);
       } finally {
         loadingPopup.style.display = 'none';
       }
