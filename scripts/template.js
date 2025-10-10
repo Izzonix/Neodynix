@@ -45,15 +45,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadMoreTemplates() {
       const activeButton = document.querySelector('.category-buttons button.active');
-      const currentCategory = activeButton ? activeButton.textContent : 'All';
+      const currentCategory = activeButton ? activeButton.textContent.trim() : 'All';
       const templatesToShow = allTemplates
-        .filter(template => currentCategory === 'All' || (template.category || 'Other') === currentCategory)
+        .filter(template => currentCategory === 'All' || (template.category || 'Other').trim() === currentCategory)
         .slice(displayedCount, displayedCount + templatesPerLoad);
 
       templatesToShow.forEach(template => {
         const card = document.createElement('div');
         card.className = 'template-card';
-        card.setAttribute('data-category', template.category || 'Other');
+        card.setAttribute('data-category', (template.category || 'Other').trim());
         card.innerHTML = `
           <a href="${template.link}" target="_blank">
             <img src="${template.image}" alt="${template.name} Template" />
@@ -72,9 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateViewMoreButton() {
       let viewMoreButton = document.getElementById('view-more-button');
       const activeButton = document.querySelector('.category-buttons button.active');
-      const currentCategory = activeButton ? activeButton.textContent : 'All';
+      const currentCategory = activeButton ? activeButton.textContent.trim() : 'All';
       const remainingTemplates = allTemplates
-        .filter(template => currentCategory === 'All' || (template.category || 'Other') === currentCategory)
+        .filter(template => currentCategory === 'All' || (template.category || 'Other').trim() === currentCategory)
         .length - displayedCount;
 
       if (!viewMoreButton) {
@@ -94,25 +94,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fetchTemplates();
 
-    const categoryButtons = document.querySelectorAll('.category-buttons button, #more-categories button');
+    const categoryButtons = document.querySelectorAll('.category-buttons button:not(#more-button), #more-categories button');
     categoryButtons.forEach(button => {
       button.addEventListener('click', () => {
         categoryButtons.forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
-        if (button.id !== 'more-button') {
-          templateContainer.innerHTML = '';
-          displayedCount = 0;
-          loadMoreTemplates();
-          showCategory(button.textContent);
-        }
+        templateContainer.innerHTML = '';
+        displayedCount = 0;
+        loadMoreTemplates();
       });
     });
 
     window.showCategory = function(category) {
       const cards = document.querySelectorAll('.template-card');
+      const trimmedCategory = category.trim();
       cards.forEach(card => {
-        const cardCategory = card.getAttribute('data-category');
-        card.style.display = (category === 'All' || cardCategory === category) ? 'block' : 'none';
+        const cardCategory = card.getAttribute('data-category').trim();
+        card.style.display = (trimmedCategory === 'All' || cardCategory === trimmedCategory) ? 'block' : 'none';
       });
       updateViewMoreButton();
     };
