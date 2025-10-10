@@ -1,7 +1,6 @@
 import { supabase } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Auto-fill request form
   function autoFillForm() {
     const getParam = key => new URLSearchParams(window.location.search).get(key);
     const category = getParam('category');
@@ -12,12 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (template && templateInput) templateInput.value = decodeURIComponent(template);
   }
 
-  // Run autofill if on request.html
   if (window.location.pathname.includes('request.html')) {
     autoFillForm();
   }
 
-  // Template-related logic
   const templateContainer = document.getElementById('template-container');
   if (templateContainer) {
     let allTemplates = [];
@@ -39,8 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         displayedCount = 0;
         loadMoreTemplates();
-
-        // Show view more button if more templates exist
         updateViewMoreButton();
       } catch (error) {
         console.error('Error fetching templates:', error);
@@ -52,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const activeButton = document.querySelector('.category-buttons button.active');
       const currentCategory = activeButton ? activeButton.textContent : 'All';
       const templatesToShow = allTemplates
-        .filter(template => currentCategory === 'All' || template.category === currentCategory)
+        .filter(template => currentCategory === 'All' || (template.category || 'Other') === currentCategory)
         .slice(displayedCount, displayedCount + templatesPerLoad);
 
       templatesToShow.forEach(template => {
@@ -65,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </a>
           <h3>${template.name}</h3>
           <p>${template.description || ''}</p>
-          <a href="request.html?category=${encodeURIComponent(template.category)}&template=${encodeURIComponent(template.name)}" class="btn">Choose Template</a>
+          <a href="request.html?category=${encodeURIComponent(template.category || 'Other')}&template=${encodeURIComponent(template.name)}" class="btn">Choose Template</a>
         `;
         templateContainer.appendChild(card);
       });
@@ -79,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const activeButton = document.querySelector('.category-buttons button.active');
       const currentCategory = activeButton ? activeButton.textContent : 'All';
       const remainingTemplates = allTemplates
-        .filter(template => currentCategory === 'All' || template.category === currentCategory)
+        .filter(template => currentCategory === 'All' || (template.category || 'Other') === currentCategory)
         .length - displayedCount;
 
       if (!viewMoreButton) {
@@ -89,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         viewMoreButton.textContent = 'View More';
         viewMoreButton.addEventListener('click', () => {
           loadMoreTemplates();
-          showCategory(currentCategory); // Reapply category filter
+          showCategory(currentCategory);
         });
         templateContainer.insertAdjacentElement('afterend', viewMoreButton);
       }
@@ -97,10 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
       viewMoreButton.style.display = remainingTemplates > 0 ? 'block' : 'none';
     }
 
-    // Initial load
     fetchTemplates();
 
-    // Category buttons
     const categoryButtons = document.querySelectorAll('.category-buttons button, #more-categories button');
     categoryButtons.forEach(button => {
       button.addEventListener('click', () => {
@@ -110,11 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
           templateContainer.innerHTML = '';
           displayedCount = 0;
           loadMoreTemplates();
+          showCategory(button.textContent);
         }
       });
     });
 
-    // Show category
     window.showCategory = function(category) {
       const cards = document.querySelectorAll('.template-card');
       cards.forEach(card => {
@@ -124,13 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
       updateViewMoreButton();
     };
 
-    // Toggle more categories
     window.toggleMoreCategories = function() {
       const moreCategories = document.getElementById('more-categories');
       moreCategories.style.display = moreCategories.style.display === 'none' ? 'flex' : 'none';
     };
 
-    // Search templates
     window.filterTemplates = function() {
       const searchInput = document.getElementById('search-input').value.toLowerCase();
       const templateCards = document.querySelectorAll('.template-card');
