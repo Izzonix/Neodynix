@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const activeButton = document.querySelector('.category-buttons button.active');
       const currentCategory = activeButton ? activeButton.textContent.trim() : 'All';
       const templatesToShow = allTemplates
-        .filter(template => currentCategory === 'All' || (template.category || 'Other').trim() === currentCategory)
+        .filter(template => currentCategory === 'All' || (template.category || 'Other').trim().toLowerCase() === currentCategory.toLowerCase())
         .slice(displayedCount, displayedCount + templatesPerLoad);
 
       templatesToShow.forEach(template => {
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const activeButton = document.querySelector('.category-buttons button.active');
       const currentCategory = activeButton ? activeButton.textContent.trim() : 'All';
       const remainingTemplates = allTemplates
-        .filter(template => currentCategory === 'All' || (template.category || 'Other').trim() === currentCategory)
+        .filter(template => currentCategory === 'All' || (template.category || 'Other').trim().toLowerCase() === currentCategory.toLowerCase())
         .length - displayedCount;
 
       if (!viewMoreButton) {
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const trimmedCategory = category.trim();
       cards.forEach(card => {
         const cardCategory = card.getAttribute('data-category').trim();
-        card.style.display = (trimmedCategory === 'All' || cardCategory === trimmedCategory) ? 'block' : 'none';
+        card.style.display = (trimmedCategory === 'All' || cardCategory.toLowerCase() === trimmedCategory.toLowerCase()) ? 'block' : 'none';
       });
       updateViewMoreButton();
     };
