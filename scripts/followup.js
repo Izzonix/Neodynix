@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const domainNameContainer = document.getElementById('domainNameContainer');
   const pagesInput = document.getElementById('pages');
   const extraPagesContainer = document.getElementById('extraPagesContainer');
+  const extraPagesInputs = document.getElementById('extraPagesInputs');
   const logoInput = document.getElementById('logo');
   const mediaInput = document.getElementById('media');
   const othersInput = document.getElementById('others');
@@ -28,9 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const socialMediaLinkContainer = document.getElementById('socialMediaLinkContainer');
   const socialMediaLink = document.getElementById('socialMediaLink');
   const addSocialMediaLink = document.getElementById('addSocialMediaLink');
-  const socialMediaList = document.getElementById('socialMediaList');
-
-  let socialMediaLinks = [];
+  const socialMediaLinks = document.getElementById('socialMediaLinks');
+  let socialMediaList = [];
 
   // Toggle category-specific fields
   function toggleCategoryFields() {
@@ -86,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const duration = parseInt(durationInput.value) || 12;
     const pages = parseInt(pagesInput.value) || 5;
 
-    // Reset price if required fields are missing
     if (!templateId || !country) {
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
@@ -132,8 +131,8 @@ document.addEventListener('DOMContentLoaded', () => {
           currency = 'USD';
       }
 
-      const ratePerMonth = (data.rate_per_month || 0) / 100; // Convert percentage to decimal
-      const ratePerPage = (data.rate_per_page || 0) / 100; // Convert percentage to decimal
+      const ratePerMonth = (data.rate_per_month || 0) / 100;
+      const ratePerPage = (data.rate_per_page || 0) / 100;
       const totalPrice = basePrice * Math.pow(1 + ratePerMonth, duration - 12) * Math.pow(1 + ratePerPage, pages - 5);
 
       priceOutput.textContent = totalPrice.toFixed(2);
@@ -157,10 +156,23 @@ document.addEventListener('DOMContentLoaded', () => {
     domainNameContainer.style.display = domainChoice === 'custom' ? 'block' : 'none';
   }
 
-  // Toggle extra pages field
+  // Toggle extra pages field and generate input fields
   function toggleExtraPagesField() {
-    const pages = parseInt(pagesInput.value);
+    const pages = parseInt(pagesInput.value) || 5;
     extraPagesContainer.style.display = pages > 5 ? 'block' : 'none';
+    extraPagesInputs.innerHTML = '';
+
+    if (pages > 5) {
+      const extraPagesCount = pages - 5;
+      for (let i = 1; i <= extraPagesCount; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = `extraPage${i}`;
+        input.placeholder = `Extra Page ${i} Name`;
+        input.className = 'extra-page-input';
+        extraPagesInputs.appendChild(input);
+      }
+    }
   }
 
   // Update file input labels
@@ -186,20 +198,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Update social media links display
-  function updateSocialMediaList() {
-    socialMediaList.innerHTML = '';
-    socialMediaLinks.forEach((link, index) => {
-      const div = document.createElement('div');
-      div.textContent = `${link.platform}: ${link.url}`;
+  function updateSocialMediaLinks() {
+    socialMediaLinks.innerHTML = '';
+    socialMediaList.forEach((link, index) => {
+      const li = document.createElement('li');
+      li.textContent = `${link.platform}: ${link.url}`;
       const removeBtn = document.createElement('button');
       removeBtn.textContent = 'Remove';
-      removeBtn.style.marginLeft = '10px';
-      removeBtn.addEventListener('click', () => {
-        socialMediaLinks.splice(index, 1);
-        updateSocialMediaList();
-      });
-      div.appendChild(removeBtn);
-      socialMediaList.appendChild(div);
+      removeBtn.className = 'btn btn-cancel';
+      removeBtn.onclick = () => {
+        socialMediaList.splice(index, 1);
+        updateSocialMediaLinks();
+      };
+      li.appendChild(removeBtn);
+      socialMediaLinks.appendChild(li);
     });
   }
 
@@ -269,10 +281,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const platform = socialMediaPlatform.value;
     const url = socialMediaLink.value.trim();
     if (platform && url) {
-      socialMediaLinks.push({ platform, url });
-      updateSocialMediaList();
-      socialMediaLink.value = '';
+      socialMediaList.push({ platform, url });
+      updateSocialMediaLinks();
       socialMediaPlatform.value = '';
+      socialMediaLink.value = '';
       toggleSocialMediaLink();
     }
   });
@@ -296,6 +308,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const country = formData.get('country');
         const duration = parseInt(formData.get('duration')) || 12;
         const pages = parseInt(formData.get('pages')) || 5;
+
+        // Collect extra page names
+        const extraPageNames = [];
+        if (pages > 5) {
+          const extraPagesCount = pages - 5;
+          for (let i = 1; i <= extraPagesCount; i++) {
+            const pageName = formData.get(`extraPage${i}`);
+            if (pageName) extraPageNames.push(pageName);
+          }
+        }
 
         // Fetch template details for submission
         let price = 0;
@@ -329,8 +351,8 @@ document.addEventListener('DOMContentLoaded', () => {
               basePrice = data.price_usd || 0;
               currency = 'USD';
           }
-          const ratePerMonth = (data.rate_per_month || 0) / 100; // Convert percentage to decimal
-          const ratePerPage = (data.rate_per_page || 0) / 100; // Convert percentage to decimal
+          const ratePerMonth = (data.rate_per_month || 0) / 100;
+          const ratePerPage = (data.rate_per_page || 0) / 100;
           price = basePrice * Math.pow(1 + ratePerMonth, duration - 12) * Math.pow(1 + ratePerPage, pages - 5);
         }
 
@@ -379,16 +401,16 @@ document.addEventListener('DOMContentLoaded', () => {
           template: templateName,
           price: price.toFixed(2),
           currency: currency,
-          message: formData.get('purpose') || formData.get('extraPages') || '',
+          message: formData.get('purpose') || '',
           files: allFiles,
-          social_media: socialMediaLinks.map(link => `${link.platform}: ${link.url}`),
+          social_media: socialMediaList.map(link => `${link.platform}: ${link.url}`),
           target_audience: formData.get('targetAudience'),
           country: formData.get('country'),
           domain_choice: formData.get('domainChoice'),
           domain_name: formData.get('domainName'),
           duration: parseInt(formData.get('duration')),
           pages: parseInt(formData.get('pages')),
-          extra_pages: formData.get('extraPages'),
+          extra_pages: extraPageNames.join(', '),
           theme_color: formData.get('themeChoice') === 'custom' ? formData.get('customColor') : 'default',
           created_at: new Date().toISOString()
         };
@@ -445,13 +467,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showConfirm('Form submitted successfully!', () => {
           customForm.reset();
-          socialMediaLinks = [];
-          updateSocialMediaList();
           toggleCategoryFields();
           toggleDomainNameField();
           toggleExtraPagesField();
           toggleColorPicker();
           toggleSocialMediaLink();
+          socialMediaList = [];
+          updateSocialMediaLinks();
           fetchTemplates();
           updatePrice();
           updateFileLabel(logoInput, logoName);
