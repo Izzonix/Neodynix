@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const duration = parseInt(durationInput.value) || 12;
     const pages = parseInt(pagesInput.value) || 5;
 
+    // Reset price if required fields are missing
     if (!templateId || !country) {
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
@@ -156,19 +157,17 @@ document.addEventListener('DOMContentLoaded', () => {
     domainNameContainer.style.display = domainChoice === 'custom' ? 'block' : 'none';
   }
 
-  // Toggle extra pages field and generate input fields
+  // Toggle extra pages field
   function toggleExtraPagesField() {
     const pages = parseInt(pagesInput.value) || 5;
     extraPagesContainer.style.display = pages > 5 ? 'block' : 'none';
     extraPagesInputs.innerHTML = '';
-
     if (pages > 5) {
-      const extraPagesCount = pages - 5;
-      for (let i = 1; i <= extraPagesCount; i++) {
+      for (let i = 0; i < pages - 5; i++) {
         const input = document.createElement('input');
         input.type = 'text';
-        input.name = `extraPage${i}`;
-        input.placeholder = `Extra Page ${i} Name`;
+        input.name = `extraPage${i + 1}`;
+        input.placeholder = `Extra Page ${i + 1} Name`;
         input.className = 'extra-page-input';
         extraPagesInputs.appendChild(input);
       }
@@ -310,12 +309,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const pages = parseInt(formData.get('pages')) || 5;
 
         // Collect extra page names
-        const extraPageNames = [];
+        const extraPages = [];
         if (pages > 5) {
-          const extraPagesCount = pages - 5;
-          for (let i = 1; i <= extraPagesCount; i++) {
+          for (let i = 1; i <= pages - 5; i++) {
             const pageName = formData.get(`extraPage${i}`);
-            if (pageName) extraPageNames.push(pageName);
+            if (pageName) extraPages.push(pageName);
           }
         }
 
@@ -401,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
           template: templateName,
           price: price.toFixed(2),
           currency: currency,
-          message: formData.get('purpose') || '',
+          message: formData.get('purpose') || extraPages.join(', ') || '',
           files: allFiles,
           social_media: socialMediaList.map(link => `${link.platform}: ${link.url}`),
           target_audience: formData.get('targetAudience'),
@@ -410,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
           domain_name: formData.get('domainName'),
           duration: parseInt(formData.get('duration')),
           pages: parseInt(formData.get('pages')),
-          extra_pages: extraPageNames.join(', '),
+          extra_pages: extraPages.join(', '),
           theme_color: formData.get('themeChoice') === 'custom' ? formData.get('customColor') : 'default',
           created_at: new Date().toISOString()
         };
@@ -491,10 +489,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize form state
   toggleCategoryFields();
-  toggleDomainNameField();
-  toggleExtraPagesField();
-  toggleColorPicker();
-  toggleSocialMediaLink();
-  fetchTemplates();
-  updatePrice();
-});
+  toggleDomainNameFie
