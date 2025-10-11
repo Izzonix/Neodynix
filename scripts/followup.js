@@ -24,6 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const othersName = document.getElementById('others-name');
   const mobilePricePopup = document.getElementById('mobile-price-popup');
   const durationInput = document.getElementById('duration');
+  const socialMediaPlatform = document.getElementById('socialMediaPlatform');
+  const socialMediaLinkContainer = document.getElementById('socialMediaLinkContainer');
+  const socialMediaLink = document.getElementById('socialMediaLink');
+  const addSocialMediaLink = document.getElementById('addSocialMediaLink');
+  const socialMediaList = document.getElementById('socialMediaList');
+
+  let socialMediaLinks = [];
 
   // Toggle category-specific fields
   function toggleCategoryFields() {
@@ -173,6 +180,29 @@ document.addEventListener('DOMContentLoaded', () => {
     colorPickerContainer.style.display = themeChoice === 'custom' ? 'block' : 'none';
   }
 
+  // Toggle social media link input
+  function toggleSocialMediaLink() {
+    socialMediaLinkContainer.style.display = socialMediaPlatform.value ? 'block' : 'none';
+  }
+
+  // Update social media links display
+  function updateSocialMediaList() {
+    socialMediaList.innerHTML = '';
+    socialMediaLinks.forEach((link, index) => {
+      const div = document.createElement('div');
+      div.textContent = `${link.platform}: ${link.url}`;
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = 'Remove';
+      removeBtn.style.marginLeft = '10px';
+      removeBtn.addEventListener('click', () => {
+        socialMediaLinks.splice(index, 1);
+        updateSocialMediaList();
+      });
+      div.appendChild(removeBtn);
+      socialMediaList.appendChild(div);
+    });
+  }
+
   // Show confirmation modal
   function showConfirm(message, callback) {
     const confirmModal = document.getElementById('confirmModal');
@@ -232,6 +262,20 @@ document.addEventListener('DOMContentLoaded', () => {
   logoInput.addEventListener('change', () => updateFileLabel(logoInput, logoName));
   mediaInput.addEventListener('change', () => updateFileLabel(mediaInput, mediaName));
   othersInput.addEventListener('change', () => updateFileLabel(othersInput, othersName));
+
+  socialMediaPlatform.addEventListener('change', toggleSocialMediaLink);
+
+  addSocialMediaLink.addEventListener('click', () => {
+    const platform = socialMediaPlatform.value;
+    const url = socialMediaLink.value.trim();
+    if (platform && url) {
+      socialMediaLinks.push({ platform, url });
+      updateSocialMediaList();
+      socialMediaLink.value = '';
+      socialMediaPlatform.value = '';
+      toggleSocialMediaLink();
+    }
+  });
 
   // Form submission
   customForm.addEventListener('submit', async (e) => {
@@ -337,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
           currency: currency,
           message: formData.get('purpose') || formData.get('extraPages') || '',
           files: allFiles,
-          social_media: formData.get('socialMedia') ? formData.get('socialMedia').split(',').map(s => s.trim()) : [],
+          social_media: socialMediaLinks.map(link => `${link.platform}: ${link.url}`),
           target_audience: formData.get('targetAudience'),
           country: formData.get('country'),
           domain_choice: formData.get('domainChoice'),
@@ -401,10 +445,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showConfirm('Form submitted successfully!', () => {
           customForm.reset();
+          socialMediaLinks = [];
+          updateSocialMediaList();
           toggleCategoryFields();
           toggleDomainNameField();
           toggleExtraPagesField();
           toggleColorPicker();
+          toggleSocialMediaLink();
           fetchTemplates();
           updatePrice();
           updateFileLabel(logoInput, logoName);
@@ -425,6 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
   toggleDomainNameField();
   toggleExtraPagesField();
   toggleColorPicker();
+  toggleSocialMediaLink();
   fetchTemplates();
   updatePrice();
 });
