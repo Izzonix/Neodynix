@@ -43,14 +43,54 @@
           <option value="">-- Select Template --</option>
         </select>
 
-        <label for="socialMedia">Social Media Links (comma separated)</label>
-        <textarea id="socialMedia" name="socialMedia" placeholder="e.g. https://facebook.com/yourpage, https://twitter.com/yourhandle" rows="3"></textarea>
+        <label for="socialMediaPlatform">Add Social Media Links</label>
+        <select id="socialMediaPlatform" name="socialMediaPlatform">
+          <option value="">-- Select Platform --</option>
+          <option value="facebook">Facebook</option>
+          <option value="twitter">Twitter</option>
+          <option value="instagram">Instagram</option>
+          <option value="linkedin">LinkedIn</option>
+          <option value="youtube">YouTube</option>
+          <option value="tiktok">TikTok</option>
+          <option value="pinterest">Pinterest</option>
+          <option value="snapchat">Snapchat</option>
+        </select>
+        <div id="socialMediaLinkContainer" style="display:none;">
+          <label for="socialMediaLink">Social Media Link</label>
+          <input type="url" id="socialMediaLink" name="socialMediaLink" placeholder="e.g. https://facebook.com/yourpage" />
+          <button type="button" id="addSocialMediaLink">Add Link</button>
+        </div>
+        <div id="socialMediaList"></div>
 
         <label for="purpose">Website Purpose</label>
-        <textarea id="purpose" name="purpose" placeholder="e.g. Education, E-commerce, Portfolio" rows="3"></textarea>
+        <select id="purpose" name="purpose" required>
+          <option value="">-- Select Purpose --</option>
+          <option value="branding">Branding</option>
+          <option value="ecommerce">E-commerce</option>
+          <option value="portfolio">Portfolio</option>
+          <option value="education">Education</option>
+          <option value="blogging">Blogging</option>
+          <option value="event_promotion">Event Promotion</option>
+          <option value="community">Community Engagement</option>
+          <option value="charity">Charity/Donations</option>
+          <option value="services">Services</option>
+          <option value="other">Other</option>
+        </select>
 
         <label for="targetAudience">Target Audience</label>
-        <input type="text" id="targetAudience" name="targetAudience" placeholder="e.g. Students, Professionals" />
+        <select id="targetAudience" name="targetAudience" required>
+          <option value="">-- Select Audience --</option>
+          <option value="students">Students</option>
+          <option value="professionals">Professionals</option>
+          <option value="business_owners">Business Owners</option>
+          <option value="general_public">General Public</option>
+          <option value="youth">Youth</option>
+          <option value="seniors">Seniors</option>
+          <option value="families">Families</option>
+          <option value="tech_savvy">Tech-Savvy Individuals</option>
+          <option value="local_community">Local Community</option>
+          <option value="global_audience">Global Audience</option>
+        </select>
 
         <label for="country">Your Country</label>
         <select id="country" name="country" required>
@@ -260,4 +300,4 @@
   <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/followup.js"></script>
 </body>
-</html>
+                                         </html>
