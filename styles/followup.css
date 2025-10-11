@@ -41,6 +41,38 @@ input, select, textarea {
   box-sizing: border-box;
 }
 
+/* Social Media Links List */
+#socialMediaLinks {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+#socialMediaLinks li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background: #292929;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+#socialMediaLinks li button {
+  background: #ff4444;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#socialMediaLinks li button:hover {
+  background: #cc0000;
+}
+
 /* Modern Range Slider Style */
 input[type="range"] {
   -webkit-appearance: none;
@@ -157,6 +189,15 @@ input[type="range"]::-moz-range-thumb {
   background: #4fc3f77a;
   cursor: not-allowed;
   transform: none;
+}
+
+.btn.btn-cancel {
+  background: #ff4444;
+  color: #fff;
+}
+
+.btn.btn-cancel:hover {
+  background: #cc0000;
 }
 
 /* Custom File Upload */
@@ -277,7 +318,7 @@ input[type="range"]::-moz-range-thumb {
   border-color: #03a9f4;
 }
 
-#colorPickerContainer, #emailContainer, #phoneContainer, #domainNameContainer {
+#colorPickerContainer, #emailContainer, #phoneContainer, #domainNameContainer, #socialMediaLinkContainer {
   margin-top: 10px;
 }
 
