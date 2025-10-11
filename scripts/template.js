@@ -117,7 +117,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.toggleMoreCategories = function() {
       const moreCategories = document.getElementById('more-categories');
-      moreCategories.style.display = moreCategories.style.display === 'none' ? 'flex' : 'none';
+      const moreButton = document.getElementById('more-button');
+      const isHidden = moreCategories.style.display === 'none' || moreCategories.style.display === '';
+      moreCategories.style.display = isHidden ? 'flex' : 'none';
+      moreButton.textContent = isHidden ? 'Hide' : 'More';
     };
 
     window.filterTemplates = function() {
