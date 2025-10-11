@@ -63,14 +63,18 @@ input, select, textarea {
   background: #ff4444;
   color: #fff;
   border: none;
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 #socialMediaLinks li button:hover {
   background: #cc0000;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(204, 0, 0, 0.3);
 }
 
 /* Modern Range Slider Style */
@@ -314,88 +318,4 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .theme-choice label:hover::before, .contact-method-choice label:hover::before, .domain-choice label:hover::before {
-  background: #1e1e1e;
-  border-color: #03a9f4;
-}
-
-#colorPickerContainer, #emailContainer, #phoneContainer, #domainNameContainer, #socialMediaLinkContainer {
-  margin-top: 10px;
-}
-
-/* Loading Popup */
-.loading-popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
-}
-
-.loading-content {
-  background: #1e1e1e;
-  padding: 20px 30px;
-  border-radius: 10px;
-  text-align: center;
-  color: #ffffff;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  min-width: 200px;
-}
-
-.spinner {
-  border: 4px solid #4fc3f7;
-  border-top: 4px solid #03a9f4;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 10px;
-}
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@media (max-width: 600px) {
-  .form-section {
-    padding: 20px 15px;
-  }
-  .btn {
-    padding: 12px 24px;
-  }
-  .theme-choice, .contact-method-choice, .domain-choice {
-    flex-direction: column;
-    gap: 10px;
-  }
-  .theme-choice label, .contact-method-choice label, .domain-choice label {
-    padding-left: 30px;
-  }
-  .mobile-price-popup {
-    padding: 8px 15px;
-    font-size: 0.9rem;
-  }
-}
-
-/* Contact Link */
-.contact-link {
-  text-align: center;
-  margin-top: 15px;
-  font-size: 0.95rem;
-  color: #bbb;
-}
-
-.contact-link a {
-  color: #4fc3f7;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.contact-link a:hover {
-  color: #03a9f4;
-  text-decoration: underline;
-  }
+  background: #1e1e1e
