@@ -3,10 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Neodynix Payment</title>
-  <link rel="icon" href="images/favicon.ico" type="image/x-icon" />
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/payment.css" />
+  <title>Payment Page</title>
+  <link rel="stylesheet" href="payment.css" />
 </head>
 <body>
   <main>
@@ -23,17 +21,26 @@
         </div>
         <div class="form-group">
           <label for="amount">Amount</label>
-          <input type="text" id="amount" name="amount" placeholder="Fetching amount..." disabled />
+          <input type="number" id="amount" name="amount" placeholder="Enter amount" required />
+        </div>
+        <div class="form-group">
+          <label for="currency">Currency</label>
+          <select id="currency" name="currency" required>
+            <option value="UGX">UGX (Uganda Shilling)</option>
+            <option value="KSH">KSH (Kenya Shilling)</option>
+            <option value="TZS">TZS (Tanzania Shilling)</option>
+            <option value="USD">USD (US Dollar)</option>
+          </select>
         </div>
         <div class="form-group payment-options">
           <label>Payment Method</label>
           <div class="options-grid">
-            <button type="button" class="option-btn" data-method="mobile-money">
-              <img src="images/mobile-money-icon.png" alt="Mobile Money Icon" class="option-icon" />
+            <button type="button" class="option-btn" data-method="mobilemoney">
+              <img src="https://via.placeholder.com/45" alt="Mobile Money Icon" class="option-icon" />
               <span>Mobile Money</span>
             </button>
-            <button type="button" class="option-btn" data-method="bank-card">
-              <img src="images/bank-card-icon.png" alt="Bank Card Icon" class="option-icon" />
+            <button type="button" class="option-btn" data-method="card">
+              <img src="https://via.placeholder.com/45" alt="Bank Card Icon" class="option-icon" />
               <span>Bank Card</span>
             </button>
           </div>
@@ -47,10 +54,10 @@
   </main>
 
   <footer role="contentinfo">
-    <p>© 2025 Neodynix Technologies. All rights reserved.</p>
+    <p>© 2025 Payment Portal. All rights reserved.</p>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="scripts/payment.js"></script>
+  <script src="https://checkout.flutterwave.com/v3/hosted/pay.js"></script>
+  <script src="payment.js"></script>
 </body>
   </html>
