@@ -32,7 +32,8 @@
   font-weight: 600;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 100%;
   padding: 12px;
   font-size: clamp(0.95rem, 2.5vw, 1rem);
@@ -43,15 +44,18 @@
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.form-group input:focus {
+.form-group select {
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px top 50%;
+}
+
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #03a9f4;
   box-shadow: 0 0 6px rgba(3, 169, 244, 0.5);
-}
-
-.form-group input:disabled {
-  background: #2c2c2c;
-  color: #aaa;
 }
 
 .payment-options .options-grid {
