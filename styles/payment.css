@@ -6,6 +6,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   text-align: center;
+  box-sizing: border-box; /* Ensure padding is included in width */
 }
 
 .payment-section h1 {
@@ -19,10 +20,12 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  width: 100%; /* Ensure form stays within container */
 }
 
 .form-group {
   text-align: left;
+  width: 100%; /* Ensure form-group stays within bounds */
 }
 
 .form-group label {
@@ -30,6 +33,7 @@
   color: #ddd;
   margin-bottom: 8px;
   font-weight: 600;
+  display: block; /* Ensure label doesn't overflow */
 }
 
 .form-group input,
@@ -42,6 +46,7 @@
   background: #121212;
   color: #fff;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-sizing: border-box; /* Prevent overflow from padding */
 }
 
 .form-group select {
@@ -58,10 +63,20 @@
   box-shadow: 0 0 6px rgba(3, 169, 244, 0.5);
 }
 
+.country-options {
+  margin-top: 15px;
+  width: 100%; /* Ensure suboption dropdown stays within bounds */
+}
+
+.suboption-select {
+  margin-top: 8px;
+}
+
 .payment-options .options-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 15px;
+  width: 100%; /* Ensure grid stays within container */
 }
 
 .option-btn {
@@ -74,6 +89,8 @@
   cursor: pointer;
   border: 1px solid #444;
   transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+  width: 100%; /* Ensure buttons fit within grid */
+  box-sizing: border-box;
 }
 
 .option-btn.selected {
@@ -112,6 +129,8 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.3s ease;
+  width: 100%; /* Ensure button stays within container */
+  box-sizing: border-box;
 }
 
 .btn-pay:hover {
@@ -148,4 +167,4 @@
   .options-grid {
     grid-template-columns: 1fr;
   }
-  }
+}
