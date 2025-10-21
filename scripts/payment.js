@@ -1,7 +1,7 @@
 const PESAPAL_CONSUMER_KEY = 'VSweLeBZVoHnCDWbUdrHaTJRks35lKte; // Replace with sandbox key
 const PESAPAL_CONSUMER_SECRET = 'eBHMwJof35KK5NVhANF6vyRHW00='; // Replace with sandbox secret
 const PESAPAL_IPN_NOTIFICATION_ID = 'temporary_id'; // Ignored for testing
-const PESAPAL_CALLBACK_URL = 'https://yourusername.github.io/your-repo/placeholder'; // Placeholder
+const PESAPAL_CALLBACK_URL = 'https://izzonix.github.io/Neodynix/index.html'; // Placeholder
 const PESAPAL_API_URL = 'https://cybqa.pesapal.com/api/v3/'; // Sandbox
 
 let accessToken = null;
