@@ -1,9 +1,8 @@
-// Replace with your actual Pesapal credentials
-const PESAPAL_CONSUMER_KEY = 'your_actual_consumer_key'; // From your business account
-const PESAPAL_CONSUMER_SECRET = 'your_actual_consumer_secret'; // From your business account
-const PESAPAL_IPN_NOTIFICATION_ID = 'your_actual_ipn_notification_id'; // Register IPN in Pesapal dashboard, get this ID
-const PESAPAL_CALLBACK_URL = 'https://yourdomain.com/callback'; // Your redirect URL after payment (must be HTTPS)
-const PESAPAL_API_URL = 'https://cybqa.pesapal.com/api/v3/'; // Use 'https://pay.pesapal.com/api/v3/' for production
+const PESAPAL_CONSUMER_KEY = 'your_sandbox_consumer_key'; // Replace with sandbox key
+const PESAPAL_CONSUMER_SECRET = 'your_sandbox_consumer_secret'; // Replace with sandbox secret
+const PESAPAL_IPN_NOTIFICATION_ID = 'temporary_id'; // Ignored for testing
+const PESAPAL_CALLBACK_URL = 'https://yourusername.github.io/your-repo/placeholder'; // Placeholder
+const PESAPAL_API_URL = 'https://cybqa.pesapal.com/api/v3/'; // Sandbox
 
 let accessToken = null;
 
@@ -31,18 +30,18 @@ async function getAccessToken() {
 
 async function submitOrder(formData) {
   const orderData = {
-    id: `ORDER_${Date.now()}`, // Unique merchant order ID
+    id: `ORDER_${Date.now()}`,
     currency: formData.currency,
     amount: parseFloat(formData.amount),
     description: 'Payment via Pesapal',
     callback_url: PESAPAL_CALLBACK_URL,
-    notification_id: PESAPAL_IPN_NOTIFICATION_ID,
+    // notification_id: PESAPAL_IPN_NOTIFICATION_ID, // Ignored for testing
     billing_address: {
       email_address: formData.email,
       first_name: formData.name.split(' ')[0] || 'N/A',
       last_name: formData.name.split(' ').slice(1).join(' ') || 'N/A'
     },
-    line_items: [ // Required: At least one line item
+    line_items: [
       {
         name: 'Payment',
         description: 'General Payment',
@@ -91,7 +90,6 @@ document.getElementById('payment-form').addEventListener('submit', async (e) => 
     method: document.getElementById('payment-method').value
   };
 
-  // Basic validation
   if (!formData.name || !formData.email || !formData.amount || parseFloat(formData.amount) <= 0) {
     showError('Please fill all fields with valid data');
     return;
