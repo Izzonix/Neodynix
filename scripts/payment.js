@@ -1,22 +1,23 @@
-const PESAPAL_CONSUMER_KEY = 'VSweLeBZVoHnCDWbUdrHaTJRks35lKte; // Replace with sandbox key
-const PESAPAL_CONSUMER_SECRET = 'eBHMwJof35KK5NVhANF6vyRHW00='; // Replace with sandbox secret
-const PESAPAL_IPN_NOTIFICATION_ID = 'temporary_id'; // Ignored for testing
-const PESAPAL_CALLBACK_URL = 'https://izzonix.github.io/Neodynix/index.html'; // Placeholder
-const PESAPAL_API_URL = 'https://cybqa.pesapal.com/api/v3/'; // Sandbox
+const PESAPAL_CONSUMER_KEY = 'VSweLeBZVoHnCDWbUdrHaTJRks35lKte'; // Replace with actual sandbox key
+const PESAPAL_CONSUMER_SECRET = 'eBHMwJof35KK5NVhANF6vyRHW00='; // Replace with actual sandbox secret
+const PESAPAL_CALLBACK_URL = 'https://izzonix.github.io/Neodynix/index.html'; // Your placeholder
+const PESAPAL_API_URL = 'https://cybqa.pesapal.com/pesapalv3/api/';
 
 let accessToken = null;
 
 async function getAccessToken() {
   if (accessToken) return accessToken;
-  const auth = btoa(`${PESAPAL_CONSUMER_KEY}:${PESAPAL_CONSUMER_SECRET}`);
   try {
-    const response = await fetch(`${PESAPAL_API_URL}Auth/GenerateToken`, {
+    const response = await fetch(`${PESAPAL_API_URL}Auth/RequestToken`, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${auth}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify({
+        consumer_key: PESAPAL_CONSUMER_KEY,
+        consumer_secret: PESAPAL_CONSUMER_SECRET
+      })
     });
     if (!response.ok) throw new Error('Token generation failed');
     const data = await response.json();
@@ -35,7 +36,6 @@ async function submitOrder(formData) {
     amount: parseFloat(formData.amount),
     description: 'Payment via Pesapal',
     callback_url: PESAPAL_CALLBACK_URL,
-    // notification_id: PESAPAL_IPN_NOTIFICATION_ID, // Ignored for testing
     billing_address: {
       email_address: formData.email,
       first_name: formData.name.split(' ')[0] || 'N/A',
@@ -66,13 +66,12 @@ async function submitOrder(formData) {
     const result = await response.json();
     if (response.ok && result.redirect_url) {
       document.getElementById('order-id').value = orderData.id;
-      document.getElementById('notification-id').value = PESAPAL_IPN_NOTIFICATION_ID;
       showSuccess('Payment initiated! Redirecting...');
       setTimeout(() => {
         window.location.href = result.redirect_url;
       }, 1000);
     } else {
-      showError(`Order submission failed: ${result.error || 'Unknown error'}`);
+      showError(`Error: ${result.error?.message || 'Order submission failed'}`);
     }
   } catch (error) {
     showError('Network error: Unable to process payment');
@@ -90,16 +89,16 @@ document.getElementById('payment-form').addEventListener('submit', async (e) => 
     method: document.getElementById('payment-method').value
   };
 
-  if (!formData.name || !formData.email || !formData.amount || parseFloat(formData.amount) <= 0) {
-    showError('Please fill all fields with valid data');
-    return;
-  }
-  if (!formData.method) {
-    showError('Please select a payment method');
+  if (!formData.name || !formData.email || !formData.amount || !formData.method) {
+    showError('Please fill all fields');
     return;
   }
   if (!emailIsValid(formData.email)) {
     showError('Please enter a valid email');
+    return;
+  }
+  if (parseFloat(formData.amount) <= 0 || isNaN(formData.amount)) {
+    showError('Please enter a valid amount');
     return;
   }
 
@@ -132,4 +131,4 @@ function showError(msg) {
   successMsg.style.display = 'none';
   errorMsg.textContent = msg;
   errorMsg.style.display = 'block';
-}
+        }
