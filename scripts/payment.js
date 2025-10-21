@@ -1,6 +1,6 @@
-const PESAPAL_CONSUMER_KEY = 'VSweLeBZVoHnCDWbUdrHaTJRks35lKte'; // Replace with actual sandbox key
-const PESAPAL_CONSUMER_SECRET = 'eBHMwJof35KK5NVhANF6vyRHW00='; // Replace with actual sandbox secret
-const PESAPAL_CALLBACK_URL = 'https://izzonix.github.io/Neodynix/index.html'; // Your placeholder
+const PESAPAL_CONSUMER_KEY = 'VSweLeBZVoHnCDWbUdrHaTJRks35lKte'; // Replace with your Pesapal sandbox key
+const PESAPAL_CONSUMER_SECRET = 'eBHMwJof35KK5NVhANF6vyRHW00='; // Replace with your Pesapal sandbox secret
+const PESAPAL_CALLBACK_URL = 'https://izzonix.github.io/Neodynix/index.html'; // Replace with valid HTTPS URL if needed
 const PESAPAL_API_URL = 'https://cybqa.pesapal.com/pesapalv3/api/';
 
 let accessToken = null;
@@ -19,8 +19,13 @@ async function getAccessToken() {
         consumer_secret: PESAPAL_CONSUMER_SECRET
       })
     });
-    if (!response.ok) throw new Error('Token generation failed');
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Token error response:', errorData);
+      throw new Error('Token generation failed');
+    }
     const data = await response.json();
+    console.log('Token response:', data);
     accessToken = data.token;
     return accessToken;
   } catch (error) {
@@ -64,6 +69,7 @@ async function submitOrder(formData) {
       body: JSON.stringify(orderData)
     });
     const result = await response.json();
+    console.log('Order response:', result);
     if (response.ok && result.redirect_url) {
       document.getElementById('order-id').value = orderData.id;
       showSuccess('Payment initiated! Redirecting...');
@@ -131,4 +137,4 @@ function showError(msg) {
   successMsg.style.display = 'none';
   errorMsg.textContent = msg;
   errorMsg.style.display = 'block';
-        }
+}
