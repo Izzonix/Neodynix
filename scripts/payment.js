@@ -1,87 +1,26 @@
-const PESAPAL_CONSUMER_KEY = 'VSweLeBZVoHnCDWbUdrHaTJRks35lKte'; // Replace with your Pesapal sandbox key
-const PESAPAL_CONSUMER_SECRET = 'eBHMwJof35KK5NVhANF6vyRHW00='; // Replace with your Pesapal sandbox secret
-const PESAPAL_CALLBACK_URL = 'https://izzonix.github.io/Neodynix/index.html'; // Replace with valid HTTPS URL if needed
-const PESAPAL_API_URL = 'https://cybqa.pesapal.com/pesapalv3/api/';
+import { supabaseUrl } from './supabase-config.js';
 
-let accessToken = null;
-
-async function getAccessToken() {
-  if (accessToken) return accessToken;
-  try {
-    const response = await fetch(`${PESAPAL_API_URL}Auth/RequestToken`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        consumer_key: PESAPAL_CONSUMER_KEY,
-        consumer_secret: PESAPAL_CONSUMER_SECRET
-      })
-    });
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Token error response:', errorData);
-      throw new Error('Token generation failed');
-    }
-    const data = await response.json();
-    console.log('Token response:', data);
-    accessToken = data.token;
-    return accessToken;
-  } catch (error) {
-    console.error('Auth error:', error);
-    throw error;
-  }
-}
+const PESAPAL_FUNCTION_URL = 'https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init'; // Your Supabase function URL
 
 async function submitOrder(formData) {
-  const orderData = {
-    id: `ORDER_${Date.now()}`,
-    currency: formData.currency,
-    amount: parseFloat(formData.amount),
-    description: 'Payment via Pesapal',
-    callback_url: PESAPAL_CALLBACK_URL,
-    billing_address: {
-      email_address: formData.email,
-      first_name: formData.name.split(' ')[0] || 'N/A',
-      last_name: formData.name.split(' ').slice(1).join(' ') || 'N/A'
-    },
-    line_items: [
-      {
-        name: 'Payment',
-        description: 'General Payment',
-        quantity: 1,
-        price: parseFloat(formData.amount),
-        subtotal: parseFloat(formData.amount)
-      }
-    ]
-  };
-
   try {
-    const token = await getAccessToken();
-    const response = await fetch(`${PESAPAL_API_URL}Transactions/SubmitOrderRequest`, {
+    const response = await fetch(PESAPAL_FUNCTION_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(orderData)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
     });
     const result = await response.json();
-    console.log('Order response:', result);
-    if (response.ok && result.redirect_url) {
-      document.getElementById('order-id').value = orderData.id;
-      showSuccess('Payment initiated! Redirecting...');
+    if (response.ok && result.success && result.redirect_url) {
+      showSuccess('Redirecting...');
       setTimeout(() => {
         window.location.href = result.redirect_url;
       }, 1000);
     } else {
-      showError(`Error: ${result.error?.message || 'Order submission failed'}`);
+      showError(`Error: ${result.error || 'Failed'}`);
     }
   } catch (error) {
-    showError('Network error: Unable to process payment');
-    console.error('Submit order error:', error);
+    showError('Network error');
+    console.error('Submit error:', error);
   }
 }
 
@@ -96,15 +35,15 @@ document.getElementById('payment-form').addEventListener('submit', async (e) => 
   };
 
   if (!formData.name || !formData.email || !formData.amount || !formData.method) {
-    showError('Please fill all fields');
+    showError('Fill all fields');
     return;
   }
   if (!emailIsValid(formData.email)) {
-    showError('Please enter a valid email');
+    showError('Invalid email');
     return;
   }
   if (parseFloat(formData.amount) <= 0 || isNaN(formData.amount)) {
-    showError('Please enter a valid amount');
+    showError('Invalid amount');
     return;
   }
 
@@ -137,4 +76,4 @@ function showError(msg) {
   successMsg.style.display = 'none';
   errorMsg.textContent = msg;
   errorMsg.style.display = 'block';
-}
+                 }
