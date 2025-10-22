@@ -1,66 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment Page</title>
-  <link rel="stylesheet" href="styles/payment.css" />
-  <link rel="stylesheet" href="main/payment.css" />
-</head>
-<body>
-  <main>
-    <section class="payment-section" role="region" aria-labelledby="payment-title">
-      <h1 id="payment-title">Secure Payment</h1>
-      <form id="payment-form" class="payment-form">
-        <div class="form-group">
-          <label for="name">Full Name</label>
-          <input type="text" id="name" name="name" placeholder="Enter full name" required />
-        </div>
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Enter email" required />
-        </div>
-        <div class="form-group">
-          <label for="amount">Amount</label>
-          <input type="number" id="amount" name="amount" placeholder="Enter amount" required min="0.01" step="0.01" />
-        </div>
-        <div class="form-group">
-          <label for="currency">Currency</label>
-          <select id="currency" name="currency" required>
-            <option value="UGX">UGX (Uganda Shilling)</option>
-            <option value="KES">KES (Kenya Shilling)</option>
-            <option value="TZS">TZS (Tanzania Shilling)</option>
-            <option value="USD">USD (US Dollar)</option>
-          </select>
-        </div>
-        <div class="form-group payment-options">
-          <label>Payment Method</label>
-          <div class="options-grid">
-            <button type="button" class="option-btn" data-method="mobilemoney">
-              <img src="images/mobile-money.png" alt="Mobile Money Icon" class="option-icon" />
-              <span>Mobile Money</span>
-            </button>
-            <button type="button" class="option-btn" data-method="card">
-              <img src="images/bank-card.png" alt="Bank Card Icon" class="option-icon" />
-              <span>Bank Card</span>
-            </button>
-          </div>
-          <input type="hidden" id="payment-method" name="payment-method" />
-        </div>
-        <input type="hidden" id="order-id" name="order-id" />
-        <input type="hidden" id="notification-id" name="notification-id" />
-        <button type="submit" class="btn btn-pay">Pay Now</button>
-      </form>
-      <p class="success-msg" id="success-msg">✅ Payment initiated! Redirecting...</p>
-      <p class="error-msg" id="error-msg">❌ Error: Check details and try again.</p>
-    </section>
-  </main>
+import { supabaseUrl } from './supabase-config.js';
 
-  <footer role="contentinfo">
-    <p>© 2025 Payment Portal. All rights reserved.</p>
-  </footer>
+const PESAPAL_FUNCTION_URL = 'https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init';
 
-  <script type="module" src="scripts/supabase-config.js"></script>
-  <script type="module" src="scripts/payment.js"></script>
-</body>
-  </html>
+async function submitOrder(formData) {
+  try {
+    const response = await fetch(PESAPAL_FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
+    const result = await response.json();
+    if (response.ok && result.success && result.redirect_url) {
+      showSuccess('Redirecting...');
+      setTimeout(() => {
+        window.location.href = result.redirect_url;
+      }, 1000);
+    } else {
+      showError(`Error: ${result.error || 'Failed'}`);
+    }
+  } catch (error) {
+    showError('Network error');
+    console.error('Submit error:', error);
+  }
+}
+
+document.getElementById('payment-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = {
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    amount: document.getElementById('amount').value,
+    currency: document.getElementById('currency').value,
+    method: document.getElementById('payment-method').value
+  };
+
+  if (!formData.name || !formData.email || !formData.amount || !formData.method) {
+    showError('Fill all fields');
+    return;
+  }
+  if (!emailIsValid(formData.email)) {
+    showError('Invalid email');
+    return;
+  }
+  if (parseFloat(formData.amount) <= 0 || isNaN(formData.amount)) {
+    showError('Invalid amount');
+    return;
+  }
+
+  await submitOrder(formData);
+});
+
+function emailIsValid(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+document.querySelectorAll('.option-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    document.getElementById('payment-method').value = btn.dataset.method;
+  });
+});
+
+function showSuccess(msg) {
+  const successMsg = document.getElementById('success-msg');
+  const errorMsg = document.getElementById('error-msg');
+  errorMsg.style.display = 'none';
+  successMsg.textContent = msg;
+  successMsg.style.display = 'block';
+}
+
+function showError(msg) {
+  const successMsg = document.getElementById('success-msg');
+  const errorMsg = document.getElementById('error-msg');
+  successMsg.style.display = 'none';
+  errorMsg.textContent = msg;
+  errorMsg.style.display = 'block';
+}
