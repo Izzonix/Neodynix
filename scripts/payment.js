@@ -1,6 +1,6 @@
 import { supabaseUrl } from './supabase-config.js';
 
-const PESAPAL_FUNCTION_URL = 'https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init'; // Your Supabase function URL
+const PESAPAL_FUNCTION_URL = 'https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init';
 
 async function submitOrder(formData) {
   try {
@@ -76,4 +76,4 @@ function showError(msg) {
   successMsg.style.display = 'none';
   errorMsg.textContent = msg;
   errorMsg.style.display = 'block';
-                 }
+                                                 }
