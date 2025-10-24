@@ -1,33 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>PesaPal Payment Test</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Import Supabase config -->
-  <script type="module" src="scripts/supabase-config.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
   <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
     <h1 class="text-2xl font-bold mb-4 text-center">PesaPal Payment</h1>
+
     <form id="paymentForm" class="space-y-4">
       <div>
         <label class="block text-sm font-medium text-gray-700">First Name</label>
-        <input type="text" id="first_name" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+        <input type="text" id="first_name" required class="mt-1 block w-full p-2 border border-gray-300 rounded" />
       </div>
+
       <div>
         <label class="block text-sm font-medium text-gray-700">Last Name</label>
-        <input type="text" id="last_name" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+        <input type="text" id="last_name" required class="mt-1 block w-full p-2 border border-gray-300 rounded" />
       </div>
+
       <div>
         <label class="block text-sm font-medium text-gray-700">Email</label>
-        <input type="email" id="email" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+        <input type="email" id="email" required class="mt-1 block w-full p-2 border border-gray-300 rounded" />
       </div>
+
       <div>
         <label class="block text-sm font-medium text-gray-700">Amount</label>
-        <input type="number" id="amount" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
+        <input type="number" id="amount" required class="mt-1 block w-full p-2 border border-gray-300 rounded" />
       </div>
+
       <div>
         <label class="block text-sm font-medium text-gray-700">Currency</label>
         <select id="currency" required class="mt-1 block w-full p-2 border border-gray-300 rounded">
@@ -36,25 +39,44 @@
           <option value="KES">KES</option>
         </select>
       </div>
+
       <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Pay Now</button>
     </form>
-    <p id="error" class="text-red-500 mt-4 hidden"></p>
+
+    <p id="error" class="text-red-500 mt-4 hidden whitespace-pre-wrap"></p>
+    <pre id="debug" class="text-xs text-gray-600 mt-3 hidden"></pre>
   </div>
 
   <script type="module">
-    import { SUPABASE_ANON_KEY } from './scripts/supabase-config.js';
+    // ---------------------------
+    // Paste the Supabase anon key directly (as requested)
+    // ---------------------------
+    const SUPABASE_URL = 'https://spnxywyrjbwbwntblcjl.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwbnh5d3lyamJ3YndudGJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NDc2NDYsImV4cCI6MjA3MjIyMzY0Nn0.Kjta7PEMwTcq1uu5RuKYKvEPPjpR3ko5KCwR8Qh4b6E';
 
     const form = document.getElementById('paymentForm');
     const error = document.getElementById('error');
+    const debug = document.getElementById('debug');
+
+    function showError(msg) {
+      error.textContent = msg;
+      error.classList.remove('hidden');
+    }
+
+    function showDebug(msg) {
+      debug.textContent = msg;
+      debug.classList.remove('hidden');
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       error.classList.add('hidden');
+      debug.classList.add('hidden');
 
       const data = {
-        first_name: document.getElementById('first_name').value,
-        last_name: document.getElementById('last_name').value,
-        email: document.getElementById('email').value,
+        first_name: document.getElementById('first_name').value.trim(),
+        last_name: document.getElementById('last_name').value.trim(),
+        email: document.getElementById('email').value.trim(),
         amount: parseFloat(document.getElementById('amount').value),
         currency: document.getElementById('currency').value,
       };
@@ -62,27 +84,53 @@
       console.log('Request Data:', data);
 
       try {
-        const response = await fetch('https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init', {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/pesapal-init`, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY
+            // include both apikey and Authorization for compatibility
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
           },
           body: JSON.stringify(data),
         });
 
-        const result = await response.json();
-        console.log('Full Response:', result);
+        // read response as text first - sometimes the function returns non-json
+        const text = await res.text();
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (err) {
+          // not JSON — show raw response for debugging
+          showError(`Request failed (HTTP ${res.status}). See debug box for raw response.`);
+          showDebug(`HTTP ${res.status} ${res.statusText}\n\n${text}`);
+          return;
+        }
 
-        if (result.checkoutUrl) {
-          window.location.href = result.checkoutUrl;
+        console.log('Result JSON:', result);
+
+        // handle non-2xx status
+        if (!res.ok) {
+          // PesaPal or function error payloads often have useful messages
+          const msg = result?.error?.message || result?.message || JSON.stringify(result);
+          showError(`Request failed (HTTP ${res.status}): ${msg}`);
+          showDebug(JSON.stringify(result, null, 2));
+          return;
+        }
+
+        // check for checkout url (matches your backend)
+        const url = result.checkoutUrl || result.redirect_url || result.checkout_url || result.redirectUrl;
+        if (url) {
+          // redirect to PesaPal checkout
+          window.location.href = url;
         } else {
-          error.textContent = result.error?.message || 'Payment initiation failed';
-          error.classList.remove('hidden');
+          // show returned object for debugging
+          showError('Payment initiation failed: no checkout url in response.');
+          showDebug(JSON.stringify(result, null, 2));
         }
       } catch (err) {
-        error.textContent = 'Error: ' + err.message;
-        error.classList.remove('hidden');
+        showError('Network error: ' + err.message);
+        console.error(err);
       }
     });
   </script>
