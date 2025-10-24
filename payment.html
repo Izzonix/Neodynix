@@ -51,7 +51,7 @@
         first_name: document.getElementById('first_name').value,
         last_name: document.getElementById('last_name').value,
         email: document.getElementById('email').value,
-        amount: parseFloat(document.getElementById('amount').value), // Ensure number
+        amount: parseFloat(document.getElementById('amount').value),
         currency: document.getElementById('currency').value,
       };
 
@@ -67,8 +67,8 @@
         const result = await response.json();
         console.log('Full Response:', result); // Debug response
 
-        if (result.redirect_url) { // Match backend's key
-          window.location.href = result.redirect_url;
+        if (result.checkoutUrl) { // ✅ Changed to match backend
+          window.location.href = result.checkoutUrl;
         } else {
           error.textContent = result.error?.message || 'Payment initiation failed';
           error.classList.remove('hidden');
@@ -80,4 +80,4 @@
     });
   </script>
 </body>
-</html>
+          </html>
