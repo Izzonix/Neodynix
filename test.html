@@ -28,16 +28,12 @@
   </form>
 
   <script type="module">
-    // Optional: Import supabase-config.js if it exists
-    // import { SUPABASE_FUNCTION_URL } from './supabase-config.js';
-
-    // Fallback: Hardcode the URL (replace with your correct project ID)
-    const SUPABASE_FUNCTION_URL = "https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init"; // Corrected project ID and function name
+    const SUPABASE_FUNCTION_URL = "https://spnxywrjbwntbjc.supabase.co/functions/v1/pesapal-init";
 
     document.getElementById("payment-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const statusDiv = document.getElementById("status");
-      statusDiv.textContent = "Processing...";
+      statusDiv.textContent = "Processing payment...";
 
       const data = {
         first_name: document.getElementById("first_name").value,
@@ -54,20 +50,25 @@
           body: JSON.stringify(data),
         });
 
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
         const result = await response.json();
         console.log("Server Response:", result);
 
-        if (response.ok && result.checkoutUrl) {
-          window.location.href = result.checkoutUrl;
+        if (result.checkoutUrl) {
+          statusDiv.textContent = "Redirecting to payment page...";
+          window.location.href = result.checkoutUrl; // Immediate redirect
         } else {
           statusDiv.textContent = `Failed to create payment session: ${result.error || "No checkout URL"}`;
           console.error("Payment failed:", result);
         }
       } catch (err) {
-        statusDiv.textContent = "Network error — check console for details.";
+        statusDiv.textContent = `Error: ${err.message} — Check console for details.`;
         console.error("Fetch error:", err);
       }
     });
   </script>
 </body>
-</html>
+  </html>
