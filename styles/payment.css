@@ -6,7 +6,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   text-align: center;
-  box-sizing: border-box; /* Ensure padding is included in width */
+  box-sizing: border-box;
 }
 
 .payment-section h1 {
@@ -20,12 +20,12 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  width: 100%; /* Ensure form stays within container */
+  width: 100%;
 }
 
 .form-group {
   text-align: left;
-  width: 100%; /* Ensure form-group stays within bounds */
+  width: 100%;
 }
 
 .form-group label {
@@ -33,7 +33,7 @@
   color: #ddd;
   margin-bottom: 8px;
   font-weight: 600;
-  display: block; /* Ensure label doesn't overflow */
+  display: block;
 }
 
 .form-group input,
@@ -46,7 +46,7 @@
   background: #121212;
   color: #fff;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  box-sizing: border-box; /* Prevent overflow from padding */
+  box-sizing: border-box;
 }
 
 .form-group select {
@@ -63,62 +63,6 @@
   box-shadow: 0 0 6px rgba(3, 169, 244, 0.5);
 }
 
-.country-options {
-  margin-top: 15px;
-  width: 100%; /* Ensure suboption dropdown stays within bounds */
-}
-
-.suboption-select {
-  margin-top: 8px;
-}
-
-.payment-options .options-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 15px;
-  width: 100%; /* Ensure grid stays within container */
-}
-
-.option-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: #292929;
-  padding: 15px;
-  border-radius: 8px;
-  cursor: pointer;
-  border: 1px solid #444;
-  transition: background 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
-  width: 100%; /* Ensure buttons fit within grid */
-  box-sizing: border-box;
-}
-
-.option-btn.selected {
-  background: #4fc3f7;
-  color: #000;
-  border-color: #03a9f4;
-}
-
-.option-btn:hover {
-  background: #3a3a3a;
-  transform: translateY(-2px);
-}
-
-.option-btn.selected:hover {
-  background: #03a9f4;
-}
-
-.option-icon {
-  width: 45px;
-  height: 45px;
-  margin-bottom: 10px;
-}
-
-.option-btn span {
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
-  font-weight: 600;
-}
-
 .btn-pay {
   background: #4fc3f7;
   color: #000;
@@ -129,7 +73,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.3s ease;
-  width: 100%; /* Ensure button stays within container */
+  width: 100%;
   box-sizing: border-box;
 }
 
@@ -163,8 +107,4 @@
   .payment-section h1 {
     font-size: clamp(1.7rem, 5vw, 2rem);
   }
-
-  .options-grid {
-    grid-template-columns: 1fr;
   }
-}
