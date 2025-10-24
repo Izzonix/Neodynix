@@ -29,13 +29,17 @@
 
   <script type="module">
     const SUPABASE_FUNCTION_URL = "https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init";
-    const MAX_RETRIES = 2; // Retry up to 2 times
+    const MAX_RETRIES = 2;
+    const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwbnh5d3lyamJ3YndudGJsY2psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NDc2NDYsImV4cCI6MjA3MjIyMzY0Nn0.Kjta7PEMwTcq1uu5RuKYKvEPPjpR3ko5KCwR8Qh4b6E"; // Your anon key
 
     async function makePaymentRequest(data, attempt = 1) {
       try {
         const response = await fetch(SUPABASE_FUNCTION_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${ANON_KEY}` // Using anon key
+          },
           body: JSON.stringify(data),
         });
 
@@ -86,4 +90,4 @@
     });
   </script>
 </body>
-      </html>
+</html>
