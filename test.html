@@ -29,6 +29,38 @@
 
   <script type="module">
     const SUPABASE_FUNCTION_URL = "https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init";
+    const MAX_RETRIES = 2; // Retry up to 2 times
+
+    async function makePaymentRequest(data, attempt = 1) {
+      try {
+        const response = await fetch(SUPABASE_FUNCTION_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          if (attempt <= MAX_RETRIES && response.status === 401) {
+            console.log(`Attempt ${attempt} failed with 401. Retrying...`);
+            return makePaymentRequest(data, attempt + 1);
+          }
+          throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log("Raw Response:", await response.text());
+        console.log("Parsed Response:", result);
+
+        if (result.checkoutUrl) {
+          return result.checkoutUrl;
+        } else {
+          throw new Error(`No checkout URL: ${result.error || "Unknown reason"}`);
+        }
+      } catch (err) {
+        throw err;
+      }
+    }
 
     document.getElementById("payment-form").addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -44,31 +76,14 @@
       };
 
       try {
-        const response = await fetch(SUPABASE_FUNCTION_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log("Server Response:", result);
-
-        if (result.checkoutUrl) {
-          statusDiv.textContent = "Redirecting to payment page...";
-          window.location.href = result.checkoutUrl; // Immediate redirect
-        } else {
-          statusDiv.textContent = `Failed to create payment session: ${result.error || "No checkout URL"}`;
-          console.error("Payment failed:", result);
-        }
+        const checkoutUrl = await makePaymentRequest(data);
+        statusDiv.textContent = "Redirecting to payment page...";
+        window.location.href = checkoutUrl;
       } catch (err) {
-        statusDiv.textContent = `Error: ${err.message} — Check console for details.`;
-        console.error("Fetch error:", err);
+        statusDiv.textContent = `Error: ${err.message} — Check console and network tab for details.`;
+        console.error("Payment error:", err);
       }
     });
   </script>
 </body>
-  </html>
+      </html>
