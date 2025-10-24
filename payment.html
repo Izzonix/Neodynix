@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PesaPal Payment Test</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Import your Supabase config -->
+  <script type="module" src="scripts/supabase-config.js"></script>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
   <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -39,7 +41,9 @@
     <p id="error" class="text-red-500 mt-4 hidden"></p>
   </div>
 
-  <script>
+  <script type="module">
+    import { SUPABASE_ANON_KEY } from './scripts/supabase-config.js';
+
     const form = document.getElementById('paymentForm');
     const error = document.getElementById('error');
 
@@ -60,14 +64,17 @@
       try {
         const response = await fetch('https://spnxywyrjbwbwntblcjl.supabase.co/functions/v1/pesapal-init', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_ANON_KEY
+          },
           body: JSON.stringify(data),
         });
 
         const result = await response.json();
         console.log('Full Response:', result); // Debug response
 
-        if (result.checkoutUrl) { // ✅ Changed to match backend
+        if (result.checkoutUrl) {
           window.location.href = result.checkoutUrl;
         } else {
           error.textContent = result.error?.message || 'Payment initiation failed';
@@ -80,4 +87,4 @@
     });
   </script>
 </body>
-          </html>
+</html>
