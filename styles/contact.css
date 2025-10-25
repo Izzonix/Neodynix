@@ -278,6 +278,9 @@ footer {
   border: 1px solid #80deea !important;
   border-radius: 12px !important;
   padding: 24px !important;
+  box-sizing: border-box !important;
+  width: 90% !important;
+  max-width: 400px !important;
 }
 
 #startChatPopup h3 {
@@ -294,6 +297,9 @@ footer {
   border-radius: 8px !important;
   padding: 12px !important;
   font-size: clamp(0.9rem, 2.5vw, 1rem) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-bottom: 15px !important;
 }
 
 #startChatPopup button {
@@ -303,6 +309,8 @@ footer {
   padding: 12px 24px !important;
   font-size: clamp(0.9rem, 2.5vw, 1rem) !important;
   transition: background 0.3s, transform 0.2s !important;
+  border: none !important;
+  cursor: pointer !important;
 }
 
 #startChatPopup button:hover {
@@ -355,7 +363,8 @@ footer {
 
   #startChatPopup {
     padding: 20px !important;
-    width: 90% !important;
+    width: 95% !important;
+    max-width: 350px !important;
   }
 }
 
@@ -412,4 +421,4 @@ footer {
     font-size: clamp(0.8rem, 2.2vw, 0.9rem) !important;
     padding: 10px !important;
   }
-                   }
+  }
