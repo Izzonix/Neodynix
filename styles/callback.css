@@ -1,99 +1,137 @@
-body { 
-  font-family: Arial, sans-serif;
+body {
   background: #121212;
-  color: #fff;
-  padding: 10px;
-} 
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #f0f0f0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
 .callback-section {
-  max-width: min(90vw, 800px);
-  margin: clamp(20px, 5vw, 40px) auto;
+  max-width: min(90vw, 600px);
+  margin: clamp(30px, 6vw, 50px) auto;
   background: #1e1e1e;
-  padding: clamp(15px, 4vw, 25px);
+  padding: clamp(20px, 5vw, 30px);
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   text-align: center;
   box-sizing: border-box;
+  border: 1px solid #4fc3f733;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.callback-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 .callback-section h1 {
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-size: clamp(1.6rem, 4.5vw, 2.2rem);
   color: #4fc3f7;
   margin-bottom: clamp(15px, 3vw, 20px);
   font-weight: 700;
+  text-shadow: 0 0 5px rgba(79, 195, 247, 0.3);
 }
 
 #status-message {
-  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-size: clamp(1.2rem, 3.5vw, 1.4rem);
+  color: #4fc3f7;
+  margin-bottom: clamp(20px, 4vw, 25px);
+  font-weight: 600;
+  background: #4fc3f71a;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+#status-message.error {
+  color: #ff4444;
+  background: #ff44441a;
+}
+
+.transaction-details {
+  font-size: clamp(0.9rem, 2.2vw, 1rem);
   color: #ddd;
-  margin-bottom: clamp(10px, 2.5vw, 15px);
+  text-align: left;
+  max-width: min(80vw, 450px);
+  margin: 0 auto;
+  background: #2a2a2a;
+  padding: clamp(10px, 2.5vw, 15px);
+  border-radius: 8px;
+  border: 1px solid #4fc3f71a;
 }
 
-.transaction-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: clamp(10px, 2.5vw, 15px);
-  font-size: clamp(0.85rem, 2vw, 0.95rem);
+.transaction-details p {
+  margin: clamp(8px, 2vw, 10px) 0;
+  line-height: 1.5;
 }
 
-.transaction-table th,
-.transaction-table td {
-  padding: clamp(8px, 2vw, 10px);
-  color: #ddd;
-  border: 1px solid #4fc3f7;
-  word-break: break-word;
-}
-
-.transaction-table th {
-  background: #292929;
+.transaction-details strong {
+  color: #4fc3f7;
   font-weight: 600;
 }
 
-.transaction-table td {
-  background: #121212;
+/* Footer */
+footer {
+  background: linear-gradient(180deg, #2a2a2a 0%, #1e1e1e 100%);
+  padding: 40px 20px;
+  text-align: center;
+  color: #aaaaaa;
+  border-top: 2px solid #4fc3f7;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.3);
+}
+
+footer p {
+  margin: 0;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+  font-weight: 500;
 }
 
 @media (max-width: 600px) {
+  .callback-section {
+    margin: clamp(15px, 4vw, 20px);
+    padding: clamp(15px, 3.5vw, 20px);
+  }
+
+  .callback-section h1 {
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+  }
+
+  #status-message {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    padding: 8px;
+  }
+
+  .transaction-details {
+    font-size: clamp(0.85rem, 2vw, 0.9rem);
+    max-width: 90vw;
+    padding: clamp(8px, 2vw, 12px);
+  }
+
+  footer {
+    padding: 30px 15px;
+  }
+    }
+@media (max-width: 400px) {
   .callback-section {
     margin: clamp(10px, 3vw, 15px);
     padding: clamp(10px, 3vw, 15px);
   }
 
-  .callback-section h1 {
-    font-size: clamp(1.3rem, 3.5vw, 1.7rem);
+  .transaction-details {
+    max-width: 95vw;
   }
 
-  .transaction-table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
+  .transaction-details p {
+    margin: clamp(6px, 1.5vw, 8px) 0;
   }
 
-  .transaction-table thead,
-  .transaction-table tbody,
-  .transaction-table tr {
-    display: block;
-  }
-
-  .transaction-table th,
-  .transaction-table td {
-    min-width: 120px;
-    display: inline-block;
-    text-align: left;
-  }
-
-  .transaction-table th {
-    font-size: clamp(0.8rem, 2vw, 0.9rem);
-  }
-
-  .transaction-table td {
-    font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+  footer {
+    padding: 30px 15px;
   }
 }
-
-@media (max-width: 400px) {
-  .transaction-table th,
-  .transaction-table td {
-    min-width: 100px;
-    padding: clamp(6px, 1.5vw, 8px);
-  }
-                       }
