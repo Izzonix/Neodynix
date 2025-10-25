@@ -2,7 +2,7 @@ body {
   font-family: Arial, sans-serif;
   background: #121212;
   color: #fff;
-  padding: 30px;
+  padding: 10px;
 } 
 .callback-section {
   max-width: min(90vw, 800px);
