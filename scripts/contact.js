@@ -256,6 +256,10 @@ window.onload = async () => {
   }
 };
 
+// Ensure buttons have clear titles for accessibility
+sendChat.title = 'Send Message';
+attachFile.title = 'Attach File';
+
 sendChat.addEventListener('click', async () => {
   let text = chatInput.value.trim();
   if (text && user) {
@@ -298,7 +302,7 @@ fileInput.addEventListener('change', () => {
       <div class="file-preview-item" style="display: flex; align-items: center; gap: 10px;">
         <span>${file.name}</span>
         <button class="delete-file" title="Remove File">✖</button>
-        <button class="send-file" style="padding: 5px 10px; background: #4fc3f7; border: none; border-radius: 5px; color: #000; cursor: pointer;">Send File</button>
+        <button class="send-file" style="padding: 5px 10px; background: #4fc3f7; border: none; border-radius: 5px; color: #000; cursor: pointer;" title="Send File">Send File</button>
         <span class="loading-spinner" style="display: none; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #4fc3f7; border-radius: 50%; animation: spin 1s linear infinite;"></span>
       </div>
       <style>
