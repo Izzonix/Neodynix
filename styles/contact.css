@@ -258,7 +258,6 @@ main {
 .chat-input button img {
   width: 22px;
   height: 22px;
-  filter: brightness(0) invert(1);
 }
 
 .chat-input button:hover {
