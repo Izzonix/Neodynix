@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const category = urlParams.get('category');
+  let category = urlParams.get('category');
+  category = category ? category.toLowerCase() : null;
   const fieldsContainer = document.getElementById('categoryFields');
   const docForm = document.getElementById('docForm');
 
