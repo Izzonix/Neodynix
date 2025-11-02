@@ -1,15 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Get category from URL
   const urlParams = new URLSearchParams(window.location.search);
   let category = urlParams.get('category');
 
-  console.log('Raw category from URL:', category);
+  console.log('Category from URL:', category);
 
   const fieldsContainer = document.getElementById('categoryFields');
   const docForm = document.getElementById('docForm');
 
-  // Normalize: lowercase + trim
   if (category) category = category.trim().toLowerCase();
 
+  // Mapping of fields per category
   const fieldMap = {
     business: [
       { id: 'businessName', label: 'Business Name', type: 'text' },
@@ -77,90 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
       { id: 'numStaff', label: 'Number of Staff/Volunteers', type: 'number' },
       { id: 'additionalInfo', label: 'More About Your Charity', type: 'textarea' }
-    ],
-    blog: [
-      { id: 'blogName', label: 'Blog Name', type: 'text' },
-      { id: 'topics', label: 'Blog Topics', type: 'textarea' },
-      { id: 'contactPersonBlog', label: 'Contact Person', type: 'text' },
-      { id: 'postingFrequency', label: 'Posting Frequency', type: 'text' },
-      { id: 'nicheFocus', label: 'Niche Focus', type: 'text' },
-      { id: 'monetizationPlans', label: 'Monetization Plans', type: 'textarea' },
-      { id: 'authorBio', label: 'Author Bio', type: 'textarea' },
-      { id: 'relatedCategories', label: 'Related Categories', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Contributors', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Blog', type: 'textarea' }
-    ],
-    healthcare: [
-      { id: 'facilityName', label: 'Facility Name', type: 'text' },
-      { id: 'services', label: 'Medical Services', type: 'textarea' },
-      { id: 'contactPersonHealthcare', label: 'Contact Person', type: 'text' },
-      { id: 'specialties', label: 'Specialties', type: 'textarea' },
-      { id: 'certifications', label: 'Certifications', type: 'textarea' },
-      { id: 'patientResources', label: 'Patient Resources', type: 'textarea' },
-      { id: 'emergencyContacts', label: 'Emergency Contacts', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Facility', type: 'textarea' }
-    ],
-    event: [
-      { id: 'eventName', label: 'Event Name', type: 'text' },
-      { id: 'eventDetails', label: 'Event Details', type: 'textarea' },
-      { id: 'contactPersonEvent', label: 'Contact Person', type: 'text' },
-      { id: 'dateLocation', label: 'Date/Location', type: 'text' },
-      { id: 'expectedAttendance', label: 'Expected Attendance', type: 'number' },
-      { id: 'sponsorshipNeeds', label: 'Sponsorship Needs', type: 'textarea' },
-      { id: 'agenda', label: 'Agenda/Schedule', type: 'textarea' },
-      { id: 'registrationDetails', label: 'Registration Details', type: 'textarea' },
-      { id: 'vision', label: 'Vision for the Event', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Volunteers', type: 'number' },
-      { id: 'additionalInfo', label: 'More About the Event', type: 'textarea' }
-    ],
-    church: [
-      { id: 'churchName', label: 'Church Name', type: 'text' },
-      { id: 'services', label: 'Services/Events', type: 'textarea' },
-      { id: 'contactPersonChurch', label: 'Contact Person', type: 'text' },
-      { id: 'denomination', label: 'Denomination', type: 'text' },
-      { id: 'membershipSize', label: 'Membership Size', type: 'number' },
-      { id: 'upcomingEvents', label: 'Upcoming Events', type: 'textarea' },
-      { id: 'sermonArchives', label: 'Sermon Archives', type: 'textarea' },
-      { id: 'communityOutreach', label: 'Community Outreach', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Volunteers', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Church', type: 'textarea' }
-    ],
-    nonprofit: [
-      { id: 'nonprofitName', label: 'Non-profit Name', type: 'text' },
-      { id: 'mission', label: 'Mission Statement', type: 'textarea' },
-      { id: 'contactPersonNonprofit', label: 'Contact Person', type: 'text' },
-      { id: 'legalStatus', label: 'Legal Status', type: 'text' },
-      { id: 'impactMetrics', label: 'Impact Metrics', type: 'textarea' },
-      { id: 'volunteerOpportunities', label: 'Volunteer Opportunities', type: 'textarea' },
-      { id: 'annualReports', label: 'Annual Reports', type: 'textarea' },
-      { id: 'partnershipInfo', label: 'Partnership Info', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Volunteers', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Non-profit', type: 'textarea' }
-    ],
-    other: [
-      { id: 'otherName', label: 'Organization Name', type: 'text' },
-      { id: 'services', label: 'Services/Products', type: 'textarea' },
-      { id: 'contactPersonOther', label: 'Contact Person', type: 'text' },
-      { id: 'orgType', label: 'Type of Organization', type: 'text' },
-      { id: 'keyGoals', label: 'Key Goals', type: 'textarea' },
-      { id: 'uniqueRequirements', label: 'Unique Requirements', type: 'textarea' },
-      { id: 'customSections', label: 'Custom Sections Needed', type: 'textarea' },
-      { id: 'integrations', label: 'Integration Needs (e.g., forms, maps)', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Organization', type: 'textarea' }
     ]
+    // Add other categories as needed
   };
 
   // Validate category
@@ -175,10 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const fields = fieldMap[category];
 
-  // Build fields dynamically
+  // Generate form fields dynamically
   fields.forEach(f => {
     const wrapper = document.createElement('div');
     wrapper.style.marginBottom = '1.5rem';
+    wrapper.style.padding = '0 5px';
 
     const label = document.createElement('label');
     label.htmlFor = f.id;
@@ -186,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const input = document.createElement(f.type === 'textarea' ? 'textarea' : 'input');
     input.id = input.name = f.id;
-    input.type = f.type;
+    if (f.type !== 'textarea') input.type = f.type;
     input.required = true;
     if (f.type === 'textarea') input.rows = 4;
 
@@ -195,9 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fieldsContainer.appendChild(wrapper);
   });
 
-  // Keep page from reloading on submit
+  // Handle form submission
   docForm.addEventListener('submit', e => {
-    e.preventDefault();
+    e.preventDefault(); // prevent page reload
+
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     let y = 20;
@@ -207,17 +128,22 @@ document.addEventListener('DOMContentLoaded', () => {
     y += 20;
 
     const formData = new FormData(docForm);
+
     fields.forEach(f => {
       const val = formData.get(f.id)?.trim();
       if (val) {
+        doc.setFontSize(12);
         const lines = doc.splitTextToSize(`${f.label}: ${val}`, 170);
         doc.text(lines, 20, y);
         y += lines.length * 7 + 5;
-        if (y > 280) { doc.addPage(); y = 20; }
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
       }
     });
 
+    // Download PDF
     doc.save(`${category}-document.pdf`);
-    setTimeout(() => location.href = 'followup.html', 800);
   });
 });
