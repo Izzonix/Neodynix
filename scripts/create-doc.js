@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
-  let category = urlParams.get('category')?.toLowerCase();
+  let category = urlParams.get('category');
+
+  console.log('Raw category from URL:', category);
 
   const fieldsContainer = document.getElementById('categoryFields');
   const docForm = document.getElementById('docForm');
+
+  // Normalize: lowercase + trim
+  if (category) category = category.trim().toLowerCase();
 
   const fieldMap = {
     business: [
@@ -158,62 +163,82 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
   };
 
-  // ---- Validate category ----------------------------------------------------
+  // Validate category
   if (!category || !fieldMap[category]) {
     fieldsContainer.innerHTML = `
-      <p>Invalid or missing category.</p>
-      <p><a href="followup.html">← Back to form</a></p>
+      <p style="color:#ff4444; font-weight:bold;">Invalid category: "<code>${urlParams.get('category') || 'none'}</code>"</p>
+      <p>Valid options: <code>${Object.keys(fieldMap).join(', ')}</code></p>
+      <p><a href="followup.html" style="color:#4fc3f7;">Back to form</a></p>
     `;
     return;
   }
 
   const fields = fieldMap[category];
 
-  // ---- Build dynamic fields -------------------------------------------------
+  // Build fields with mobile-friendly wrapper
   fields.forEach(f => {
+    const wrapper = document.createElement('div');
+    wrapper.style.marginBottom = '1.5rem';
+    wrapper.style.padding = '0 5px';
+
     const label = document.createElement('label');
     label.htmlFor = f.id;
     label.textContent = f.label;
+    label.style.display = 'block';
+    label.style.marginBottom = '0.5rem';
+    label.style.fontWeight = '600';
+    label.style.color = '#fff';
+    label.style.fontSize = '1rem';
 
     const input = document.createElement(f.type === 'textarea' ? 'textarea' : 'input');
     input.id = input.name = f.id;
     input.type = f.type;
     input.required = true;
+    input.style.width = '100%';
+    input.style.padding = '12px';
+    input.style.border = '1px solid #444';
+    input.style.borderRadius = '6px';
+    input.style.backgroundColor = '#292929';
+    input.style.color = '#eee';
+    input.style.fontSize = '1rem';
+    input.style.boxSizing = 'border-box';
+    if (f.type === 'textarea') input.rows = 4;
 
-    fieldsContainer.appendChild(label);
-    fieldsContainer.appendChild(input);
+    wrapper.appendChild(label);
+    wrapper.appendChild(input);
+    fieldsContainer.appendChild(wrapper);
   });
 
-  // Fix mobile visibility: make container scrollable
+  // Ensure scroll on mobile
   fieldsContainer.style.overflowY = 'auto';
   fieldsContainer.style.maxHeight = '70vh';
+  fieldsContainer.style.padding = '1rem';
+  fieldsContainer.style.boxSizing = 'border-box';
 
-  // ---- Submit → generate PDF ------------------------------------------------
+  // Submit → Generate PDF
   docForm.addEventListener('submit', e => {
     e.preventDefault();
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     let y = 20;
 
-    const title = `${category.charAt(0).toUpperCase() + category.slice(1)} Document`;
-    doc.text(title, 20, y);
-    y += 15;
+    doc.setFontSize(16);
+    doc.text(`${category.charAt(0).toUpperCase() + category.slice(1)} Document`, 20, y);
+    y += 20;
 
     const formData = new FormData(docForm);
     fields.forEach(f => {
       const val = formData.get(f.id)?.trim();
       if (val) {
+        doc.setFontSize(12);
         const lines = doc.splitTextToSize(`${f.label}: ${val}`, 170);
         doc.text(lines, 20, y);
         y += lines.length * 7 + 5;
-        if (y > 280) {
-          doc.addPage();
-          y = 20;
-        }
+        if (y > 280) { doc.addPage(); y = 20; }
       }
     });
 
     doc.save(`${category}-document.pdf`);
-    setTimeout(() => location.href = 'followup.html', 500);
+    setTimeout(() => location.href = 'followup.html', 800);
   });
 });
