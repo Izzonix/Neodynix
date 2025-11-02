@@ -318,7 +318,7 @@ input[type="range"]::-moz-range-thumb {
   border-color: #03a9f4;
 }
 
-#colorPickerContainer, #emailContainer, #phoneContainer, #domainNameContainer, #socialMediaLinkContainer {
+#colorPickerContainer, #emailContainer, #phoneContainer, #domainNameContainer, #socialMediaLinkContainer, #categoryDocumentContainer {
   margin-top: 10px;
 }
 
