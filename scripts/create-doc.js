@@ -184,6 +184,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fieldsContainer.appendChild(input);
   });
 
+  // Fix mobile visibility: make container scrollable
+  fieldsContainer.style.overflowY = 'auto';
+  fieldsContainer.style.maxHeight = '70vh';
+
   // ---- Submit → generate PDF ------------------------------------------------
   docForm.addEventListener('submit', e => {
     e.preventDefault();
