@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const createDocBtn = document.getElementById('createDocBtn');
   let socialMediaList = [];
 
-  // Toggle category document field
   function toggleCategoryDocument() {
     const category = categorySelect.value;
     if (category) {
@@ -50,13 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleCreateDocBtn();
   }
 
-  // Toggle create doc button
   function toggleCreateDocBtn() {
     const hasFile = categoryDocumentInput.files.length > 0;
     createDocBtnContainer.style.display = categorySelect.value && !hasFile ? 'block' : 'none';
   }
 
-  // Toggle mobile price popup
   function toggleMobilePricePopup() {
     const priceBox = document.querySelector('.price-box');
     const rect = priceBox.getBoundingClientRect();
@@ -64,7 +61,6 @@ document.addEventListener('DOMContentLoaded', () => {
     mobilePricePopup.style.display = priceOutput.textContent !== '0' && !isVisible ? 'block' : 'none';
   }
 
-  // Fetch templates
   async function fetchTemplates() {
     const category = categorySelect.value;
     templateSelect.innerHTML = '<option value="">-- Select Template --</option>';
@@ -95,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Update price
   async function updatePrice() {
     const templateId = templateSelect.value;
     const country = countrySelect.value;
@@ -147,13 +142,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Toggle domain name field
   function toggleDomainNameField() {
     const domainChoice = document.querySelector('input[name="domainChoice"]:checked').value;
     domainNameContainer.style.display = domainChoice === 'custom' ? 'block' : 'none';
   }
 
-  // Toggle extra pages
   function toggleExtraPagesField() {
     const pages = parseInt(pagesInput.value);
     extraPagesContainer.style.display = pages > 5 ? 'block' : 'none';
@@ -176,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Update file label
   function updateFileLabel(input, labelElement) {
     if (input.files.length === 0) {
       labelElement.textContent = input.multiple ? 'No files chosen' : 'No file chosen';
@@ -188,18 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleCreateDocBtn();
   }
 
-  // Toggle color picker
   function toggleColorPicker() {
     const themeChoice = document.querySelector('input[name="themeChoice"]:checked')?.value;
     colorPickerContainer.style.display = themeChoice === 'custom' ? 'block' : 'none';
   }
 
-  // Toggle social media input
   function toggleSocialMediaLink() {
     socialMediaLinkContainer.style.display = socialMediaPlatform.value ? 'block' : 'none';
   }
 
-  // Update social media list
   function updateSocialMediaLinks() {
     socialMediaLinks.innerHTML = '';
     socialMediaList.forEach((link, index) => {
@@ -217,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Show confirmation modal
   function showConfirm(message, callback) {
     const confirmModal = document.getElementById('confirmModal');
     const confirmMessage = document.getElementById('confirmMessage');
@@ -244,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmNo.addEventListener('click', noHandler);
   }
 
-  // === FIXED: Create Document Button ===
+  // FIXED: Create Document Button
   createDocBtn.addEventListener('click', () => {
     const category = categorySelect.value;
     if (!category) {
@@ -300,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Form submission
   customForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     showConfirm('Submit form details?', async (confirmed) => {
@@ -447,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Initialize
   toggleCategoryDocument();
   toggleDomainNameField();
   toggleExtraPagesField();
