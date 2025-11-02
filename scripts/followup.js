@@ -30,14 +30,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const socialMediaLink = document.getElementById('socialMediaLink');
   const addSocialMediaLink = document.getElementById('addSocialMediaLink');
   const socialMediaLinks = document.getElementById('socialMediaLinks');
+  const categoryDocumentInput = document.getElementById('categoryDocument');
+  const categoryDocumentName = document.getElementById('categoryDocument-name');
+  const categoryLabel = document.getElementById('categoryLabel');
+  const categoryDocumentContainer = document.getElementById('categoryDocumentContainer');
+  const createDocBtnContainer = document.getElementById('createDocBtnContainer');
+  const createDocBtn = document.getElementById('createDocBtn');
   let socialMediaList = [];
 
-  // Toggle category-specific fields
-  function toggleCategoryFields() {
-    const selectedCategory = categorySelect.value;
-    document.querySelectorAll('.category-fields').forEach(field => {
-      field.style.display = field.classList.contains(`${selectedCategory}-fields`) ? 'block' : 'none';
-    });
+  // Toggle category document field
+  function toggleCategoryDocument() {
+    const category = categorySelect.value;
+    if (category) {
+      categoryLabel.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+      categoryDocumentContainer.style.display = 'block';
+    } else {
+      categoryDocumentContainer.style.display = 'none';
+    }
+    toggleCreateDocBtn();
+  }
+
+  // Toggle create doc button
+  function toggleCreateDocBtn() {
+    const hasFile = categoryDocumentInput.files.length > 0;
+    createDocBtnContainer.style.display = categorySelect.value && !hasFile ? 'block' : 'none';
   }
 
   // Toggle mobile price popup based on price box visibility
@@ -112,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mobilePricePopup.style.display = 'none';
         return;
       }
-
       let basePrice, currency;
       switch (country) {
         case 'UG':
@@ -189,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       labelElement.textContent = `${input.files.length} files chosen`;
     }
+    toggleCreateDocBtn();
   }
 
   // Toggle color picker
@@ -249,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Event listeners
   categorySelect.addEventListener('change', () => {
-    toggleCategoryFields();
+    toggleCategoryDocument();
     fetchTemplates();
     updatePrice();
   });
@@ -279,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
   logoInput.addEventListener('change', () => updateFileLabel(logoInput, logoName));
   mediaInput.addEventListener('change', () => updateFileLabel(mediaInput, mediaName));
   othersInput.addEventListener('change', () => updateFileLabel(othersInput, othersName));
+  categoryDocumentInput.addEventListener('change', () => updateFileLabel(categoryDocumentInput, categoryDocumentName));
 
   socialMediaPlatform.addEventListener('change', toggleSocialMediaLink);
 
@@ -292,6 +309,12 @@ document.addEventListener('DOMContentLoaded', () => {
       socialMediaLink.value = '';
       toggleSocialMediaLink();
     }
+  });
+
+  createDocBtn.addEventListener('click', () => {
+    const category = categorySelect.value;
+    const url = `create-doc.html?category=${category}`;
+    window.location.href = url;
   });
 
   // Form submission
@@ -308,6 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const logoFile = logoInput.files[0];
         const mediaFiles = Array.from(mediaInput.files);
         const otherFiles = Array.from(othersInput.files);
+        const categoryDocumentFile = categoryDocumentInput.files[0];
         const category = formData.get('category');
         const templateId = formData.get('template');
         const country = formData.get('country');
@@ -393,6 +417,17 @@ document.addEventListener('DOMContentLoaded', () => {
           otherUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`);
         }
 
+        // Upload category document
+        let categoryDocUrl = null;
+        if (categoryDocumentFile) {
+          const fileName = `${Date.now()}-${categoryDocumentFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+          const { data, error } = await supabase.storage
+            .from('custom_requests')
+            .upload(fileName, categoryDocumentFile, { cacheControl: '3600', upsert: false, contentType: categoryDocumentFile.type });
+          if (error) throw new Error(`Document upload failed: ${error.message}`);
+          categoryDocUrl = `${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`;
+        }
+
         // Combine all file URLs
         const allFiles = [...(logoUrl ? [logoUrl] : []), ...mediaUrls, ...otherUrls];
 
@@ -416,54 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
           pages: parseInt(formData.get('pages')),
           extra_pages: extraPageNames.join(', '),
           theme_color: formData.get('themeChoice') === 'custom' ? formData.get('customColor') : 'default',
+          category_document: categoryDocUrl,
           created_at: new Date().toISOString()
         };
-
-        // Add category-specific fields
-        if (data.category === 'education') {
-          data.school_name = formData.get('schoolName');
-          data.num_students = parseInt(formData.get('numStudents')) || null;
-        } else if (data.category === 'business') {
-          data.business_name = formData.get('businessName');
-          data.services = formData.get('services');
-          data.contact_person = formData.get('contactPersonBusiness');
-        } else if (data.category === 'portfolio') {
-          data.portfolio_url = formData.get('portfolioUrl');
-          data.projects = formData.get('projects');
-          data.contact_person = formData.get('contactPersonPortfolio');
-        } else if (data.category === 'ecommerce') {
-          data.business_name = formData.get('businessName');
-          data.products = formData.get('products');
-          data.contact_person = formData.get('contactPersonEcommerce');
-        } else if (data.category === 'charity') {
-          data.charity_name = formData.get('charityName');
-          data.mission = formData.get('mission');
-          data.contact_person = formData.get('contactPersonCharity');
-        } else if (data.category === 'blog') {
-          data.blog_name = formData.get('blogName');
-          data.topics = formData.get('topics');
-          data.contact_person = formData.get('contactPersonBlog');
-        } else if (data.category === 'healthcare') {
-          data.facility_name = formData.get('facilityName');
-          data.services = formData.get('services');
-          data.contact_person = formData.get('contactPersonHealthcare');
-        } else if (data.category === 'event') {
-          data.event_name = formData.get('eventName');
-          data.event_details = formData.get('eventDetails');
-          data.contact_person = formData.get('contactPersonEvent');
-        } else if (data.category === 'church') {
-          data.church_name = formData.get('churchName');
-          data.services = formData.get('services');
-          data.contact_person = formData.get('contactPersonChurch');
-        } else if (data.category === 'nonprofit') {
-          data.nonprofit_name = formData.get('nonprofitName');
-          data.mission = formData.get('mission');
-          data.contact_person = formData.get('contactPersonNonprofit');
-        } else if (data.category === 'other') {
-          data.other_name = formData.get('otherName');
-          data.services = formData.get('services');
-          data.contact_person = formData.get('contactPersonOther');
-        }
 
         // Insert data into Supabase
         const { error } = await supabase.from('custom_requests').insert(data);
@@ -471,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showConfirm('Form submitted successfully!', () => {
           customForm.reset();
-          toggleCategoryFields();
+          toggleCategoryDocument();
           toggleDomainNameField();
           toggleExtraPagesField();
           toggleColorPicker();
@@ -483,6 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
           updateFileLabel(logoInput, logoName);
           updateFileLabel(mediaInput, mediaName);
           updateFileLabel(othersInput, othersName);
+          updateFileLabel(categoryDocumentInput, categoryDocumentName);
         });
       } catch (error) {
         showConfirm(`Submission failed: ${error.message}`, () => {});
@@ -494,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Initialize form state
-  toggleCategoryFields();
+  toggleCategoryDocument();
   toggleDomainNameField();
   toggleExtraPagesField();
   toggleColorPicker();
