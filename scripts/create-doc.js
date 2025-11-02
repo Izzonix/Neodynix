@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
-  let category = urlParams.get('category');
-  category = category ? category.toLowerCase() : null;
+  let category = urlParams.get('category')?.toLowerCase();
+
   const fieldsContainer = document.getElementById('categoryFields');
   const docForm = document.getElementById('docForm');
 
@@ -158,45 +158,58 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
   };
 
+  // ---- Validate category ----------------------------------------------------
   if (!category || !fieldMap[category]) {
-    fieldsContainer.innerHTML = '<p>Invalid category.</p>';
+    fieldsContainer.innerHTML = `
+      <p>Invalid or missing category.</p>
+      <p><a href="followup.html">← Back to form</a></p>
+    `;
     return;
   }
 
   const fields = fieldMap[category];
-  fields.forEach(field => {
+
+  // ---- Build dynamic fields -------------------------------------------------
+  fields.forEach(f => {
     const label = document.createElement('label');
-    label.setAttribute('for', field.id);
-    label.textContent = field.label;
-    const input = document.createElement(field.type === 'textarea' ? 'textarea' : 'input');
-    input.id = field.id;
-    input.name = field.id;
-    input.type = field.type;
+    label.htmlFor = f.id;
+    label.textContent = f.label;
+
+    const input = document.createElement(f.type === 'textarea' ? 'textarea' : 'input');
+    input.id = input.name = f.id;
+    input.type = f.type;
     input.required = true;
+
     fieldsContainer.appendChild(label);
     fieldsContainer.appendChild(input);
   });
 
-  docForm.addEventListener('submit', (e) => {
+  // ---- Submit → generate PDF ------------------------------------------------
+  docForm.addEventListener('submit', e => {
     e.preventDefault();
-    const formData = new FormData(docForm);
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    let yPos = 20;
-    doc.text(`Category Document: ${category.charAt(0).toUpperCase() + category.slice(1)}`, 20, yPos);
-    yPos += 20;
-    fields.forEach(field => {
-      const value = formData.get(field.id);
-      if (value) {
-        doc.text(`${field.label}: ${value}`, 20, yPos);
-        yPos += 20;
-        if (yPos > 280) {
+    let y = 20;
+
+    const title = `${category.charAt(0).toUpperCase() + category.slice(1)} Document`;
+    doc.text(title, 20, y);
+    y += 15;
+
+    const formData = new FormData(docForm);
+    fields.forEach(f => {
+      const val = formData.get(f.id)?.trim();
+      if (val) {
+        const lines = doc.splitTextToSize(`${f.label}: ${val}`, 170);
+        doc.text(lines, 20, y);
+        y += lines.length * 7 + 5;
+        if (y > 280) {
           doc.addPage();
-          yPos = 20;
+          y = 20;
         }
       }
     });
+
     doc.save(`${category}-document.pdf`);
-    window.location.href = 'followup.html';
+    setTimeout(() => location.href = 'followup.html', 500);
   });
 });
