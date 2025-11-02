@@ -1,244 +1,105 @@
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
-  let category = urlParams.get('category');
-
-  console.log('Raw category from URL:', category);
-
+  const category = urlParams.get('category');
   const fieldsContainer = document.getElementById('categoryFields');
   const docForm = document.getElementById('docForm');
-
-  // Normalize: lowercase + trim
-  if (category) category = category.trim().toLowerCase();
 
   const fieldMap = {
     business: [
       { id: 'businessName', label: 'Business Name', type: 'text' },
       { id: 'services', label: 'Services Offered', type: 'textarea' },
-      { id: 'contactPersonBusiness', label: 'Contact Person', type: 'text' },
-      { id: 'industry', label: 'Industry/Sector', type: 'text' },
-      { id: 'targetMarket', label: 'Target Market', type: 'text' },
-      { id: 'yearsInOperation', label: 'Years in Operation', type: 'number' },
-      { id: 'businessTagline', label: 'Business Tagline', type: 'text' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Business', type: 'textarea' }
+      { id: 'contactPersonBusiness', label: 'Contact Person', type: 'text' }
     ],
     portfolio: [
       { id: 'portfolioUrl', label: 'Portfolio URL', type: 'url' },
       { id: 'projects', label: 'Projects', type: 'textarea' },
-      { id: 'contactPersonPortfolio', label: 'Contact Person', type: 'text' },
-      { id: 'skills', label: 'Skills/Expertise', type: 'textarea' },
-      { id: 'testimonials', label: 'Client Testimonials', type: 'textarea' },
-      { id: 'contactMethod', label: 'Preferred Contact Method', type: 'text' },
-      { id: 'featuredProject', label: 'Featured Project', type: 'text' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners/Collaborators (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff (if applicable)', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Yourself', type: 'textarea' }
+      { id: 'contactPersonPortfolio', label: 'Contact Person', type: 'text' }
     ],
     education: [
       { id: 'schoolName', label: 'School Name', type: 'text' },
-      { id: 'numStudents', label: 'Number of Students', type: 'number' },
-      { id: 'programs', label: 'Programs/Courses Offered', type: 'textarea' },
-      { id: 'accreditation', label: 'Accreditation Status', type: 'text' },
-      { id: 'enrollmentCapacity', label: 'Enrollment Capacity', type: 'number' },
-      { id: 'facultyHighlights', label: 'Faculty Highlights', type: 'textarea' },
-      { id: 'admissionsProcess', label: 'Admissions Process', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Institution', type: 'textarea' }
+      { id: 'numStudents', label: 'Number of Students', type: 'number' }
     ],
     ecommerce: [
       { id: 'businessName', label: 'Business Name', type: 'text' },
       { id: 'products', label: 'Products Offered', type: 'textarea' },
-      { id: 'contactPersonEcommerce', label: 'Contact Person', type: 'text' },
-      { id: 'paymentMethods', label: 'Payment Methods', type: 'textarea' },
-      { id: 'shippingOptions', label: 'Shipping Options', type: 'textarea' },
-      { id: 'inventorySize', label: 'Inventory Size', type: 'number' },
-      { id: 'productCategories', label: 'Product Categories', type: 'textarea' },
-      { id: 'returnPolicy', label: 'Return Policy', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Business', type: 'textarea' }
+      { id: 'contactPersonEcommerce', label: 'Contact Person', type: 'text' }
     ],
     charity: [
       { id: 'charityName', label: 'Charity Name', type: 'text' },
       { id: 'mission', label: 'Mission Statement', type: 'textarea' },
-      { id: 'contactPersonCharity', label: 'Contact Person', type: 'text' },
-      { id: 'foundedYear', label: 'Founded Year', type: 'number' },
-      { id: 'keyPrograms', label: 'Key Programs', type: 'textarea' },
-      { id: 'fundingSources', label: 'Funding Sources', type: 'textarea' },
-      { id: 'successStories', label: 'Success Stories', type: 'textarea' },
-      { id: 'donationGoals', label: 'Donation Goals', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Volunteers', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Charity', type: 'textarea' }
+      { id: 'contactPersonCharity', label: 'Contact Person', type: 'text' }
     ],
     blog: [
       { id: 'blogName', label: 'Blog Name', type: 'text' },
       { id: 'topics', label: 'Blog Topics', type: 'textarea' },
-      { id: 'contactPersonBlog', label: 'Contact Person', type: 'text' },
-      { id: 'postingFrequency', label: 'Posting Frequency', type: 'text' },
-      { id: 'nicheFocus', label: 'Niche Focus', type: 'text' },
-      { id: 'monetizationPlans', label: 'Monetization Plans', type: 'textarea' },
-      { id: 'authorBio', label: 'Author Bio', type: 'textarea' },
-      { id: 'relatedCategories', label: 'Related Categories', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Contributors', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Blog', type: 'textarea' }
+      { id: 'contactPersonBlog', label: 'Contact Person', type: 'text' }
     ],
     healthcare: [
       { id: 'facilityName', label: 'Facility Name', type: 'text' },
       { id: 'services', label: 'Medical Services', type: 'textarea' },
-      { id: 'contactPersonHealthcare', label: 'Contact Person', type: 'text' },
-      { id: 'specialties', label: 'Specialties', type: 'textarea' },
-      { id: 'certifications', label: 'Certifications', type: 'textarea' },
-      { id: 'patientResources', label: 'Patient Resources', type: 'textarea' },
-      { id: 'emergencyContacts', label: 'Emergency Contacts', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Facility', type: 'textarea' }
+      { id: 'contactPersonHealthcare', label: 'Contact Person', type: 'text' }
     ],
     event: [
       { id: 'eventName', label: 'Event Name', type: 'text' },
       { id: 'eventDetails', label: 'Event Details', type: 'textarea' },
-      { id: 'contactPersonEvent', label: 'Contact Person', type: 'text' },
-      { id: 'dateLocation', label: 'Date/Location', type: 'text' },
-      { id: 'expectedAttendance', label: 'Expected Attendance', type: 'number' },
-      { id: 'sponsorshipNeeds', label: 'Sponsorship Needs', type: 'textarea' },
-      { id: 'agenda', label: 'Agenda/Schedule', type: 'textarea' },
-      { id: 'registrationDetails', label: 'Registration Details', type: 'textarea' },
-      { id: 'vision', label: 'Vision for the Event', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Volunteers', type: 'number' },
-      { id: 'additionalInfo', label: 'More About the Event', type: 'textarea' }
+      { id: 'contactPersonEvent', label: 'Contact Person', type: 'text' }
     ],
     church: [
       { id: 'churchName', label: 'Church Name', type: 'text' },
       { id: 'services', label: 'Services/Events', type: 'textarea' },
-      { id: 'contactPersonChurch', label: 'Contact Person', type: 'text' },
-      { id: 'denomination', label: 'Denomination', type: 'text' },
-      { id: 'membershipSize', label: 'Membership Size', type: 'number' },
-      { id: 'upcomingEvents', label: 'Upcoming Events', type: 'textarea' },
-      { id: 'sermonArchives', label: 'Sermon Archives', type: 'textarea' },
-      { id: 'communityOutreach', label: 'Community Outreach', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Volunteers', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Church', type: 'textarea' }
+      { id: 'contactPersonChurch', label: 'Contact Person', type: 'text' }
     ],
     nonprofit: [
       { id: 'nonprofitName', label: 'Non-profit Name', type: 'text' },
       { id: 'mission', label: 'Mission Statement', type: 'textarea' },
-      { id: 'contactPersonNonprofit', label: 'Contact Person', type: 'text' },
-      { id: 'legalStatus', label: 'Legal Status', type: 'text' },
-      { id: 'impactMetrics', label: 'Impact Metrics', type: 'textarea' },
-      { id: 'volunteerOpportunities', label: 'Volunteer Opportunities', type: 'textarea' },
-      { id: 'annualReports', label: 'Annual Reports', type: 'textarea' },
-      { id: 'partnershipInfo', label: 'Partnership Info', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff/Volunteers', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Non-profit', type: 'textarea' }
+      { id: 'contactPersonNonprofit', label: 'Contact Person', type: 'text' }
     ],
     other: [
       { id: 'otherName', label: 'Organization Name', type: 'text' },
       { id: 'services', label: 'Services/Products', type: 'textarea' },
-      { id: 'contactPersonOther', label: 'Contact Person', type: 'text' },
-      { id: 'orgType', label: 'Type of Organization', type: 'text' },
-      { id: 'keyGoals', label: 'Key Goals', type: 'textarea' },
-      { id: 'uniqueRequirements', label: 'Unique Requirements', type: 'textarea' },
-      { id: 'customSections', label: 'Custom Sections Needed', type: 'textarea' },
-      { id: 'integrations', label: 'Integration Needs (e.g., forms, maps)', type: 'textarea' },
-      { id: 'vision', label: 'Vision', type: 'textarea' },
-      { id: 'partners', label: 'Partners (if any)', type: 'textarea' },
-      { id: 'numStaff', label: 'Number of Staff', type: 'number' },
-      { id: 'additionalInfo', label: 'More About Your Organization', type: 'textarea' }
+      { id: 'contactPersonOther', label: 'Contact Person', type: 'text' }
     ]
   };
 
-  // Validate category
   if (!category || !fieldMap[category]) {
-    fieldsContainer.innerHTML = `
-      <p style="color:#ff4444; font-weight:bold;">Invalid category: "<code>${urlParams.get('category') || 'none'}</code>"</p>
-      <p>Valid options: <code>${Object.keys(fieldMap).join(', ')}</code></p>
-      <p><a href="followup.html" style="color:#4fc3f7;">Back to form</a></p>
-    `;
+    fieldsContainer.innerHTML = '<p>Invalid category.</p>';
     return;
   }
 
   const fields = fieldMap[category];
-
-  // Build fields with mobile-friendly wrapper
-  fields.forEach(f => {
-    const wrapper = document.createElement('div');
-    wrapper.style.marginBottom = '1.5rem';
-    wrapper.style.padding = '0 5px';
-
+  fields.forEach(field => {
     const label = document.createElement('label');
-    label.htmlFor = f.id;
-    label.textContent = f.label;
-    label.style.display = 'block';
-    label.style.marginBottom = '0.5rem';
-    label.style.fontWeight = '600';
-    label.style.color = '#fff';
-    label.style.fontSize = '1rem';
-
-    const input = document.createElement(f.type === 'textarea' ? 'textarea' : 'input');
-    input.id = input.name = f.id;
-    input.type = f.type;
+    label.setAttribute('for', field.id);
+    label.textContent = field.label;
+    const input = document.createElement(field.type === 'textarea' ? 'textarea' : 'input');
+    input.id = field.id;
+    input.name = field.id;
+    input.type = field.type;
     input.required = true;
-    input.style.width = '100%';
-    input.style.padding = '12px';
-    input.style.border = '1px solid #444';
-    input.style.borderRadius = '6px';
-    input.style.backgroundColor = '#292929';
-    input.style.color = '#eee';
-    input.style.fontSize = '1rem';
-    input.style.boxSizing = 'border-box';
-    if (f.type === 'textarea') input.rows = 4;
-
-    wrapper.appendChild(label);
-    wrapper.appendChild(input);
-    fieldsContainer.appendChild(wrapper);
+    fieldsContainer.appendChild(label);
+    fieldsContainer.appendChild(input);
   });
 
-  // Ensure scroll on mobile
-  fieldsContainer.style.overflowY = 'auto';
-  fieldsContainer.style.maxHeight = '70vh';
-  fieldsContainer.style.padding = '1rem';
-  fieldsContainer.style.boxSizing = 'border-box';
-
-  // Submit → Generate PDF
-  docForm.addEventListener('submit', e => {
+  docForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    const formData = new FormData(docForm);
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    let y = 20;
-
-    doc.setFontSize(16);
-    doc.text(`${category.charAt(0).toUpperCase() + category.slice(1)} Document`, 20, y);
-    y += 20;
-
-    const formData = new FormData(docForm);
-    fields.forEach(f => {
-      const val = formData.get(f.id)?.trim();
-      if (val) {
-        doc.setFontSize(12);
-        const lines = doc.splitTextToSize(`${f.label}: ${val}`, 170);
-        doc.text(lines, 20, y);
-        y += lines.length * 7 + 5;
-        if (y > 280) { doc.addPage(); y = 20; }
+    let yPos = 20;
+    doc.text(`Category Document: ${category.charAt(0).toUpperCase() + category.slice(1)}`, 20, yPos);
+    yPos += 20;
+    fields.forEach(field => {
+      const value = formData.get(field.id);
+      if (value) {
+        doc.text(`${field.label}: ${value}`, 20, yPos);
+        yPos += 20;
+        if (yPos > 280) {
+          doc.addPage();
+          yPos = 20;
+        }
       }
     });
-
     doc.save(`${category}-document.pdf`);
-    setTimeout(() => location.href = 'followup.html', 800);
+    window.location.href = 'followup.html';
   });
 });
