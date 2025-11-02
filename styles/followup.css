@@ -3,7 +3,11 @@ body {
   background: #121212;
   color: #fff;
   padding: 30px;
-} 
+}
+
+body, html {
+  overflow-y: auto;
+}
 
 .form-section {
   background: #1e1e1e;
