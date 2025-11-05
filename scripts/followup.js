@@ -377,9 +377,18 @@ document.addEventListener('DOMContentLoaded', () => {
           categoryDocUrl = `${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`;
         }
 
-        const allFiles = [...(logoUrl ? [logoUrl] : []), ...mediaUrls, ...otherUrls];
+        // Updated: Create typed files array as JSON objects
+        const typedFiles = [];
+        if (logoUrl) {
+          typedFiles.push({ url: logoUrl, type: 'logo' });
+        }
+        mediaUrls.forEach(url => typedFiles.push({ url, type: 'media' }));
+        otherUrls.forEach(url => typedFiles.push({ url, type: 'other' }));
+        if (categoryDocUrl) {
+          typedFiles.push({ url: categoryDocUrl, type: 'category_doc' });
+        }
 
-        const data = {
+        const dataToInsert = {
           name: `${formData.get('firstName')} ${formData.get('lastName')}`,
           email: formData.get('email'),
           phone: formData.get('phone'),
@@ -388,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
           price: price.toFixed(2),
           currency: currency,
           message: formData.get('purpose') || '',
-          files: allFiles,
+          files: typedFiles,  // Now an array of {url, type} objects
           social_media: socialMediaList.map(link => `${link.platform}: ${link.url}`),
           target_audience: formData.get('targetAudience'),
           country: formData.get('country'),
@@ -398,11 +407,11 @@ document.addEventListener('DOMContentLoaded', () => {
           pages: parseInt(formData.get('pages')),
           extra_pages: extraPageNames.join(', '),
           theme_color: formData.get('themeChoice') === 'custom' ? formData.get('customColor') : 'default',
-          category_document: categoryDocUrl,
+          category_document: categoryDocUrl,  // Keep separate for legacy, but use files for distinction
           created_at: new Date().toISOString()
         };
 
-        const { error } = await supabase.from('custom_requests').insert(data);
+        const { error } = await supabase.from('custom_requests').insert([dataToInsert]);
         if (error) throw new Error(`Database insert failed: ${error.message}`);
 
         showConfirm('Form submitted successfully!', () => {
