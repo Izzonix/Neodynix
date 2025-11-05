@@ -476,66 +476,109 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  async function fetchCustomRequests() {
-    try {
-      const { data, error } = await supabase
-        .from('custom_requests')
-        .select('id, name, email, category, template, price, currency, message, files, created_at')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      customRequestList.innerHTML = '';
-      if (data.length === 0) {
-        customRequestList.innerHTML = '<p>No custom requests available.</p>';
-        return;
-      }
-      data.forEach(request => {
-        const card = document.createElement('div');
-        card.className = 'custom-request-card';
-        const fileList = request.files?.map(file => `
-          <li>
-            <a href="${file}" download="${file.split('/').pop()}" target="_blank">${file.split('/').pop()}</a>
-            <button class="btn btn-delete" onclick="deleteFile('${request.id}', '${file}')">Delete File</button>
-          </li>
-        `).join('') || '';
-        card.innerHTML = `
-          <h3>${request.name}</h3>
-          <p>Email: ${request.email}</p>
-          <p>Category: ${request.category}</p>
-          <p>Template: ${request.template}</p>
-          <p>Price: ${request.price.toFixed(2)} ${request.currency}</p>
-          <p>Message: ${request.message}</p>
-          <ul>${fileList}</ul>
-        `;
-        customRequestList.appendChild(card);
-      });
-    } catch (error) {
-      console.error('Error fetching custom requests:', error);
-      customRequestList.innerHTML = '<p class="error">Failed to load custom requests.</p>';
+// custom_requests
+async function fetchCustomRequests() {
+  try {
+    const { data, error } = await supabase
+      .from('custom_requests')
+      .select('id, name, email, category, template, price, currency, message, files, created_at')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    customRequestList.innerHTML = '';
+    if (data.length === 0) {
+      customRequestList.innerHTML = '<p>No custom requests available.</p>';
+      return;
     }
-  }
-
-  window.deleteFile = async (requestId, fileUrl) => {
-    showConfirm('Are you sure you want to delete this file?', async () => {
-      loadingPopup.style.display = 'flex';
-      try {
-        const path = fileUrl.split('/').slice(-2).join('/');
-        const { error: storageError } = await supabase.storage.from('custom_requests').remove([path]);
-        if (storageError) throw storageError;
-        const { data: request, error: fetchError } = await supabase.from('custom_requests').select('files').eq('id', requestId).single();
-        if (fetchError) throw fetchError;
-        const updatedFiles = request.files.filter(file => file !== fileUrl);
-        const { error: updateError } = await supabase.from('custom_requests').update({ files: updatedFiles }).eq('id', requestId);
-        if (updateError) throw updateError;
-        showResult('File deleted successfully!', true);
-        fetchCustomRequests();
-      } catch (error) {
-        console.error('Error deleting file:', error);
-        showResult(`Failed to delete file: ${error.message}`, false);
-      } finally {
-        loadingPopup.style.display = 'none';
+    data.forEach(request => {
+      const card = document.createElement('div');
+      card.className = 'custom-request-card';
+      // Group files by type
+      const filesByType = {
+        logo: [],
+        media: [],
+        other: [],
+        category_doc: []
+      };
+      if (request.files && Array.isArray(request.files)) {
+        request.files.forEach(fileObj => {
+          if (filesByType[fileObj.type]) {
+            filesByType[fileObj.type].push(fileObj.url);
+          }
+        });
       }
+      const logoList = filesByType.logo.map(file => `
+        <li>
+          <a href="${file}" download="logo-${request.id}" target="_blank">Logo File</a>
+          <button class="btn btn-delete" onclick="deleteFile('${request.id}', '${file}', 'logo')">Delete</button>
+        </li>
+      `).join('') || '<li>No logo uploaded</li>';
+      const mediaList = filesByType.media.map(file => `
+        <li>
+          <a href="${file}" download="media-${request.id}" target="_blank">${file.split('/').pop()}</a>
+          <button class="btn btn-delete" onclick="deleteFile('${request.id}', '${file}', 'media')">Delete</button>
+        </li>
+      `).join('') || '<li>No media files uploaded</li>';
+      const otherList = filesByType.other.map(file => `
+        <li>
+          <a href="${file}" download="other-${request.id}" target="_blank">${file.split('/').pop()}</a>
+          <button class="btn btn-delete" onclick="deleteFile('${request.id}', '${file}', 'other')">Delete</button>
+        </li>
+      `).join('') || '<li>No other files uploaded</li>';
+      const docList = filesByType.category_doc.map(file => `
+        <li>
+          <a href="${file}" download="doc-${request.id}" target="_blank">Category Document</a>
+          <button class="btn btn-delete" onclick="deleteFile('${request.id}', '${file}', 'category_doc')">Delete</button>
+        </li>
+      `).join('') || '<li>No category document uploaded</li>';
+      card.innerHTML = `
+        <h3>${request.name}</h3>
+        <p>Email: ${request.email}</p>
+        <p>Category: ${request.category}</p>
+        <p>Template: ${request.template}</p>
+        <p>Price: ${request.price.toFixed(2)} ${request.currency}</p>
+        <p>Message: ${request.message}</p>
+        <h4>Logo Files</h4>
+        <ul>${logoList}</ul>
+        <h4>Media Files</h4>
+        <ul>${mediaList}</ul>
+        <h4>Other Files</h4>
+        <ul>${otherList}</ul>
+        <h4>Category Document</h4>
+        <ul>${docList}</ul>
+      `;
+      customRequestList.appendChild(card);
     });
-  };
+  } catch (error) {
+    console.error('Error fetching custom requests:', error);
+    customRequestList.innerHTML = '<p class="error">Failed to load custom requests.</p>';
+  }
+}
+
+window.deleteFile = async (requestId, fileUrl, fileType) => {
+  showConfirm('Are you sure you want to delete this file?', async () => {
+    loadingPopup.style.display = 'flex';
+    try {
+      // Delete from storage
+      const path = fileUrl.split('/').slice(-2).join('/');
+      const { error: storageError } = await supabase.storage.from('custom_requests').remove([path]);
+      if (storageError) throw storageError;
+      // Fetch current files
+      const { data: request, error: fetchError } = await supabase.from('custom_requests').select('files').eq('id', requestId).single();
+      if (fetchError) throw fetchError;
+      // Filter out the deleted file based on URL and type
+      const updatedFiles = request.files.filter(fileObj => !(fileObj.url === fileUrl && fileObj.type === fileType));
+      const { error: updateError } = await supabase.from('custom_requests').update({ files: updatedFiles }).eq('id', requestId);
+      if (updateError) throw updateError;
+      showResult('File deleted successfully!', true);
+      fetchCustomRequests();
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      showResult(`Failed to delete file: ${error.message}`, false);
+    } finally {
+      loadingPopup.style.display = 'none';
+    }
+  });
+};
 
   emailForm.addEventListener('submit', async (e) => {
     e.preventDefault();
