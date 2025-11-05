@@ -584,27 +584,55 @@ async function fetchCustomRequests() {
     customRequestList.innerHTML = '<p class="error">Failed to load custom requests.</p>';
   }
 }
-  
+// This version adds optimistic UI update (removes the element immediately) and better error handling
 window.deleteFile = async (requestId, fileUrl, fileType) => {
   showConfirm('Are you sure you want to delete this file?', async () => {
+    // Optimistic UI update: Find and remove the specific <li> element immediately
+    const liElement = event.target.closest('li');  // Assumes click is on button inside <li>
+    if (liElement) {
+      liElement.style.opacity = '0.5';  // Visual feedback
+      liElement.innerHTML += '<span style="color: yellow; font-size: 12px;"> Deleting...</span>';
+    }
+
     loadingPopup.style.display = 'flex';
     try {
       // Delete from storage
       const path = fileUrl.split('/').slice(-2).join('/');
       const { error: storageError } = await supabase.storage.from('custom_requests').remove([path]);
-      if (storageError) throw storageError;
-      // Fetch current files
+      if (storageError) throw new Error(`Storage delete failed: ${storageError.message}`);
+
+      // Update DB: Fetch current files and filter
       const { data: request, error: fetchError } = await supabase.from('custom_requests').select('files').eq('id', requestId).single();
-      if (fetchError) throw fetchError;
-      // Filter out the deleted file based on URL and type
+      if (fetchError) throw new Error(`Fetch error: ${fetchError.message}`);
+
+      // Filter out the exact {url, type} match
       const updatedFiles = request.files.filter(fileObj => !(fileObj.url === fileUrl && fileObj.type === fileType));
+
       const { error: updateError } = await supabase.from('custom_requests').update({ files: updatedFiles }).eq('id', requestId);
-      if (updateError) throw updateError;
+      if (updateError) throw new Error(`DB update failed: ${updateError.message}`);
+
+      // If UI element exists, remove it completely (optimistic success)
+      if (liElement) {
+        liElement.remove();
+        // Check if the parent <ul> is now empty, and update message if so
+        const ul = liElement.closest('ul');
+        if (ul && ul.children.length === 0) {
+          const sectionType = liElement.closest('h5').previousElementSibling ? liElement.closest('h5').textContent.toLowerCase().replace(' files', '') : fileType;
+          ul.innerHTML = `<li>No ${sectionType} files uploaded</li>`;
+        }
+      }
+
       showResult('File deleted successfully!', true);
-      fetchCustomRequests();
+      // Optional: Re-fetch to ensure sync (but optimistic update should suffice for instant disappearance)
+      // fetchCustomRequests();
     } catch (error) {
       console.error('Error deleting file:', error);
       showResult(`Failed to delete file: ${error.message}`, false);
+      // Revert UI if error
+      if (liElement) {
+        liElement.style.opacity = '1';
+        liElement.innerHTML = liElement.innerHTML.replace('<span style="color: yellow; font-size: 12px;"> Deleting...</span>', '');
+      }
     } finally {
       loadingPopup.style.display = 'none';
     }
