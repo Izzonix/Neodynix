@@ -477,6 +477,20 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 // custom_requests
+window.toggleDetails = (cardId) => {
+  const detailsDiv = document.getElementById(`details-${cardId}`);
+  const toggleBtn = document.getElementById(`toggle-${cardId}`);
+  if (detailsDiv.style.display === 'none' || detailsDiv.style.display === '') {
+    detailsDiv.style.display = 'block';
+    toggleBtn.textContent = 'Hide Details';
+    toggleBtn.className = 'btn btn-cancel';  // Style as delete-like for hide
+  } else {
+    detailsDiv.style.display = 'none';
+    toggleBtn.textContent = 'Show Details';
+    toggleBtn.className = 'btn';  // Regular button style
+  }
+};
+
 async function fetchCustomRequests() {
   try {
     const { data, error } = await supabase
@@ -492,6 +506,7 @@ async function fetchCustomRequests() {
     data.forEach(request => {
       const card = document.createElement('div');
       card.className = 'custom-request-card';
+      card.id = `card-${request.id}`;
       // Group files by type (from JSONB array)
       const filesByType = {
         logo: [],
@@ -533,31 +548,34 @@ async function fetchCustomRequests() {
       card.innerHTML = `
         <h3>${request.name}</h3>
         <p><strong>Email:</strong> ${request.email}</p>
-        <p><strong>Phone:</strong> ${request.phone || 'N/A'}</p>
-        <p><strong>Category:</strong> ${request.category}</p>
-        <p><strong>Template:</strong> ${request.template || 'N/A'}</p>
-        <p><strong>Price:</strong> ${request.price ? request.price.toFixed(2) : 'N/A'} ${request.currency || ''}</p>
-        <p><strong>Message:</strong> ${request.message || 'N/A'}</p>
-        <p><strong>Social Media:</strong> ${Array.isArray(request.social_media) ? request.social_media.join(', ') : 'N/A'}</p>
-        <p><strong>Target Audience:</strong> ${request.target_audience || 'N/A'}</p>
-        <p><strong>Country:</strong> ${request.country || 'N/A'}</p>
-        <p><strong>Domain Choice:</strong> ${request.domain_choice || 'N/A'}</p>
-        <p><strong>Domain Name:</strong> ${request.domain_name || 'N/A'}</p>
-        <p><strong>Duration (months):</strong> ${request.duration || 'N/A'}</p>
-        <p><strong>Pages:</strong> ${request.pages || 'N/A'}</p>
-        <p><strong>Extra Pages:</strong> ${request.extra_pages || 'N/A'}</p>
-        <p><strong>Theme Color:</strong> ${request.theme_color || 'N/A'}</p>
-        <p><strong>Category Document (Legacy URL):</strong> ${request.category_document ? `<a href="${request.category_document}" target="_blank">View</a>` : 'N/A'}</p>
-        <p><strong>Created At:</strong> ${new Date(request.created_at).toLocaleString()}</p>
-        <h4>Files (Grouped by Type)</h4>
-        <h5>Logo Files</h5>
-        <ul>${logoList}</ul>
-        <h5>Media Files</h5>
-        <ul>${mediaList}</ul>
-        <h5>Other Files</h5>
-        <ul>${otherList}</ul>
-        <h5>Category Document Files</h5>
-        <ul>${docList}</ul>
+        <button id="toggle-${request.id}" class="btn" onclick="toggleDetails('${request.id}')">Show Details</button>
+        <div id="details-${request.id}" style="display: none;">
+          <p><strong>Phone:</strong> ${request.phone || 'N/A'}</p>
+          <p><strong>Category:</strong> ${request.category}</p>
+          <p><strong>Template:</strong> ${request.template || 'N/A'}</p>
+          <p><strong>Price:</strong> ${request.price ? request.price.toFixed(2) : 'N/A'} ${request.currency || ''}</p>
+          <p><strong>Message:</strong> ${request.message || 'N/A'}</p>
+          <p><strong>Social Media:</strong> ${Array.isArray(request.social_media) ? request.social_media.join(', ') : 'N/A'}</p>
+          <p><strong>Target Audience:</strong> ${request.target_audience || 'N/A'}</p>
+          <p><strong>Country:</strong> ${request.country || 'N/A'}</p>
+          <p><strong>Domain Choice:</strong> ${request.domain_choice || 'N/A'}</p>
+          <p><strong>Domain Name:</strong> ${request.domain_name || 'N/A'}</p>
+          <p><strong>Duration (months):</strong> ${request.duration || 'N/A'}</p>
+          <p><strong>Pages:</strong> ${request.pages || 'N/A'}</p>
+          <p><strong>Extra Pages:</strong> ${request.extra_pages || 'N/A'}</p>
+          <p><strong>Theme Color:</strong> ${request.theme_color || 'N/A'}</p>
+          <p><strong>Category Document (Legacy URL):</strong> ${request.category_document ? `<a href="${request.category_document}" target="_blank">View</a>` : 'N/A'}</p>
+          <p><strong>Created At:</strong> ${new Date(request.created_at).toLocaleString()}</p>
+          <h4>Files (Grouped by Type)</h4>
+          <h5>Logo Files</h5>
+          <ul>${logoList}</ul>
+          <h5>Media Files</h5>
+          <ul>${mediaList}</ul>
+          <h5>Other Files</h5>
+          <ul>${otherList}</ul>
+          <h5>Category Document Files</h5>
+          <ul>${docList}</ul>
+        </div>
       `;
       customRequestList.appendChild(card);
     });
@@ -565,7 +583,7 @@ async function fetchCustomRequests() {
     console.error('Error fetching custom requests:', error);
     customRequestList.innerHTML = '<p class="error">Failed to load custom requests.</p>';
   }
-          }
+}
   
 window.deleteFile = async (requestId, fileUrl, fileType) => {
   showConfirm('Are you sure you want to delete this file?', async () => {
