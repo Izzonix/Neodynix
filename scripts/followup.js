@@ -233,11 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // FIXED: Create Document Button
-createDocBtn.addEventListener('click', () => {
-  const category = categorySelect.value;
-  if (!category) return alert('Select a category');
-  window.location.href = `create-doc.html?category=${encodeURIComponent(category)}`;
-});
+  createDocBtn.addEventListener('click', () => {
+    const category = categorySelect.value;
+    if (!category) return alert('Select a category');
+    window.location.href = `create-doc.html?category=${encodeURIComponent(category)}`;
+  });
+
   // Event Listeners
   categorySelect.addEventListener('change', () => {
     toggleCategoryDocument();
