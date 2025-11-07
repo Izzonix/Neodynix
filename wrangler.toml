@@ -2,10 +2,8 @@ name = "neodynix"
 compatibility_date = "2025-11-07"
 compatibility_flags = ["nodejs_compat"]
 
-[pages]
-# 👇 This tells Cloudflare Pages where your site files are located
-pages_build_output_dir = "./"
-
 [build]
-# 👇 This makes Pages install your npm dependencies before deploying
 command = "npm install"
+
+[site]
+bucket = "./"
