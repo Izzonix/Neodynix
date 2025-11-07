@@ -1,8 +1,9 @@
 name = "neodynix"
-type = "javascript"
 compatibility_date = "2025-11-07"
+
+[pages]
+# this tells Cloudflare Pages where to find your static site output
+pages_build_output_dir = "."
 
 [build]
 command = "npm install"
-[build.upload]
-format = "modules"
