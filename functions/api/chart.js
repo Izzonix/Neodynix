@@ -9,8 +9,9 @@ export async function onRequestPost(context) {
 
   try {
     const { userId, content, fileUrl } = await request.json();
-    if (!userId || !content)
-      return new Response('Bad request', { status: 400 });
+    if (!userId || !content) {
+      return new Response(JSON.stringify({ error: 'Bad request' }), { status: 400 });
+    }
 
     // Save user message
     await supabase.from('messages').insert({
@@ -22,10 +23,9 @@ export async function onRequestPost(context) {
     });
 
     // Extract topic
-    const userTopic =
-      content.match(/\[Topic: ([^\]]+)\]/)?.[1]?.toLowerCase() || 'general';
+    const userTopic = content.match(/\[Topic: ([^\]]+)\]/)?.[1]?.toLowerCase() || 'general';
 
-    // Get chat history
+    // Get chat history (limit to last 8 to avoid token overflow)
     const { data: history } = await supabase
       .from('messages')
       .select('content,sender')
@@ -44,9 +44,7 @@ export async function onRequestPost(context) {
     // Get templates
     const { data: templates } = await supabase
       .from('templates')
-      .select(
-        'name,category,price_usd,price_ugx,price_ksh,price_tsh,description'
-      )
+      .select('name,category,price_usd,price_ugx,price_ksh,price_tsh,description')
       .ilike('category', `%${userTopic}%`)
       .limit(3);
 
@@ -57,15 +55,11 @@ export async function onRequestPost(context) {
     const faqs = (knowledge || [])
       .map(k => `FAQ: ${k.content}`)
       .join('\n\n');
-    const tmpl =
-      templates?.length > 0
-        ? `Templates:\n${templates
-            .map(
-              t =>
-                `- ${t.name} (${t.category}): $${t.price_usd} USD | ${t.price_ugx} UGX | ${t.price_ksh} KES`
-            )
-            .join('\n')}`
-        : 'No matching templates.';
+    const tmpl = templates?.length > 0
+      ? `Templates:\n${templates
+          .map(t => `- ${t.name} (${t.category}): $${t.price_usd} USD | ${t.price_ugx} UGX | ${t.price_ksh} KES | ${t.price_tsh} TSH\n  Description: ${t.description}`)
+          .join('\n')}`
+      : 'No matching templates.';
 
     const prompt = `You are a friendly, expert support agent for Neodynix Technologies.
 
@@ -88,10 +82,14 @@ User: ${content}
 
 Assistant (max 120 words, warm, clear, end with action):`;
 
-    const { response: aiText } = await ai.run(
-      '@cf/meta/llama-3-8b-instruct',
-      { prompt, max_tokens: 150 }
-    );
+    let aiText;
+    try {
+      const { response } = await ai.run('@cf/meta/llama-3-8b-instruct', { prompt, max_tokens: 150 });
+      aiText = response;
+    } catch (aiError) {
+      console.error('AI error:', aiError);
+      aiText = null;
+    }
 
     const reply = (aiText || 'Thanks! Our team will reply soon.').trim();
 
@@ -103,9 +101,12 @@ Assistant (max 120 words, warm, clear, end with action):`;
       is_auto: true
     });
 
-    return Response.json({ success: true, reply });
+    return new Response(JSON.stringify({ success: true, reply }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
   } catch (e) {
     console.error(e);
-    return new Response('Error', { status: 500 });
+    return new Response(JSON.stringify({ error: 'Server error' }), { status: 500 });
   }
-      }
+            }
