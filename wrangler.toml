@@ -1,11 +1,13 @@
 name = "neodynix-pages"
 compatibility_date = "2025-11-07"
 
-# Required for Pages Functions
+# REQUIRED: Tell Pages where static files are
 pages_build_output_dir = "."
 
+# Optional but safe
 node_compat = true
 
+# Functions config
 [[pages.functions]]
   directory = "functions"
   external = [
@@ -13,5 +15,6 @@ node_compat = true
     "@supabase/supabase-js"
   ]
 
+# AI binding (matches dashboard)
 [ai]
 binding = "AI"
