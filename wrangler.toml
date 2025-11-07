@@ -1,18 +1,12 @@
-name = "neodynix-pages"
+name = "neodynix"
 compatibility_date = "2025-11-07"
 
-# This must be TOP-LEVEL — NO [pages] section!
+# Required for static files (your HTML/CSS/JS)
 pages_build_output_dir = "."
 
-# Remove node_compat — Pages Functions don't support it
-# node_compat = true   ← DELETE THIS LINE
+# Enables Node.js APIs for Supabase
+compatibility_flags = ["nodejs_compat"]
 
-[[functions]]
-  directory = "functions"
-  external = [
-    "@cloudflare/ai",
-    "@supabase/supabase-js"
-  ]
-
+# AI binding (matches dashboard)
 [ai]
 binding = "AI"
