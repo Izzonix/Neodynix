@@ -1,8 +1,9 @@
 {
   "name": "neodynix-functions",
+  "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@cloudflare/ai": "^1.0.0",
-    "@supabase/supabase-js": "^2.35.0"
+    "@cloudflare/ai": "latest",
+    "@supabase/supabase-js": "latest"
   }
 }
