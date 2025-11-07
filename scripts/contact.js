@@ -9,8 +9,8 @@ const attachFile = document.getElementById('attachFile');
 let user = null;
 let selectedTopic = '';
 
-// UPDATE THIS
-const WORKER_URL = 'https://chat-ai-worker.your-account.workers.dev';
+// Cloudflare Pages function
+const WORKER_URL = '/api/chat';
 
 async function showStartChatPopup() {
   return new Promise(resolve => {
@@ -166,11 +166,17 @@ fileInput.onchange = () => {
     </div>
     <style>@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style>
   `;
-  filePreview.querySelector('.delete-file').onclick = () => { fileInput.value=''; filePreview.innerHTML=''; };
-  filePreview.querySelector('.send-file').onclick = async () => {
-    const btn = filePreview.querySelector('.send-file');
-    const spinner = filePreview.querySelector('.loading-spinner');
-    btn.disabled = true; filePreview.style.pointerEvents = 'none'; sendChat.disabled = true; spinner.style.display = 'inline-block';
+  const deleteBtn = filePreview.querySelector('.delete-file');
+  const sendBtn = filePreview.querySelector('.send-file');
+  const spinner = filePreview.querySelector('.loading-spinner');
+
+  deleteBtn.onclick = () => { fileInput.value=''; filePreview.innerHTML=''; };
+
+  sendBtn.onclick = async () => {
+    sendBtn.disabled = true;
+    filePreview.style.pointerEvents = 'none';
+    sendChat.disabled = true;
+    spinner.style.display = 'inline-block';
     try {
       const path = `${user.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data } = await supabase.storage.from('chat-files').upload(path, file);
@@ -181,6 +187,6 @@ fileInput.onchange = () => {
       await sendMessageViaWorker(content, url);
       fileInput.value=''; filePreview.innerHTML='';
     } catch (e) { alert('Upload failed'); }
-    finally { btn.disabled=false; filePreview.style.pointerEvents='auto'; sendChat.disabled=false; spinner.style.display='none'; }
+    finally { sendBtn.disabled=false; filePreview.style.pointerEvents='auto'; sendChat.disabled=false; spinner.style.display='none'; }
   };
 };
