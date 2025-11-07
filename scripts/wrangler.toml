@@ -1,0 +1,17 @@
+name = "neodynix-pages"
+compatibility_date = "2025-11-07"
+
+# Tell Cloudflare: These are runtime-only
+node_compat = true
+
+[[pages.functions]]
+  directory = "functions"
+  # These are provided by Cloudflare / browser — don't bundle!
+  external = [
+    "@cloudflare/ai",
+    "@supabase/supabase-js"
+  ]
+
+# Optional: AI binding (already set in dashboard, but safe to define)
+[ai]
+binding = "AI"
