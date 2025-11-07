@@ -1,7 +1,8 @@
-name = "neodynix-worker"
-main = "functions/api/Chart.js"
-compatibility_date = "2025-11-07"
+name = "neodynix"
 type = "javascript"
+compatibility_date = "2025-11-07"
 
 [build]
 command = "npm install"
+[build.upload]
+format = "modules"
