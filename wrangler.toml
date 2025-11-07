@@ -1,20 +1,18 @@
 name = "neodynix-pages"
 compatibility_date = "2025-11-07"
 
-# REQUIRED: Tell Pages where static files are
+# This must be TOP-LEVEL — NO [pages] section!
 pages_build_output_dir = "."
 
-# Optional but safe
-node_compat = true
+# Remove node_compat — Pages Functions don't support it
+# node_compat = true   ← DELETE THIS LINE
 
-# Functions config
-[[pages.functions]]
+[[functions]]
   directory = "functions"
   external = [
     "@cloudflare/ai",
     "@supabase/supabase-js"
   ]
 
-# AI binding (matches dashboard)
 [ai]
 binding = "AI"
