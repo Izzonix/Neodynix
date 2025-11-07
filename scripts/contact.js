@@ -39,47 +39,57 @@ async function showStartChatPopup() {
       if (email && topic && name) {
         popup.remove();
         resolve({ email, topic, name });
-      } else alert('Fill all fields');
+      } else alert('Please fill all fields');
     };
   });
 }
 
 async function startChat() {
-  const { email, topic, name } = await showStartChatPopup();
-  selectedTopic = topic;
+  try {
+    const { email, topic, name } = await showStartChatPopup();
+    selectedTopic = topic;
 
-  const userId = Array.from(new TextEncoder().encode(email))
-    .map(b => b.toString(16).padStart(2, '0')).join('');
-  localStorage.setItem('chat_user_id', userId);
+    const userId = Array.from(new TextEncoder().encode(email))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+    localStorage.setItem('chat_user_id', userId);
 
-  const { data } = await supabase.from('users').select().eq('id', userId).single();
-  if (data) {
-    user = data;
-    if (user.name !== name || user.topic !== topic) {
-      await supabase.from('users').update({ name, topic }).eq('id', userId);
+    const { data } = await supabase.from('users').select().eq('id', userId).single();
+    if (data) {
+      user = data;
+      if (user.name !== name || user.topic !== topic) {
+        await supabase.from('users').update({ name, topic }).eq('id', userId);
+      }
+    } else {
+      const { data: newUser } = await supabase.from('users').insert({
+        id: userId, name, email, topic
+      }).select().single();
+      user = newUser;
     }
-  } else {
-    const { data: newUser } = await supabase.from('users').insert({
-      id: userId, name, email, topic
-    }).select().single();
-    user = newUser;
-  }
 
-  await loadMessages(userId);
-  subscribeToMessages();
+    await loadMessages(userId);
+    subscribeToMessages();
+  } catch (err) {
+    console.error('Start chat error:', err);
+    alert('Failed to start chat. Try again.');
+    localStorage.removeItem('chat_user_id');
+  }
 }
 
 async function loadMessages(userId) {
-  const { data } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
-  chatMessages.innerHTML = '';
-  data.forEach(msg => {
-    const div = document.createElement('div');
-    div.className = `msg ${msg.is_auto ? 'auto-msg' : msg.sender === 'support' ? 'support-msg' : 'user-msg'}`;
-    const content = msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content;
-    div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
-    chatMessages.appendChild(div);
-  });
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  try {
+    const { data } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
+    chatMessages.innerHTML = '';
+    data.forEach(msg => {
+      const div = document.createElement('div');
+      div.className = `msg ${msg.is_auto ? 'auto-msg' : msg.sender === 'support' ? 'support-msg' : 'user-msg'}`;
+      const content = msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content;
+      div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+      chatMessages.appendChild(div);
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  } catch (err) {
+    console.error('Load messages error:', err);
+  }
 }
 
 function addLocalMessage(content, sender = 'user') {
@@ -97,18 +107,21 @@ async function subscribeToMessages() {
       const content = msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content;
       addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender);
     })
-    .subscribe();
+    .subscribe(status => {
+      if (status === 'SUBSCRIBED') console.log('Subscribed to messages');
+    });
 }
 
 async function sendMessageViaWorker(content, fileUrl = null) {
   try {
-    await fetch(WORKER_URL, {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.id, content, fileUrl })
     });
+    if (!res.ok) throw new Error('Worker failed');
   } catch (err) {
-    console.warn('AI failed, using fallback');
+    console.warn('AI failed, using fallback:', err);
     const { error } = await supabase.from('messages').insert({
       user_id: user.id, content, sender: 'user', is_auto: false, file_url: fileUrl
     });
@@ -137,7 +150,10 @@ window.onload = async () => {
     if (data) {
       user = data; selectedTopic = data.topic || '';
       await loadMessages(userId); subscribeToMessages();
-    } else startChat();
+    } else {
+      localStorage.removeItem('chat_user_id');
+      startChat();
+    }
   } else startChat();
 };
 
@@ -179,14 +195,22 @@ fileInput.onchange = () => {
     spinner.style.display = 'inline-block';
     try {
       const path = `${user.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const { data } = await supabase.storage.from('chat-files').upload(path, file);
+      const { data, error: uploadError } = await supabase.storage.from('chat-files').upload(path, file);
+      if (uploadError) throw uploadError;
       const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
       const content = selectedTopic ? `[Topic: ${selectedTopic}] Sent file: <a href="${url}" target="_blank">${file.name}</a>` : `Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
       addLocalMessage(content);
       selectedTopic = '';
       await sendMessageViaWorker(content, url);
       fileInput.value=''; filePreview.innerHTML='';
-    } catch (e) { alert('Upload failed'); }
-    finally { sendBtn.disabled=false; filePreview.style.pointerEvents='auto'; sendChat.disabled=false; spinner.style.display='none'; }
+    } catch (e) { 
+      console.error('Upload error:', e);
+      alert('File upload failed. Try again.'); 
+    } finally { 
+      sendBtn.disabled = false; 
+      filePreview.style.pointerEvents = 'auto'; 
+      sendChat.disabled = false; 
+      spinner.style.display = 'none'; 
+    }
   };
 };
