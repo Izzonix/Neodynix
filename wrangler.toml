@@ -1,12 +1,7 @@
-name = "neodynix"
+name = "neodynix-worker"
+main = "functions/api/Chart.js"
 compatibility_date = "2025-11-07"
+type = "javascript"
 
-# Required for static files (your HTML/CSS/JS)
-pages_build_output_dir = "."
-
-# Enables Node.js APIs for Supabase
-compatibility_flags = ["nodejs_compat"]
-
-# AI binding (matches dashboard)
-[ai]
-binding = "AI"
+[build]
+command = "npm install"
