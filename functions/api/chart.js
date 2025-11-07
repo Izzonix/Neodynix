@@ -1,8 +1,10 @@
+import { Ai } from '@cloudflare/ai';
 import { createClient } from '@supabase/supabase-js';
 
 export async function onRequestPost(context) {
   const env = context.env;
   const request = context.request;
+  const ai = new Ai(env.AI);
   const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY);
 
   try {
@@ -82,7 +84,7 @@ Assistant (max 120 words, warm, clear, end with action):`;
 
     let aiText;
     try {
-      const { response } = await env.AI.run('@cf/meta/llama-3-8b-instruct', { prompt, max_tokens: 150 });
+      const { response } = await ai.run('@cf/meta/llama-3-8b-instruct', { prompt, max_tokens: 150 });
       aiText = response;
     } catch (aiError) {
       console.error('AI error:', aiError);
