@@ -1,6 +1,9 @@
-name = "neodynix-functions"
+name = "neodynix"
 compatibility_date = "2025-11-07"
+compatibility_flags = ["nodejs_compat"]
 
 [pages]
-# Root folder for your site (index.html, contact.html, etc.)
 pages_build_output_dir = "./"
+
+[build]
+command = "npm install"
