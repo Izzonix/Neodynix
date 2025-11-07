@@ -1,9 +1,6 @@
-name = "neodynix"
+name = "neodynix-functions"
 compatibility_date = "2025-11-07"
 
 [pages]
-# this tells Cloudflare Pages where to find your static site output
-pages_build_output_dir = "."
-
-[build]
-command = "npm install"
+# Root folder for your site (index.html, contact.html, etc.)
+pages_build_output_dir = "./"
