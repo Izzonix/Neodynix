@@ -1,5 +1,5 @@
 {
-  "name": "neodynix-worker",
+  "name": "neodynix-functions",
   "type": "module",
   "dependencies": {
     "@cloudflare/ai": "^1.0.0",
