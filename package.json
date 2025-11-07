@@ -1,8 +1,8 @@
 {
-  "name": "neodynix",
-  "version": "1.0.0",
-  "private": true,
+  "name": "neodynix-worker",
+  "type": "module",
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.4"
+    "@cloudflare/ai": "^1.0.0",
+    "@supabase/supabase-js": "^2.35.0"
   }
 }
