@@ -9,11 +9,11 @@ export async function onRequestPost({ request, env }) {
     const SUPABASE_URL = env.SUPABASE_URL;
     const SUPABASE_KEY = env.SUPABASE_SERVICE_KEY;
     const ACCOUNT_ID = env.ACCOUNT_ID;
-    const MODEL = "@cf/meta/llama-3.1-8b-instruct"; // Updated
+    const MODEL = "@cf/meta/llama-3.1-8b-instruct"; // Updated & stable
 
-    console.log("Worker started for user:", userId);
+    console.log("Worker: Processing message for user:", userId);
 
-    // --- Helper ---
+    // --- Supabase Helper ---
     async function supabaseFetch(table, method = "GET", body = null, query = "") {
       const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
       const res = await fetch(url, {
@@ -33,7 +33,7 @@ export async function onRequestPost({ request, env }) {
       return res.json();
     }
 
-    // --- 1. Save USER message ---
+    // 1. Save USER message
     await supabaseFetch("messages", "POST", {
       user_id: userId,
       content,
@@ -43,10 +43,10 @@ export async function onRequestPost({ request, env }) {
     });
     console.log("User message saved");
 
-    // --- 2. Extract topic ---
+    // 2. Extract topic
     const userTopic = content.match(/\[Topic: ([^\]]+)\]/)?.[1]?.toLowerCase() || "general";
 
-    // --- 3. Get history ---
+    // 3. Get history (last 6)
     const history = await supabaseFetch(
       "messages",
       "GET",
@@ -54,7 +54,7 @@ export async function onRequestPost({ request, env }) {
       `?user_id=eq.${userId}&order=created_at.asc&limit=6`
     );
 
-    // --- 4. Get knowledge + templates ---
+    // 4. Get knowledge + templates
     const knowledge = await supabaseFetch(
       "knowledge",
       "GET",
@@ -69,36 +69,33 @@ export async function onRequestPost({ request, env }) {
       `?category=ilike.%25${userTopic}%25&limit=3`
     );
 
-    // --- 5. Build prompt ---
+    // 5. Build prompt
     const chat = (history || []).map(m => 
       `${m.sender === "user" ? "User" : "Agent"}: ${m.content.replace(/\[Topic:[^\]]+\]\s*/g, '')}`
     ).join("\n");
 
-    const faqs = (knowledge || []).map(k => `• ${k.content}`).join("\n");
+    const faqs = (knowledge || []).map(k => `• ${k.content}`).join("\n") || "No FAQs.";
     const tmpl = templates.length > 0
-      ? `Available Templates:\n${templates.map(t => 
-          `- ${t.name}: $${t.price_usd} | ${t.description}`
-        ).join("\n")}`
-      : "No templates available.";
+      ? `Templates:\n${templates.map(t => `- ${t.name}: $${t.price_usd} | ${t.description}`).join("\n")}`
+      : "No templates.";
 
     const prompt = `
-You are a friendly, expert support agent for Neodynix Technologies.
-We sell customizable website templates.
+You are a friendly support agent for Neodynix Technologies (we sell website templates).
 
-Use this info:
+Use:
 ${faqs}
 
 ${tmpl}
 
-Recent chat:
+Chat:
 ${chat}
 
-Current user message: ${content}
+User: ${content}
 
-Respond in 1-2 short sentences. Be warm, clear, and helpful. End with a question or next step.`;
+Respond in 1-2 short sentences. Be warm and helpful. End with a question or next step.`;
 
-    // --- 6. Call AI ---
-    let aiText = "Thanks! Our team will get back to you soon.";
+    // 6. Call AI
+    let aiText = "Thanks! Our team will reply soon.";
     try {
       console.log("Calling Cloudflare AI...");
       const aiRes = await fetch(
@@ -119,21 +116,15 @@ Respond in 1-2 short sentences. Be warm, clear, and helpful. End with a question
         }
       );
 
-      if (!aiRes.ok) {
-        const err = await aiRes.text();
-        console.error("AI API error:", err);
-        throw new Error("AI failed");
-      }
-
+      if (!aiRes.ok) throw new Error(await aiRes.text());
       const aiData = await aiRes.json();
       aiText = (aiData?.result?.response || aiText).trim();
-      console.log("AI response:", aiText);
+      console.log("AI reply:", aiText);
     } catch (err) {
-      console.error("AI call failed:", err);
-      // Still proceed to save fallback
+      console.error("AI failed:", err);
     }
 
-    // --- 7. Save AI reply ---
+    // 7. Save AI reply
     await supabaseFetch("messages", "POST", {
       user_id: userId,
       content: aiText,
@@ -148,7 +139,7 @@ Respond in 1-2 short sentences. Be warm, clear, and helpful. End with a question
     });
 
   } catch (err) {
-    console.error("Worker crashed:", err);
+    console.error("Worker error:", err);
     return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
   }
-}
+      }
