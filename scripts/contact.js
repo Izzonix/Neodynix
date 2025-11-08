@@ -1,3 +1,4 @@
+// Neodynix/scripts/contact.js
 import { supabase } from './supabase-config.js';
 
 const chatMessages = document.getElementById('chatMessages');
