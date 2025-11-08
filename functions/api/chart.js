@@ -8,10 +8,12 @@ export async function onRequestPost({ request, env }) {
 
     const SUPABASE_URL = env.SUPABASE_URL;
     const SUPABASE_KEY = env.SUPABASE_SERVICE_KEY;
-    const ACCOUNT_ID = env.ACCOUNT_ID; // ✅ use environment variable
-    const MODEL = "@cf/meta/llama-3-8b-instruct";
+    const ACCOUNT_ID = env.ACCOUNT_ID;
+    const MODEL = "@cf/meta/llama-3.1-8b-instruct"; // Updated
 
-    // --- Helper for Supabase REST calls ---
+    console.log("Worker started for user:", userId);
+
+    // --- Helper ---
     async function supabaseFetch(table, method = "GET", body = null, query = "") {
       const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
       const res = await fetch(url, {
@@ -23,11 +25,15 @@ export async function onRequestPost({ request, env }) {
         },
         body: body ? JSON.stringify(body) : undefined,
       });
-      if (!res.ok) console.error(`Supabase error: ${res.statusText}`);
+      if (!res.ok) {
+        const err = await res.text();
+        console.error(`Supabase ${method} ${table} failed:`, err);
+        throw new Error(`Supabase error: ${res.status}`);
+      }
       return res.json();
     }
 
-    // --- 1. Save user message ---
+    // --- 1. Save USER message ---
     await supabaseFetch("messages", "POST", {
       user_id: userId,
       content,
@@ -35,24 +41,25 @@ export async function onRequestPost({ request, env }) {
       is_auto: false,
       file_url: fileUrl || null,
     });
+    console.log("User message saved");
 
     // --- 2. Extract topic ---
     const userTopic = content.match(/\[Topic: ([^\]]+)\]/)?.[1]?.toLowerCase() || "general";
 
-    // --- 3. Retrieve message history ---
+    // --- 3. Get history ---
     const history = await supabaseFetch(
       "messages",
       "GET",
       null,
-      `?user_id=eq.${userId}&order=created_at.asc&limit=8`
+      `?user_id=eq.${userId}&order=created_at.asc&limit=6`
     );
 
-    // --- 4. Retrieve knowledge and templates ---
+    // --- 4. Get knowledge + templates ---
     const knowledge = await supabaseFetch(
       "knowledge",
       "GET",
       null,
-      `?or=(topic.ilike.%25${userTopic}%25,topic.ilike.%25general%25)&order=priority.asc&limit=5`
+      `?or=(topic.ilike.%25${userTopic}%25,topic.ilike.%25general%25)&order=priority.desc&limit=4`
     );
 
     const templates = await supabaseFetch(
@@ -63,39 +70,37 @@ export async function onRequestPost({ request, env }) {
     );
 
     // --- 5. Build prompt ---
-    const chat = (history || [])
-      .map(m => `${m.sender === "user" ? "User" : "Agent"}: ${m.content}`)
-      .join("\n");
-    const faqs = (knowledge || [])
-      .map(k => `FAQ: ${k.content}`)
-      .join("\n\n");
-    const tmpl = templates.length
-      ? `Templates:\n${templates.map(
-          t => `- ${t.name} (${t.category}): $${t.price_usd} USD | ${t.price_ugx} UGX | ${t.price_ksh} KES | ${t.price_tsh} TSH\n  Description: ${t.description}`
+    const chat = (history || []).map(m => 
+      `${m.sender === "user" ? "User" : "Agent"}: ${m.content.replace(/\[Topic:[^\]]+\]\s*/g, '')}`
+    ).join("\n");
+
+    const faqs = (knowledge || []).map(k => `• ${k.content}`).join("\n");
+    const tmpl = templates.length > 0
+      ? `Available Templates:\n${templates.map(t => 
+          `- ${t.name}: $${t.price_usd} | ${t.description}`
         ).join("\n")}`
-      : "No matching templates found.";
+      : "No templates available.";
 
     const prompt = `
 You are a friendly, expert support agent for Neodynix Technologies.
+We sell customizable website templates.
 
-Business:
-- We sell pre-built, customizable website templates.
-
-Use this data:
+Use this info:
 ${faqs}
 
 ${tmpl}
 
-Chat so far:
+Recent chat:
 ${chat}
 
-User: ${content}
+Current user message: ${content}
 
-Assistant (max 120 words, warm tone, clear, and end with a helpful next step):`;
+Respond in 1-2 short sentences. Be warm, clear, and helpful. End with a question or next step.`;
 
-    // --- 6. Cloudflare AI API call ---
-    let aiText = "Thanks! Our team will reply soon.";
+    // --- 6. Call AI ---
+    let aiText = "Thanks! Our team will get back to you soon.";
     try {
+      console.log("Calling Cloudflare AI...");
       const aiRes = await fetch(
         `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/ai/run/${MODEL}`,
         {
@@ -106,17 +111,26 @@ Assistant (max 120 words, warm tone, clear, and end with a helpful next step):`;
           },
           body: JSON.stringify({
             messages: [
-              { role: "system", content: "You are a helpful customer support assistant." },
-              { role: "user", content: prompt },
+              { role: "system", content: "You are a concise, friendly support agent." },
+              { role: "user", content: prompt }
             ],
+            max_tokens: 150
           }),
         }
       );
 
+      if (!aiRes.ok) {
+        const err = await aiRes.text();
+        console.error("AI API error:", err);
+        throw new Error("AI failed");
+      }
+
       const aiData = await aiRes.json();
-      aiText = aiData?.result?.response || aiText;
+      aiText = (aiData?.result?.response || aiText).trim();
+      console.log("AI response:", aiText);
     } catch (err) {
-      console.error("AI fetch error:", err);
+      console.error("AI call failed:", err);
+      // Still proceed to save fallback
     }
 
     // --- 7. Save AI reply ---
@@ -126,16 +140,15 @@ Assistant (max 120 words, warm tone, clear, and end with a helpful next step):`;
       sender: "support",
       is_auto: true,
     });
+    console.log("AI reply saved");
 
     return new Response(JSON.stringify({ success: true, reply: aiText }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
+
   } catch (err) {
-    console.error("Server error:", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Worker crashed:", err);
+    return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
   }
-}
+                                     }
