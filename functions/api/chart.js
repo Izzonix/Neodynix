@@ -1,7 +1,6 @@
 export async function onRequestPost({ request, env }) {
   try {
     const { userId, content, fileUrl } = await request.json();
-
     if (!userId || !content) {
       return new Response(JSON.stringify({ error: "Missing userId or content" }), { status: 400 });
     }
@@ -9,11 +8,10 @@ export async function onRequestPost({ request, env }) {
     const SUPABASE_URL = env.SUPABASE_URL;
     const SUPABASE_KEY = env.SUPABASE_SERVICE_KEY;
     const ACCOUNT_ID = env.ACCOUNT_ID;
-    const MODEL = "@cf/meta/llama-3.1-8b-instruct"; // Updated & stable
+    const MODEL = "@cf/meta/llama-3.1-8b-instruct";
 
     console.log("Worker: Processing message for user:", userId);
 
-    // --- Supabase Helper ---
     async function supabaseFetch(table, method = "GET", body = null, query = "") {
       const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
       const res = await fetch(url, {
@@ -33,7 +31,6 @@ export async function onRequestPost({ request, env }) {
       return res.json();
     }
 
-    // 1. Save USER message
     await supabaseFetch("messages", "POST", {
       user_id: userId,
       content,
@@ -43,10 +40,8 @@ export async function onRequestPost({ request, env }) {
     });
     console.log("User message saved");
 
-    // 2. Extract topic
     const userTopic = content.match(/\[Topic: ([^\]]+)\]/)?.[1]?.toLowerCase() || "general";
 
-    // 3. Get history (last 6)
     const history = await supabaseFetch(
       "messages",
       "GET",
@@ -54,22 +49,20 @@ export async function onRequestPost({ request, env }) {
       `?user_id=eq.${userId}&order=created_at.asc&limit=6`
     );
 
-    // 4. Get knowledge + templates
     const knowledge = await supabaseFetch(
       "knowledge",
       "GET",
       null,
-      `?or=(topic.ilike.%25${userTopic}%25,topic.ilike.%25general%25)&order=priority.desc&limit=4`
+      `?or=(topic.ilike.%${userTopic}%,topic.ilike.%general%)&order=priority.desc&limit=4`
     );
 
     const templates = await supabaseFetch(
       "templates",
       "GET",
       null,
-      `?category=ilike.%25${userTopic}%25&limit=3`
+      `?category=ilike.%${userTopic}%&limit=3`
     );
 
-    // 5. Build prompt
     const chat = (history || []).map(m => 
       `${m.sender === "user" ? "User" : "Agent"}: ${m.content.replace(/\[Topic:[^\]]+\]\s*/g, '')}`
     ).join("\n");
@@ -94,7 +87,6 @@ User: ${content}
 
 Respond in 1-2 short sentences. Be warm and helpful. End with a question or next step.`;
 
-    // 6. Call AI
     let aiText = "Thanks! Our team will reply soon.";
     try {
       console.log("Calling Cloudflare AI...");
@@ -124,7 +116,6 @@ Respond in 1-2 short sentences. Be warm and helpful. End with a question or next
       console.error("AI failed:", err);
     }
 
-    // 7. Save AI reply
     await supabaseFetch("messages", "POST", {
       user_id: userId,
       content: aiText,
@@ -142,4 +133,4 @@ Respond in 1-2 short sentences. Be warm and helpful. End with a question or next
     console.error("Worker error:", err);
     return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
   }
-  }
+}
