@@ -9,7 +9,7 @@ const attachFile = document.getElementById('attachFile');
 
 let user = null;
 let selectedTopic = '';
-const WORKER_URL = '/api/chart';
+const WORKER_URL = '/api/chart.js';
 
 // ----- Start Chat Popup -----
 async function showStartChatPopup() {
