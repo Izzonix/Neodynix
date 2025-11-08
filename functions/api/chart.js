@@ -88,7 +88,7 @@ Assistant (max 120 words, warm, clear, and end with an action):`;
 
     let aiText = "Thanks! Our team will reply soon.";
     try {
-      const aiRes = await fetch("https://api.cloudflare.com/client/v4/accounts/YOUR_ACCOUNT_ID/ai/llama-3-8b-instruct", {
+      const aiRes = await fetch("https://api.cloudflare.com/client/v4/accounts/b9bb9fa97040508999fbb56b7974171c/ai/llama-3-8b-instruct", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${env.AI_KEY}`,
