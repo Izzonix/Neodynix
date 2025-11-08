@@ -16,10 +16,7 @@ async function showStartChatPopup() {
   return new Promise(resolve => {
     const popup = document.createElement('div');
     popup.id = 'startChatPopup';
-    popup.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-      background:#1c2526;padding:24px;border-radius:12px;z-index:1000;
-      box-shadow:0 4px 10px rgba(0,0,0,0.5);color:#eceff1;text-align:center;
-      width:90%;max-width:400px;box-sizing:border-box;`;
+    popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1c2526;padding:24px;border-radius:12px;z-index:1000;box-shadow:0 4px 10px rgba(0,0,0,0.5);color:#eceff1;text-align:center;width:90%;max-width:400px;box-sizing:border-box;';
 
     popup.innerHTML = `
       <h3 style="margin-bottom:20px;color:#80deea;">Start Chat</h3>
@@ -61,20 +58,39 @@ async function startChat() {
       .map(b => b.toString(16).padStart(2, '0')).join('');
     localStorage.setItem('chat_user_id', userId);
 
-    const { data } = await supabase.from('users').select().eq('id', userId).single();
+    const { data: existing } = await supabase
+      .from('users')
+      .select()
+      .eq('id', userId)
+      .single();
 
-    if (data) {
-      user = data;
+    if (existing) {
+      user = existing;
       if (user.name !== name || user.topic !== topic) {
         await supabase.from('users').update({ name, topic }).eq('id', userId);
       }
     } else {
-      const { data: newUser } = await supabase.from('users').insert({ id: userId, name, email, topic }).select().single();
+      const { data: newUser } = await supabase
+        .from('users')
+        .insert({ id: userId, name, email, topic })
+        .select()
+        .single();
       user = newUser;
+
+      // INSERT WELCOME MESSAGE FROM AI
+      const welcomeText = `Hi ${name}! Welcome to Neodynix Technologies support. How can I help you with ${topic.toLowerCase()} today?`;
+      await supabase.from('messages').insert({
+        user_id: userId,
+        content: welcomeText,
+        sender: 'support',
+        is_auto: true,
+      });
+      console.log('Welcome message saved');
     }
 
     await loadMessages(userId);
     subscribeToMessages();
+
   } catch (err) {
     console.error('Start chat error:', err);
     alert('Failed to start chat. Try again.');
@@ -88,7 +104,7 @@ async function loadMessages(userId) {
     const { data } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
     chatMessages.innerHTML = '';
     data.forEach(msg => {
-      const content = msg.file_url 
+      const content = msg.file_url
         ? `${msg.content} <a href="${msg.file_url}" target="_blank" style="color:#4fc3f7;">View File</a>`
         : msg.content;
       addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender);
@@ -113,14 +129,14 @@ function addLocalMessage(content, sender = 'user') {
 // ----- Subscribe to Messages -----
 function subscribeToMessages() {
   supabase.channel('chat')
-    .on('postgres_changes', { 
-      event: 'INSERT', 
-      schema: 'public', 
-      table: 'messages', 
-      filter: `user_id=eq.${user.id}` 
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `user_id=eq.${user.id}`
     }, payload => {
       const msg = payload.new;
-      const content = msg.file_url 
+      const content = msg.file_url
         ? `${msg.content} <a href="${msg.file_url}" target="_blank" style="color:#4fc3f7;">View File</a>`
         : msg.content;
       addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender);
@@ -145,7 +161,6 @@ async function sendMessageViaWorker(content, fileUrl = null) {
     }
   } catch (err) {
     console.warn('AI failed, using fallback');
-    // Insert fallback directly
     await supabase.from('messages').insert({
       user_id: user.id,
       content: "Thanks! Our team will reply soon.",
@@ -184,7 +199,6 @@ sendChat.onclick = async () => {
   chatInput.value = '';
   selectedTopic = '';
 
-  // Show sending indicator
   const indicator = document.createElement('div');
   indicator.id = 'sending-indicator';
   indicator.innerHTML = `<span style="color:#888;font-style:italic;">Sending...</span>`;
@@ -237,7 +251,7 @@ fileInput.onchange = () => {
       if (error) throw error;
 
       const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
-      const content = selectedTopic 
+      const content = selectedTopic
         ? `[Topic: ${selectedTopic}] Sent file: <a href="${url}" target="_blank">${file.name}</a>`
         : `Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
 
