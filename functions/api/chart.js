@@ -142,4 +142,4 @@ Respond in 1-2 short sentences. Be warm and helpful. End with a question or next
     console.error("Worker error:", err);
     return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
   }
-      }
+  }
