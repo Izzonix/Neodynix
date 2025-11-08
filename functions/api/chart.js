@@ -151,4 +151,4 @@ Respond in 1-2 short sentences. Be warm, clear, and helpful. End with a question
     console.error("Worker crashed:", err);
     return new Response(JSON.stringify({ error: "Server error" }), { status: 500 });
   }
-                                     }
+}
