@@ -6,17 +6,23 @@ const fileInput = document.getElementById('fileInput');
 const filePreview = document.getElementById('filePreview');
 const sendChat = document.getElementById('sendChat');
 const attachFile = document.getElementById('attachFile');
+
 let user = null;
 let selectedTopic = '';
 
-// Cloudflare Pages function
-const WORKER_URL = '/api/chat';
+// Cloudflare Pages Worker URL
+const WORKER_URL = '/api/chart'; // updated to match your worker file
 
+// ----- UI: Start Chat Popup -----
 async function showStartChatPopup() {
   return new Promise(resolve => {
     const popup = document.createElement('div');
     popup.id = 'startChatPopup';
-    popup.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1c2526;padding:24px;border-radius:12px;z-index:1000;box-shadow:0 4px 10px rgba(0,0,0,0.5);color:#eceff1;text-align:center;width:90%;max-width:400px;box-sizing:border-box;`;
+    popup.style.cssText = `position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+      background:#1c2526;padding:24px;border-radius:12px;z-index:1000;
+      box-shadow:0 4px 10px rgba(0,0,0,0.5);color:#eceff1;text-align:center;
+      width:90%;max-width:400px;box-sizing:border-box;`;
+
     popup.innerHTML = `
       <h3 style="margin-bottom:20px;color:#80deea;">Start Chat</h3>
       <input type="email" id="emailInput" placeholder="Email" style="padding:12px;width:100%;box-sizing:border-box;border-radius:8px;margin-bottom:15px;border:1px solid #80deea;background:#263238;color:#eceff1;" required>
@@ -30,6 +36,7 @@ async function showStartChatPopup() {
       <input type="text" id="nameInput" placeholder="Name" style="padding:12px;width:100%;box-sizing:border-box;border-radius:8px;margin-bottom:15px;border:1px solid #80deea;background:#263238;color:#eceff1;" required>
       <button id="submitInfo" style="padding:12px 24px;background:#4fc3f7;border:none;border-radius:8px;color:#121212;cursor:pointer;">Start Chat</button>
     `;
+
     document.body.appendChild(popup);
 
     document.getElementById('submitInfo').onclick = () => {
@@ -39,11 +46,14 @@ async function showStartChatPopup() {
       if (email && topic && name) {
         popup.remove();
         resolve({ email, topic, name });
-      } else alert('Please fill all fields');
+      } else {
+        alert('Please fill all fields');
+      }
     };
   });
 }
 
+// ----- Initialize Chat -----
 async function startChat() {
   try {
     const { email, topic, name } = await showStartChatPopup();
@@ -54,15 +64,14 @@ async function startChat() {
     localStorage.setItem('chat_user_id', userId);
 
     const { data } = await supabase.from('users').select().eq('id', userId).single();
+
     if (data) {
       user = data;
       if (user.name !== name || user.topic !== topic) {
         await supabase.from('users').update({ name, topic }).eq('id', userId);
       }
     } else {
-      const { data: newUser } = await supabase.from('users').insert({
-        id: userId, name, email, topic
-      }).select().single();
+      const { data: newUser } = await supabase.from('users').insert({ id: userId, name, email, topic }).select().single();
       user = newUser;
     }
 
@@ -75,32 +84,31 @@ async function startChat() {
   }
 }
 
+// ----- Load Messages -----
 async function loadMessages(userId) {
   try {
     const { data } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
     chatMessages.innerHTML = '';
     data.forEach(msg => {
-      const div = document.createElement('div');
-      div.className = `msg ${msg.is_auto ? 'auto-msg' : msg.sender === 'support' ? 'support-msg' : 'user-msg'}`;
-      const content = msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content;
-      div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
-      chatMessages.appendChild(div);
+      addLocalMessage(msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content, msg.is_auto ? 'auto' : msg.sender);
     });
-    chatMessages.scrollTop = chatMessages.scrollHeight;
   } catch (err) {
     console.error('Load messages error:', err);
   }
 }
 
+// ----- Add Message to UI -----
 function addLocalMessage(content, sender = 'user') {
   const div = document.createElement('div');
   div.className = `msg ${sender === 'support' ? 'support-msg' : sender === 'auto' ? 'auto-msg' : 'user-msg'}`;
-  div.innerHTML = `<span class="msg-content">${content}</span><span class="msg-timestamp">${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+  div.innerHTML = `<span class="msg-content">${content}</span>
+                   <span class="msg-timestamp">${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-async function subscribeToMessages() {
+// ----- Subscribe to Messages -----
+function subscribeToMessages() {
   supabase.channel('chat')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${user.id}` }, payload => {
       const msg = payload.new;
@@ -112,6 +120,7 @@ async function subscribeToMessages() {
     });
 }
 
+// ----- Send Message to Cloudflare Worker -----
 async function sendMessageViaWorker(content, fileUrl = null) {
   try {
     const res = await fetch(WORKER_URL, {
@@ -121,20 +130,21 @@ async function sendMessageViaWorker(content, fileUrl = null) {
     });
     if (!res.ok) throw new Error('Worker failed');
   } catch (err) {
-    console.warn('AI failed, using fallback:', err);
-    const { error } = await supabase.from('messages').insert({
-      user_id: user.id, content, sender: 'user', is_auto: false, file_url: fileUrl
-    });
-    if (!error) await sendSecondAutoReply();
+    console.warn('AI failed, storing fallback message:', err);
+    await supabase.from('messages').insert({ user_id: user.id, content, sender: 'user', is_auto: false, file_url: fileUrl });
+    await sendSecondAutoReply();
   }
 }
 
+// ----- Send fallback auto-reply -----
 async function sendSecondAutoReply() {
   const sent = localStorage.getItem('secondAutoReplySent');
   if (sent || !user) return;
+
   const { data: msgs } = await supabase.from('messages').select('is_auto,sender').eq('user_id', user.id).order('created_at');
   const hasAuto = msgs.some(m => m.is_auto);
   const userMsgs = msgs.filter(m => !m.is_auto && m.sender === 'user');
+
   if (hasAuto && userMsgs.length === 1) {
     const msg = 'Thank you for providing details. Our team will review your issue and reply soon.';
     await supabase.from('messages').insert({ user_id: user.id, content: msg, sender: 'support', is_auto: true });
@@ -143,13 +153,16 @@ async function sendSecondAutoReply() {
   }
 }
 
+// ----- Initialize on page load -----
 window.onload = async () => {
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
     const { data } = await supabase.from('users').select().eq('id', userId).single();
     if (data) {
-      user = data; selectedTopic = data.topic || '';
-      await loadMessages(userId); subscribeToMessages();
+      user = data;
+      selectedTopic = data.topic || '';
+      await loadMessages(userId);
+      subscribeToMessages();
     } else {
       localStorage.removeItem('chat_user_id');
       startChat();
@@ -157,22 +170,28 @@ window.onload = async () => {
   } else startChat();
 };
 
+// ----- Send chat message -----
 sendChat.onclick = async () => {
   const text = chatInput.value.trim();
   if (!text || !user) return;
+
   sendChat.disabled = true;
   const content = selectedTopic ? `[Topic: ${selectedTopic}] ${text}` : text;
   addLocalMessage(content);
-  chatInput.value = ''; selectedTopic = '';
+  chatInput.value = '';
+  selectedTopic = '';
+
   await sendMessageViaWorker(content);
   sendChat.disabled = false;
 };
 
+// ----- File upload handling -----
 attachFile.onclick = () => fileInput.click();
 
 fileInput.onchange = () => {
   const file = fileInput.files[0];
   if (!file) return;
+
   filePreview.innerHTML = `
     <div style="display:flex;gap:10px;align-items:center;">
       <span>${file.name}</span>
@@ -182,6 +201,7 @@ fileInput.onchange = () => {
     </div>
     <style>@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style>
   `;
+
   const deleteBtn = filePreview.querySelector('.delete-file');
   const sendBtn = filePreview.querySelector('.send-file');
   const spinner = filePreview.querySelector('.loading-spinner');
@@ -193,24 +213,29 @@ fileInput.onchange = () => {
     filePreview.style.pointerEvents = 'none';
     sendChat.disabled = true;
     spinner.style.display = 'inline-block';
+
     try {
       const path = `${user.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
       const { data, error: uploadError } = await supabase.storage.from('chat-files').upload(path, file);
       if (uploadError) throw uploadError;
+
       const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
       const content = selectedTopic ? `[Topic: ${selectedTopic}] Sent file: <a href="${url}" target="_blank">${file.name}</a>` : `Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
+
       addLocalMessage(content);
       selectedTopic = '';
+
       await sendMessageViaWorker(content, url);
-      fileInput.value=''; filePreview.innerHTML='';
-    } catch (e) { 
+      fileInput.value='';
+      filePreview.innerHTML='';
+    } catch (e) {
       console.error('Upload error:', e);
-      alert('File upload failed. Try again.'); 
-    } finally { 
-      sendBtn.disabled = false; 
-      filePreview.style.pointerEvents = 'auto'; 
-      sendChat.disabled = false; 
-      spinner.style.display = 'none'; 
+      alert('File upload failed. Try again.');
+    } finally {
+      sendBtn.disabled = false;
+      filePreview.style.pointerEvents = 'auto';
+      sendChat.disabled = false;
+      spinner.style.display = 'none';
     }
   };
 };
