@@ -9,7 +9,8 @@ const attachFile = document.getElementById('attachFile');
 
 let user = null;
 let selectedTopic = '';
-const WORKER_URL = '/api/chart.js';
+// FIX #1: Remove .js extension - Cloudflare Pages Functions don't use extensions
+const WORKER_URL = '/api/chart';
 
 // ----- Start Chat Popup -----
 async function showStartChatPopup() {
@@ -58,11 +59,11 @@ async function startChat() {
       .map(b => b.toString(16).padStart(2, '0')).join('');
     localStorage.setItem('chat_user_id', userId);
 
-    const { data: existing } = await supabase
+    const { data: existing, error: selectError } = await supabase
       .from('users')
       .select()
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // FIX #2: Use maybeSingle() to avoid error if no rows
 
     if (existing) {
       user = existing;
@@ -70,14 +71,19 @@ async function startChat() {
         await supabase.from('users').update({ name, topic }).eq('id', userId);
       }
     } else {
-      const { data: newUser } = await supabase
+      const { data: newUser, error: insertError } = await supabase
         .from('users')
         .insert({ id: userId, name, email, topic })
         .select()
         .single();
+      
+      if (insertError) {
+        console.error('User insert error:', insertError);
+        throw insertError;
+      }
       user = newUser;
 
-      // INSERT WELCOME MESSAGE FROM AI
+      // Welcome message
       const welcomeText = `Hi ${name}! Welcome to Neodynix Technologies support. How can I help you with ${topic.toLowerCase()} today?`;
       await supabase.from('messages').insert({
         user_id: userId,
@@ -85,7 +91,6 @@ async function startChat() {
         sender: 'support',
         is_auto: true,
       });
-      console.log('Welcome message saved');
     }
 
     await loadMessages(userId);
@@ -93,7 +98,7 @@ async function startChat() {
 
   } catch (err) {
     console.error('Start chat error:', err);
-    alert('Failed to start chat. Try again.');
+    alert('Failed to start chat: ' + err.message);
     localStorage.removeItem('chat_user_id');
   }
 }
@@ -101,9 +106,16 @@ async function startChat() {
 // ----- Load Messages -----
 async function loadMessages(userId) {
   try {
-    const { data } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
+    const { data, error } = await supabase
+      .from('messages')
+      .select()
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true });
+    
+    if (error) throw error;
+    
     chatMessages.innerHTML = '';
-    data.forEach(msg => {
+    (data || []).forEach(msg => {
       const content = msg.file_url
         ? `${msg.content} <a href="${msg.file_url}" target="_blank" style="color:#4fc3f7;">View File</a>`
         : msg.content;
@@ -126,6 +138,9 @@ function addLocalMessage(content, sender = 'user') {
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+// FIX #3: Track if we're waiting for a response to prevent duplicate display
+let waitingForResponse = false;
+
 // ----- Subscribe to Messages -----
 function subscribeToMessages() {
   supabase.channel('chat')
@@ -136,10 +151,23 @@ function subscribeToMessages() {
       filter: `user_id=eq.${user.id}`
     }, payload => {
       const msg = payload.new;
+      
+      // FIX #4: Only show messages from support (AI responses)
+      // User messages are already shown when sent
+      if (msg.sender === 'user' && waitingForResponse) {
+        // Skip - we already showed this
+        return;
+      }
+      
       const content = msg.file_url
         ? `${msg.content} <a href="${msg.file_url}" target="_blank" style="color:#4fc3f7;">View File</a>`
         : msg.content;
       addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender);
+      
+      // Reset waiting flag when we get AI response
+      if (msg.sender === 'support') {
+        waitingForResponse = false;
+      }
     })
     .subscribe(status => {
       if (status === 'SUBSCRIBED') console.log('Subscribed to real-time messages');
@@ -149,18 +177,35 @@ function subscribeToMessages() {
 // ----- Send Message via Worker -----
 async function sendMessageViaWorker(content, fileUrl = null) {
   try {
+    console.log('Sending to worker:', { userId: user.id, content, fileUrl });
+    
     const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.id, content, fileUrl })
     });
+    
+    const responseText = await res.text();
+    console.log('Worker response:', responseText);
+    
     if (!res.ok) {
-      const err = await res.text();
-      console.error('Worker error:', err);
-      throw new Error('Worker failed');
+      console.error('Worker error response:', responseText);
+      throw new Error('Worker failed: ' + responseText);
     }
+    
+    // Try to parse JSON
+    try {
+      const data = JSON.parse(responseText);
+      console.log('Worker success:', data);
+    } catch (e) {
+      console.warn('Response not JSON:', responseText);
+    }
+    
   } catch (err) {
-    console.warn('AI failed, using fallback');
+    console.error('AI failed, using fallback:', err);
+    addLocalMessage('⚠️ Connection issue. Our team will respond soon.', 'auto');
+    
+    // Still save fallback to database
     await supabase.from('messages').insert({
       user_id: user.id,
       content: "Thanks! Our team will reply soon.",
@@ -174,7 +219,12 @@ async function sendMessageViaWorker(content, fileUrl = null) {
 window.onload = async () => {
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
-    const { data } = await supabase.from('users').select().eq('id', userId).single();
+    const { data, error } = await supabase
+      .from('users')
+      .select()
+      .eq('id', userId)
+      .maybeSingle();
+    
     if (data) {
       user = data;
       selectedTopic = data.topic || '';
@@ -199,9 +249,13 @@ sendChat.onclick = async () => {
   chatInput.value = '';
   selectedTopic = '';
 
+  // FIX #5: Show user message immediately (don't wait for real-time)
+  addLocalMessage(content.replace(/\[Topic:[^\]]+\]\s*/g, ''), 'user');
+  waitingForResponse = true;
+
   const indicator = document.createElement('div');
   indicator.id = 'sending-indicator';
-  indicator.innerHTML = `<span style="color:#888;font-style:italic;">Sending...</span>`;
+  indicator.innerHTML = `<span style="color:#888;font-style:italic;">AI is typing...</span>`;
   chatMessages.appendChild(indicator);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -212,6 +266,14 @@ sendChat.onclick = async () => {
     sendChat.disabled = false;
   }
 };
+
+// FIX #6: Add Enter key support
+chatInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat.click();
+  }
+});
 
 // ----- File Upload -----
 attachFile.onclick = () => fileInput.click();
@@ -252,8 +314,12 @@ fileInput.onchange = () => {
 
       const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
       const content = selectedTopic
-        ? `[Topic: ${selectedTopic}] Sent file: <a href="${url}" target="_blank">${file.name}</a>`
-        : `Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
+        ? `[Topic: ${selectedTopic}] Sent file: ${file.name}`
+        : `Sent file: ${file.name}`;
+
+      // Show file message immediately
+      addLocalMessage(`${content} <a href="${url}" target="_blank" style="color:#4fc3f7;">View File</a>`, 'user');
+      waitingForResponse = true;
 
       selectedTopic = '';
       await sendMessageViaWorker(content, url);
@@ -262,7 +328,7 @@ fileInput.onchange = () => {
       filePreview.innerHTML = '';
     } catch (e) {
       console.error('Upload failed:', e);
-      alert('Upload failed. Try again.');
+      alert('Upload failed: ' + e.message);
     } finally {
       sendBtn.disabled = false;
       filePreview.style.pointerEvents = 'auto';
