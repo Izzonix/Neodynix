@@ -177,12 +177,25 @@ sendChat.onclick = async () => {
 
   sendChat.disabled = true;
   const content = selectedTopic ? `[Topic: ${selectedTopic}] ${text}` : text;
-  addLocalMessage(content);
   chatInput.value = '';
   selectedTopic = '';
 
-  await sendMessageViaWorker(content);
-  sendChat.disabled = false;
+  // Show "typing..." temporarily
+  const typingDiv = document.createElement('div');
+  typingDiv.id = 'typing-indicator';
+  typingDiv.innerHTML = `<span style="color:#888; font-style:italic;">Sending...</span>`;
+  chatMessages.appendChild(typingDiv);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+
+  try {
+    await sendMessageViaWorker(content);
+  } catch (err) {
+    console.error("Send failed:", err);
+  } finally {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) indicator.remove();
+    sendChat.disabled = false;
+  }
 };
 
 // ----- File upload handling -----
@@ -222,10 +235,17 @@ fileInput.onchange = () => {
       const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
       const content = selectedTopic ? `[Topic: ${selectedTopic}] Sent file: <a href="${url}" target="_blank">${file.name}</a>` : `Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
 
-      addLocalMessage(content);
       selectedTopic = '';
 
+      // Show "typing..." temporarily
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typing-indicator';
+      typingDiv.innerHTML = `<span style="color:#888; font-style:italic;">Sending...</span>`;
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
       await sendMessageViaWorker(content, url);
+
       fileInput.value='';
       filePreview.innerHTML='';
     } catch (e) {
@@ -236,6 +256,8 @@ fileInput.onchange = () => {
       filePreview.style.pointerEvents = 'auto';
       sendChat.disabled = false;
       spinner.style.display = 'none';
+      const indicator = document.getElementById('typing-indicator');
+      if (indicator) indicator.remove();
     }
   };
 };
