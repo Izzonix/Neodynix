@@ -1,4 +1,3 @@
-// Neodynix/scripts/contact.js
 import { supabase } from './supabase-config.js';
 
 const chatMessages = document.getElementById('chatMessages');
@@ -10,11 +9,9 @@ const attachFile = document.getElementById('attachFile');
 
 let user = null;
 let selectedTopic = '';
+const WORKER_URL = '/api/chart';
 
-// Cloudflare Pages Worker URL
-const WORKER_URL = '/api/chart'; // updated to match your worker file
-
-// ----- UI: Start Chat Popup -----
+// ----- Start Chat Popup -----
 async function showStartChatPopup() {
   return new Promise(resolve => {
     const popup = document.createElement('div');
@@ -91,7 +88,10 @@ async function loadMessages(userId) {
     const { data } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
     chatMessages.innerHTML = '';
     data.forEach(msg => {
-      addLocalMessage(msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content, msg.is_auto ? 'auto' : msg.sender);
+      const content = msg.file_url 
+        ? `${msg.content} <a href="${msg.file_url}" target="_blank" style="color:#4fc3f7;">View File</a>`
+        : msg.content;
+      addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender);
     });
   } catch (err) {
     console.error('Load messages error:', err);
@@ -102,8 +102,10 @@ async function loadMessages(userId) {
 function addLocalMessage(content, sender = 'user') {
   const div = document.createElement('div');
   div.className = `msg ${sender === 'support' ? 'support-msg' : sender === 'auto' ? 'auto-msg' : 'user-msg'}`;
-  div.innerHTML = `<span class="msg-content">${content}</span>
-                   <span class="msg-timestamp">${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>`;
+  div.innerHTML = `
+    <span class="msg-content">${content}</span>
+    <span class="msg-timestamp">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+  `;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -111,17 +113,24 @@ function addLocalMessage(content, sender = 'user') {
 // ----- Subscribe to Messages -----
 function subscribeToMessages() {
   supabase.channel('chat')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `user_id=eq.${user.id}` }, payload => {
+    .on('postgres_changes', { 
+      event: 'INSERT', 
+      schema: 'public', 
+      table: 'messages', 
+      filter: `user_id=eq.${user.id}` 
+    }, payload => {
       const msg = payload.new;
-      const content = msg.file_url ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>` : msg.content;
+      const content = msg.file_url 
+        ? `${msg.content} <a href="${msg.file_url}" target="_blank" style="color:#4fc3f7;">View File</a>`
+        : msg.content;
       addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender);
     })
     .subscribe(status => {
-      if (status === 'SUBSCRIBED') console.log('Subscribed to messages');
+      if (status === 'SUBSCRIBED') console.log('Subscribed to real-time messages');
     });
 }
 
-// ----- Send Message to Cloudflare Worker -----
+// ----- Send Message via Worker -----
 async function sendMessageViaWorker(content, fileUrl = null) {
   try {
     const res = await fetch(WORKER_URL, {
@@ -129,32 +138,24 @@ async function sendMessageViaWorker(content, fileUrl = null) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user.id, content, fileUrl })
     });
-    if (!res.ok) throw new Error('Worker failed');
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('Worker error:', err);
+      throw new Error('Worker failed');
+    }
   } catch (err) {
-    console.warn('AI failed, storing fallback message:', err);
-    await supabase.from('messages').insert({ user_id: user.id, content, sender: 'user', is_auto: false, file_url: fileUrl });
-    await sendSecondAutoReply();
+    console.warn('AI failed, using fallback');
+    // Insert fallback directly
+    await supabase.from('messages').insert({
+      user_id: user.id,
+      content: "Thanks! Our team will reply soon.",
+      sender: 'support',
+      is_auto: true
+    });
   }
 }
 
-// ----- Send fallback auto-reply -----
-async function sendSecondAutoReply() {
-  const sent = localStorage.getItem('secondAutoReplySent');
-  if (sent || !user) return;
-
-  const { data: msgs } = await supabase.from('messages').select('is_auto,sender').eq('user_id', user.id).order('created_at');
-  const hasAuto = msgs.some(m => m.is_auto);
-  const userMsgs = msgs.filter(m => !m.is_auto && m.sender === 'user');
-
-  if (hasAuto && userMsgs.length === 1) {
-    const msg = 'Thank you for providing details. Our team will review your issue and reply soon.';
-    await supabase.from('messages').insert({ user_id: user.id, content: msg, sender: 'support', is_auto: true });
-    localStorage.setItem('secondAutoReplySent', 'true');
-    addLocalMessage(msg, 'auto');
-  }
-}
-
-// ----- Initialize on page load -----
+// ----- Page Load -----
 window.onload = async () => {
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
@@ -168,10 +169,12 @@ window.onload = async () => {
       localStorage.removeItem('chat_user_id');
       startChat();
     }
-  } else startChat();
+  } else {
+    startChat();
+  }
 };
 
-// ----- Send chat message -----
+// ----- Send Text Message -----
 sendChat.onclick = async () => {
   const text = chatInput.value.trim();
   if (!text || !user) return;
@@ -181,25 +184,22 @@ sendChat.onclick = async () => {
   chatInput.value = '';
   selectedTopic = '';
 
-  // Show "typing..." temporarily
-  const typingDiv = document.createElement('div');
-  typingDiv.id = 'typing-indicator';
-  typingDiv.innerHTML = `<span style="color:#888; font-style:italic;">Sending...</span>`;
-  chatMessages.appendChild(typingDiv);
+  // Show sending indicator
+  const indicator = document.createElement('div');
+  indicator.id = 'sending-indicator';
+  indicator.innerHTML = `<span style="color:#888;font-style:italic;">Sending...</span>`;
+  chatMessages.appendChild(indicator);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 
   try {
     await sendMessageViaWorker(content);
-  } catch (err) {
-    console.error("Send failed:", err);
   } finally {
-    const indicator = document.getElementById('typing-indicator');
-    if (indicator) indicator.remove();
+    indicator.remove();
     sendChat.disabled = false;
   }
 };
 
-// ----- File upload handling -----
+// ----- File Upload -----
 attachFile.onclick = () => fileInput.click();
 
 fileInput.onchange = () => {
@@ -207,11 +207,11 @@ fileInput.onchange = () => {
   if (!file) return;
 
   filePreview.innerHTML = `
-    <div style="display:flex;gap:10px;align-items:center;">
-      <span>${file.name}</span>
-      <button class="delete-file" title="Remove">X</button>
-      <button class="send-file" style="padding:5px 10px;background:#4fc3f7;border:none;border-radius:5px;color:#000;">Send</button>
-      <span class="loading-spinner" style="display:none;width:16px;height:16px;border:2px solid #f3f3f3;border-top:2px solid #4fc3f7;border-radius:50%;animation:spin 1s linear infinite;"></span>
+    <div style="display:flex;gap:10px;align-items:center;padding:8px;background:#263238;border-radius:8px;">
+      <span style="flex:1;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${file.name}</span>
+      <button class="delete-file" title="Remove" style="background:none;border:none;color:#ff6b6b;cursor:pointer;font-weight:bold;">X</button>
+      <button class="send-file" style="padding:5px 10px;background:#4fc3f7;border:none;border-radius:5px;color:#000;font-size:12px;">Send</button>
+      <span class="loading-spinner" style="display:none;width:14px;height:14px;border:2px solid #ccc;border-top:2px solid #4fc3f7;border-radius:50%;animation:spin 1s linear infinite;"></span>
     </div>
     <style>@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style>
   `;
@@ -220,7 +220,10 @@ fileInput.onchange = () => {
   const sendBtn = filePreview.querySelector('.send-file');
   const spinner = filePreview.querySelector('.loading-spinner');
 
-  deleteBtn.onclick = () => { fileInput.value=''; filePreview.innerHTML=''; };
+  deleteBtn.onclick = () => {
+    fileInput.value = '';
+    filePreview.innerHTML = '';
+  };
 
   sendBtn.onclick = async () => {
     sendBtn.disabled = true;
@@ -230,35 +233,27 @@ fileInput.onchange = () => {
 
     try {
       const path = `${user.id}/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const { data, error: uploadError } = await supabase.storage.from('chat-files').upload(path, file);
-      if (uploadError) throw uploadError;
+      const { data, error } = await supabase.storage.from('chat-files').upload(path, file);
+      if (error) throw error;
 
       const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
-      const content = selectedTopic ? `[Topic: ${selectedTopic}] Sent file: <a href="${url}" target="_blank">${file.name}</a>` : `Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
+      const content = selectedTopic 
+        ? `[Topic: ${selectedTopic}] Sent file: <a href="${url}" target="_blank">${file.name}</a>`
+        : `Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
 
       selectedTopic = '';
-
-      // Show "typing..." temporarily
-      const typingDiv = document.createElement('div');
-      typingDiv.id = 'typing-indicator';
-      typingDiv.innerHTML = `<span style="color:#888; font-style:italic;">Sending...</span>`;
-      chatMessages.appendChild(typingDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-
       await sendMessageViaWorker(content, url);
 
-      fileInput.value='';
-      filePreview.innerHTML='';
+      fileInput.value = '';
+      filePreview.innerHTML = '';
     } catch (e) {
-      console.error('Upload error:', e);
-      alert('File upload failed. Try again.');
+      console.error('Upload failed:', e);
+      alert('Upload failed. Try again.');
     } finally {
       sendBtn.disabled = false;
       filePreview.style.pointerEvents = 'auto';
       sendChat.disabled = false;
       spinner.style.display = 'none';
-      const indicator = document.getElementById('typing-indicator');
-      if (indicator) indicator.remove();
     }
   };
 };
