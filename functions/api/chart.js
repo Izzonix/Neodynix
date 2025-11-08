@@ -8,8 +8,10 @@ export async function onRequestPost({ request, env }) {
 
     const SUPABASE_URL = env.SUPABASE_URL;
     const SUPABASE_KEY = env.SUPABASE_SERVICE_KEY;
+    const ACCOUNT_ID = env.ACCOUNT_ID; // ✅ use environment variable
+    const MODEL = "@cf/meta/llama-3-8b-instruct";
 
-    // Helper for Supabase REST calls
+    // --- Helper for Supabase REST calls ---
     async function supabaseFetch(table, method = "GET", body = null, query = "") {
       const url = `${SUPABASE_URL}/rest/v1/${table}${query}`;
       const res = await fetch(url, {
@@ -21,10 +23,11 @@ export async function onRequestPost({ request, env }) {
         },
         body: body ? JSON.stringify(body) : undefined,
       });
+      if (!res.ok) console.error(`Supabase error: ${res.statusText}`);
       return res.json();
     }
 
-    // Save user message
+    // --- 1. Save user message ---
     await supabaseFetch("messages", "POST", {
       user_id: userId,
       content,
@@ -33,10 +36,10 @@ export async function onRequestPost({ request, env }) {
       file_url: fileUrl || null,
     });
 
-    // Extract topic
+    // --- 2. Extract topic ---
     const userTopic = content.match(/\[Topic: ([^\]]+)\]/)?.[1]?.toLowerCase() || "general";
 
-    // Last 8 messages
+    // --- 3. Retrieve message history ---
     const history = await supabaseFetch(
       "messages",
       "GET",
@@ -44,7 +47,7 @@ export async function onRequestPost({ request, env }) {
       `?user_id=eq.${userId}&order=created_at.asc&limit=8`
     );
 
-    // Knowledge
+    // --- 4. Retrieve knowledge and templates ---
     const knowledge = await supabaseFetch(
       "knowledge",
       "GET",
@@ -52,7 +55,6 @@ export async function onRequestPost({ request, env }) {
       `?or=(topic.ilike.%25${userTopic}%25,topic.ilike.%25general%25)&order=priority.asc&limit=5`
     );
 
-    // Templates
     const templates = await supabaseFetch(
       "templates",
       "GET",
@@ -60,14 +62,19 @@ export async function onRequestPost({ request, env }) {
       `?category=ilike.%25${userTopic}%25&limit=3`
     );
 
-    // Build conversation & knowledge
-    const chat = (history || []).map(m => `${m.sender === "user" ? "User" : "Agent"}: ${m.content}`).join("\n");
-    const faqs = (knowledge || []).map(k => `FAQ: ${k.content}`).join("\n\n");
+    // --- 5. Build prompt ---
+    const chat = (history || [])
+      .map(m => `${m.sender === "user" ? "User" : "Agent"}: ${m.content}`)
+      .join("\n");
+    const faqs = (knowledge || [])
+      .map(k => `FAQ: ${k.content}`)
+      .join("\n\n");
     const tmpl = templates.length
-      ? `Templates:\n${templates.map(t => `- ${t.name} (${t.category}): $${t.price_usd} USD | ${t.price_ugx} UGX | ${t.price_ksh} KES | ${t.price_tsh} TSH\n  Description: ${t.description}`).join("\n")}`
-      : "No matching templates.";
+      ? `Templates:\n${templates.map(
+          t => `- ${t.name} (${t.category}): $${t.price_usd} USD | ${t.price_ugx} UGX | ${t.price_ksh} KES | ${t.price_tsh} TSH\n  Description: ${t.description}`
+        ).join("\n")}`
+      : "No matching templates found.";
 
-    // Cloudflare AI call
     const prompt = `
 You are a friendly, expert support agent for Neodynix Technologies.
 
@@ -79,30 +86,40 @@ ${faqs}
 
 ${tmpl}
 
-Chat:
+Chat so far:
 ${chat}
 
 User: ${content}
 
-Assistant (max 120 words, warm, clear, and end with an action):`;
+Assistant (max 120 words, warm tone, clear, and end with a helpful next step):`;
 
+    // --- 6. Cloudflare AI API call ---
     let aiText = "Thanks! Our team will reply soon.";
     try {
-      const aiRes = await fetch("https://api.cloudflare.com/client/v4/accounts/b9bb9fa97040508999fbb56b7974171c/ai/llama-3-8b-instruct", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${env.AI_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt, max_tokens: 150 }),
-      });
+      const aiRes = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/ai/run/${MODEL}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${env.AI_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: [
+              { role: "system", content: "You are a helpful customer support assistant." },
+              { role: "user", content: prompt },
+            ],
+          }),
+        }
+      );
+
       const aiData = await aiRes.json();
-      if (aiData?.result) aiText = aiData.result;
+      aiText = aiData?.result?.response || aiText;
     } catch (err) {
-      console.error("AI error:", err);
+      console.error("AI fetch error:", err);
     }
 
-    // Save AI reply
+    // --- 7. Save AI reply ---
     await supabaseFetch("messages", "POST", {
       user_id: userId,
       content: aiText,
@@ -114,9 +131,11 @@ Assistant (max 120 words, warm, clear, and end with an action):`;
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-
   } catch (err) {
     console.error("Server error:", err);
-    return new Response(JSON.stringify({ error: "Internal server error" }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
-                                     }
+}
