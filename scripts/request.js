@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         email: formData.get('email'),
         category: formData.get('category'),
         template: formData.get('template'),
-        followup_link: 'https://izzonix.github.io/Neodynix/followup.html',
+        followup_link: 'https://neodynix.pages.dev/followup',
       });
 
       alert('✅ Request submitted successfully! Check your email.');
