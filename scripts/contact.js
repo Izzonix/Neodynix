@@ -8,6 +8,65 @@ const sendChat = document.getElementById('sendChat');
 const attachFile = document.getElementById('attachFile');
 let user = null;
 let selectedTopic = '';
+let knowledgeBase = [];
+
+// Fetch knowledge base from Supabase
+async function loadKnowledgeBase() {
+  try {
+    const { data, error } = await supabase
+      .from('knowledge')
+      .select('*')
+      .order('category');
+    
+    if (error) throw error;
+    knowledgeBase = data || [];
+    console.log('Knowledge base loaded:', knowledgeBase.length, 'entries');
+  } catch (err) {
+    console.error('Error loading knowledge base:', err);
+  }
+}
+
+// Generate AI response using Cloudflare Workers AI
+async function getAIResponse(userMessage, topic) {
+  try {
+    // Filter relevant knowledge based on topic
+    const relevantKnowledge = knowledgeBase.filter(k => 
+      !topic || k.category.toLowerCase() === topic.toLowerCase() || k.category === 'General'
+    );
+
+    // Call Cloudflare Worker endpoint
+    // Replace with your actual Cloudflare Worker URL
+    const WORKER_URL = 'https://your-subdomain.workers.dev/ai-chat';
+    
+    const response = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: userMessage,
+        topic: topic,
+        knowledgeBase: relevantKnowledge
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Worker error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.success) {
+      return data.message;
+    } else {
+      throw new Error(data.error || 'Unknown error');
+    }
+
+  } catch (err) {
+    console.error('Error getting AI response:', err);
+    return "I'm having trouble processing that right now. A human agent will assist you shortly.";
+  }
+}
 
 async function showStartChatPopup() {
   return new Promise(resolve => {
@@ -116,7 +175,7 @@ async function startChat() {
 
     const autoReplySent = localStorage.getItem('autoReplySent');
     if (!autoReplySent) {
-      const autoReplyMessage = `Hello ${name}, thank you for contacting us about ${topic}. Please specify your issue or question related to this topic.`;
+      const autoReplyMessage = `Hello ${name}, thank you for contacting us about ${topic}. I'm your AI assistant and I'm here to help! Please ask me anything about our services.`;
       const { error } = await supabase.from('messages').insert({
         user_id: user.id, content: autoReplyMessage, sender: 'support', is_auto: true
       });
@@ -198,39 +257,9 @@ async function subscribeToMessages() {
   }
 }
 
-async function sendSecondAutoReply() {
-  const secondAutoReplySent = localStorage.getItem('secondAutoReplySent');
-  if (!secondAutoReplySent) {
-    const { data: messages, error: messagesError } = await supabase
-      .from('messages')
-      .select('is_auto, sender')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: true });
-
-    if (messagesError) {
-      console.error('Error checking messages:', messagesError.message);
-      return;
-    }
-
-    const hasFirstAutoReply = messages.some(m => m.is_auto);
-    const userMessages = messages.filter(m => !m.is_auto && m.sender === 'user');
-    if (hasFirstAutoReply && userMessages.length === 1) {
-      const secondAutoReplyMessage = 'Thank you for providing details. Our team will review your issue and reply soon.';
-      const { error } = await supabase.from('messages').insert({
-        user_id: user.id,
-        content: secondAutoReplyMessage,
-        sender: 'support',
-        is_auto: true
-      });
-      if (!error) {
-        localStorage.setItem('secondAutoReplySent', 'true');
-        addLocalMessage(secondAutoReplyMessage, 'auto');
-      }
-    }
-  }
-}
-
 window.onload = async () => {
+  await loadKnowledgeBase();
+  
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
     try {
@@ -263,20 +292,50 @@ sendChat.addEventListener('click', async () => {
     sendChat.disabled = true;
     let content = selectedTopic ? `[Topic: ${selectedTopic}] ${text}` : text;
     addLocalMessage(content);
+    chatInput.value = '';
+    
     try {
+      // Save user message
       const { error } = await supabase.from('messages').insert({
         user_id: user.id,
         content,
         sender: 'user',
         is_auto: false
       });
-      if (!error) {
-        chatInput.value = '';
-        selectedTopic = '';
-        await sendSecondAutoReply();
-      }
+      
+      if (error) throw error;
+
+      // Show typing indicator
+      const typingDiv = document.createElement('div');
+      typingDiv.classList.add('msg', 'auto-msg', 'typing-indicator');
+      typingDiv.innerHTML = `<span class="msg-content">AI is typing...</span>`;
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Get AI response
+      const aiResponse = await getAIResponse(text, selectedTopic);
+      
+      // Remove typing indicator
+      typingDiv.remove();
+
+      // Save AI response
+      const { error: aiError } = await supabase.from('messages').insert({
+        user_id: user.id,
+        content: aiResponse,
+        sender: 'support',
+        is_auto: true
+      });
+
+      if (aiError) throw aiError;
+
+      addLocalMessage(aiResponse, 'auto');
+      selectedTopic = '';
+
     } catch (err) {
       console.error('Error sending message:', err);
+      // Remove typing indicator if exists
+      const typingIndicator = chatMessages.querySelector('.typing-indicator');
+      if (typingIndicator) typingIndicator.remove();
     } finally {
       sendChat.disabled = false;
     }
@@ -350,7 +409,6 @@ fileInput.addEventListener('change', () => {
 
         fileInput.value = '';
         filePreview.innerHTML = '';
-        await sendSecondAutoReply();
 
       } catch (err) {
         console.error('Error uploading file:', err);
