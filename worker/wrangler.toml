@@ -1,0 +1,6 @@
+name = "neodynix-ai-chat"
+main = "index.js"
+compatibility_date = "2025-11-12"
+
+[[ai]]
+binding = "AI"
