@@ -33,10 +33,12 @@ export default {
         ? knowledgeBase.map(k => `Q: ${k.question}\nA: ${k.answer}`).join('\n\n')
         : 'General information: We offer website templates, custom development, and support services.';
 
-      // Call Cloudflare AI
-      const ai = env.AI || new Ai(env.AI_BINDING);
-      
-      const response = await ai.run('@cf/meta/llama-3-8b-instruct', {
+      // Use env.AI directly — NO new Ai()
+      if (!env.AI) {
+        throw new Error('AI binding not configured');
+      }
+
+      const response = await env.AI.run('@cf/meta/llama-3-8b-instruct', {
         messages: [
           {
             role: 'system',
@@ -64,7 +66,7 @@ Guidelines:
         temperature: 0.7
       });
 
-      const aiMessage = response.response || response.content || 
+      const aiMessage = response.response || 
         "I'll connect you with our support team for personalized assistance.";
 
       return new Response(JSON.stringify({ 
