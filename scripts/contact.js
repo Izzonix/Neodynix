@@ -36,7 +36,7 @@ async function getAIResponse(userMessage, topic) {
 
     // Call Cloudflare Worker endpoint
     // Replace with your actual Cloudflare Worker URL
-    const WORKER_URL = 'ai-chat';
+    const WORKER_URL = '/ai-chat';
     
     const response = await fetch(WORKER_URL, {
       method: 'POST',
