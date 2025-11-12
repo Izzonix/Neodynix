@@ -1,4 +1,4 @@
-name = "neodynix-ai-chat"
+name = "ai-chat"
 main = "index.js"
 compatibility_date = "2025-11-12"
 
