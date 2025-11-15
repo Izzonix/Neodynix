@@ -132,7 +132,7 @@
           <h3>Add New Knowledge Entry</h3>
           <form id="addKnowledgeForm" class="template-upload">
             <div class="form-group">
-              <label for="category">Category</label>
+              <label for="knowledgeCategory">Category</label>
               <select name="category" id="knowledgeCategory" required aria-label="Knowledge Category">
                 <option value="" disabled selected>Select Category</option>
                 <option value="General">General</option>
@@ -313,8 +313,8 @@
           <form id="editKnowledgeForm" class="edit-template-form">
             <input type="hidden" id="editKnowledgeId" name="editKnowledgeId" />
             <div class="form-group">
-              <label for="editCategory">Category</label>
-              <select name="editCategory" id="editCategory" required aria-label="Knowledge Category">
+              <label for="editKnowledgeCategory">Category</label>
+              <select name="editKnowledgeCategory" id="editKnowledgeCategory" required aria-label="Knowledge Category">
                 <option value="" disabled selected>Select Category</option>
                 <option value="General">General</option>
                 <option value="Templates">Templates</option>
@@ -379,11 +379,5 @@
   <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/admin.js"></script>
   <script type="module" src="scripts/main.js"></script>
-  <script>
-    // Add cancel handler for knowledge edit modal
-    document.addEventListener('DOMContentLoaded', () => {
-      const cancelKnowledgeEdit = document.getElementById('cancelKnowledgeEdit');
-      if (cancelKnowledgeEdit) {
-        cancelKnowledgeEdit.addEventListener('click', () => {
-          document.getElementById('editKnowledgeModal').style.display = 'none';
-          document.getElementById('editKnowledgeForm').r
+</body>
+  </html>
