@@ -155,7 +155,7 @@ main {
 }
 
 .template-upload input:focus, .template-upload select:focus, .template-upload textarea:focus,
-.email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus,
+email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus,
 #editTemplateForm input:focus, #editTemplateForm select:focus, #editTemplateForm textarea:focus {
   outline: none;
   border-color: #03a9f4;
@@ -274,6 +274,44 @@ main {
   padding: 8px;
   font-size: 12px;
   max-width: 120px;
+}
+
+/* Knowledge Card */
+.knowledge-card {
+  background: #2a2a2a;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  max-width: 500px;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.knowledge-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.knowledge-card h4 {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: #4fc3f7;
+}
+
+.knowledge-card p {
+  font-size: 13px;
+  color: #cccccc;
+  margin-bottom: 8px;
+}
+
+.knowledge-card .button-container {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
 
 /* Chat and Custom Request Cards */
@@ -517,6 +555,78 @@ main {
   box-shadow: 0 0 6px rgba(3, 169, 244, 0.4);
 }
 
+/* Edit Knowledge Modal */
+#editKnowledgeModal {
+  overflow-y: auto;
+  max-height: 90vh;
+}
+
+#editKnowledgeModal .modal-content {
+  background: #1e1e1e;
+  padding: 24px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+#editKnowledgeModal h2 {
+  font-size: 20px;
+  font-weight: 500;
+  color: #4fc3f7;
+  margin-bottom: 20px;
+}
+
+#editKnowledgeForm {
+  max-height: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #1e1e1e;
+  padding: 0;
+}
+
+#editKnowledgeForm .form-group {
+  margin-bottom: 16px;
+}
+
+#editKnowledgeForm .form-group label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+#editKnowledgeForm input,
+#editKnowledgeForm select,
+#editKnowledgeForm textarea {
+  padding: 12px;
+  background: #2a2a2a;
+  color: #ffffff;
+  border: 2px solid #4fc3f7;
+  border-radius: 8px;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#editKnowledgeForm input:focus,
+#editKnowledgeForm select:focus,
+#editKnowledgeForm textarea:focus {
+  outline: none;
+  border-color: #03a9f4;
+  box-shadow: 0 0 6px rgba(3, 169, 244, 0.4);
+}
+
+#editKnowledgeForm textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
 /* Mobile Styles */
 @media (max-width: 600px) {
   body {
@@ -618,6 +728,20 @@ main {
     padding: 16px;
     max-height: 85vh;
     overflow-y: auto;
+  }
+
+  /* Mobile for Knowledge Modal */
+  #editKnowledgeModal .modal-content {
+    padding: 16px;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  #editKnowledgeForm input,
+  #editKnowledgeForm select,
+  #editKnowledgeForm textarea {
+    padding: 10px;
+    font-size: 12px;
   }
 }
 
