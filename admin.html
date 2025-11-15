@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Panel - Neodynix</title>
   <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/admin.css" />
+  <script type="module" src="scripts/admin-core.js"></script>
+ <script type="module" src="scripts/admin-features.js"></script>
 </head>
 <body>
   <header class="top-header">
@@ -372,12 +373,13 @@
       </div>
     </section>
   </main>
-  <footer>
+    <footer>
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
   <script type="module" src="scripts/supabase-config.js"></script>
-  <script type="module" src="scripts/admin.js"></script>
+  <script type="module" src="scripts/admin-core.js"></script>
+  <script type="module" src="scripts/admin-features.js"></script>
   <script type="module" src="scripts/main.js"></script>
 </body>
-  </html>
+</html>
