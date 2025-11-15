@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
     const sectionMap = {
       templates: { id: 'sectionTemplates', btn: 'btnTemplates', fetch: fetchTemplates },
+      knowledge: { id: 'sectionKnowledge', btn: 'btnKnowledge', fetch: fetchKnowledge },
       email: { id: 'sectionSendEmail', btn: 'btnSendEmail' },
       chat: { id: 'sectionChat', btn: 'btnChat', fetch: fetchChatRequests },
       custom: { id: 'sectionCustomRequests', btn: 'btnCustomRequests', fetch: fetchCustomRequests }
@@ -336,183 +337,191 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('editImagePreview').innerHTML = '';
   });
 
-// Add this to admin.js for managing knowledge base
-
-// Add to showSection function cases:
-// knowledge: { id: 'sectionKnowledge', btn: 'btnKnowledge', fetch: fetchKnowledge }
-
-async function fetchKnowledge() {
-  try {
-    const knowledgeList = document.getElementById('knowledgeList');
-    if (!knowledgeList) return;
-    
-    knowledgeList.innerHTML = '<p>Loading knowledge base...</p>';
-    
-    const { data, error } = await supabase
-      .from('knowledge')
-      .select('*')
-      .order('priority', { ascending: false })
-      .order('category');
-    
-    if (error) throw error;
-    
-    knowledgeList.innerHTML = '';
-    
-    if (data.length === 0) {
-      knowledgeList.innerHTML = '<p>No knowledge entries available.</p>';
-      return;
-    }
-    
-    data.forEach(item => {
-      const card = document.createElement('div');
-      card.className = 'knowledge-card';
-      card.style.cssText = `
-        background: #2a2a2a;
-        padding: 16px;
-        border-radius: 12px;
-        margin-bottom: 16px;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
-      `;
+  // ========== KNOWLEDGE BASE MANAGEMENT ==========
+  
+  async function fetchKnowledge() {
+    try {
+      const knowledgeList = document.getElementById('knowledgeList');
+      if (!knowledgeList) return;
       
-      card.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-          <h3 style="color: #4fc3f7; margin: 0; font-size: 16px;">${item.category}</h3>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn" style="padding: 6px 12px; font-size: 12px;" onclick="editKnowledge('${item.id}')">Edit</button>
-            <button class="btn btn-delete" style="padding: 6px 12px; font-size: 12px;" onclick="deleteKnowledge('${item.id}')">Delete</button>
+      knowledgeList.innerHTML = '<p>Loading knowledge base...</p>';
+      
+      const { data, error } = await supabase
+        .from('knowledge')
+        .select('*')
+        .order('priority', { ascending: false })
+        .order('category');
+      
+      if (error) throw error;
+      
+      knowledgeList.innerHTML = '';
+      
+      if (data.length === 0) {
+        knowledgeList.innerHTML = '<p>No knowledge entries available.</p>';
+        return;
+      }
+      
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'knowledge-card';
+        card.style.cssText = `
+          background: #2a2a2a;
+          padding: 16px;
+          border-radius: 12px;
+          margin-bottom: 16px;
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+        `;
+        
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+            <h3 style="color: #4fc3f7; margin: 0; font-size: 16px;">${item.category}</h3>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn" style="padding: 6px 12px; font-size: 12px;" onclick="editKnowledge('${item.id}')">Edit</button>
+              <button class="btn btn-delete" style="padding: 6px 12px; font-size: 12px;" onclick="deleteKnowledge('${item.id}')">Delete</button>
+            </div>
           </div>
-        </div>
-        <p style="font-weight: bold; color: #fff; margin: 8px 0;"><strong>Q:</strong> ${item.question}</p>
-        <p style="color: #ccc; margin: 8px 0;"><strong>A:</strong> ${item.answer}</p>
-        <div style="display: flex; gap: 15px; font-size: 13px; color: #aaa; margin-top: 10px;">
-          <span>Priority: ${item.priority}</span>
-          <span>Active: ${item.is_active ? '✅' : '❌'}</span>
-          ${item.keywords ? `<span>Keywords: ${item.keywords.join(', ')}</span>` : ''}
-        </div>
-      `;
+          <p style="font-weight: bold; color: #fff; margin: 8px 0;"><strong>Q:</strong> ${item.question}</p>
+          <p style="color: #ccc; margin: 8px 0;"><strong>A:</strong> ${item.answer}</p>
+          <div style="display: flex; gap: 15px; font-size: 13px; color: #aaa; margin-top: 10px;">
+            <span>Priority: ${item.priority}</span>
+            <span>Active: ${item.is_active ? '✅' : '❌'}</span>
+            ${item.keywords ? `<span>Keywords: ${item.keywords.join(', ')}</span>` : ''}
+          </div>
+        `;
+        
+        knowledgeList.appendChild(card);
+      });
+    } catch (error) {
+      console.error('Error fetching knowledge:', error);
+      showResult('Failed to load knowledge base.', false);
+    }
+  }
+
+  // Add knowledge form submission
+  const addKnowledgeForm = document.getElementById('addKnowledgeForm');
+  if (addKnowledgeForm) {
+    addKnowledgeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
       
-      knowledgeList.appendChild(card);
+      const formData = new FormData(addKnowledgeForm);
+      const keywords = formData.get('keywords').split(',').map(k => k.trim()).filter(k => k);
+      
+      loadingPopup.style.display = 'flex';
+      
+      try {
+        const { error } = await supabase.from('knowledge').insert([{
+          category: formData.get('category'),
+          question: formData.get('question'),
+          answer: formData.get('answer'),
+          keywords: keywords,
+          priority: parseInt(formData.get('priority')) || 0,
+          is_active: formData.get('is_active') === 'true'
+        }]);
+        
+        if (error) throw error;
+        
+        addKnowledgeForm.reset();
+        showResult('Knowledge entry added successfully!', true);
+        fetchKnowledge();
+      } catch (error) {
+        console.error('Error adding knowledge:', error);
+        showResult(`Failed to add knowledge: ${error.message}`, false);
+      } finally {
+        loadingPopup.style.display = 'none';
+      }
     });
-  } catch (error) {
-    console.error('Error fetching knowledge:', error);
-    showResult('Failed to load knowledge base.', false);
   }
-}
 
-// Add knowledge form submission
-const addKnowledgeForm = document.getElementById('addKnowledgeForm');
-if (addKnowledgeForm) {
-  addKnowledgeForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(addKnowledgeForm);
-    const keywords = formData.get('keywords').split(',').map(k => k.trim()).filter(k => k);
-    
-    loadingPopup.style.display = 'flex';
-    
+  window.editKnowledge = async (id) => {
     try {
-      const { error } = await supabase.from('knowledge').insert([{
-        category: formData.get('category'),
-        question: formData.get('question'),
-        answer: formData.get('answer'),
-        keywords: keywords,
-        priority: parseInt(formData.get('priority')) || 0,
-        is_active: formData.get('is_active') === 'true'
-      }]);
+      const { data, error } = await supabase.from('knowledge').select('*').eq('id', id).single();
+      if (error || !data) throw new Error('Knowledge entry not found');
       
-      if (error) throw error;
+      const item = data;
+      const modal = document.getElementById('editKnowledgeModal');
+      const form = document.getElementById('editKnowledgeForm');
       
-      addKnowledgeForm.reset();
-      showResult('Knowledge entry added successfully!', true);
-      fetchKnowledge();
+      form.editKnowledgeId.value = item.id;
+      form.editCategory.value = item.category;
+      form.editQuestion.value = item.question;
+      form.editAnswer.value = item.answer;
+      form.editKeywords.value = item.keywords ? item.keywords.join(', ') : '';
+      form.editPriority.value = item.priority || 0;
+      form.editIsActive.value = item.is_active ? 'true' : 'false';
+      
+      modal.style.display = 'flex';
     } catch (error) {
-      console.error('Error adding knowledge:', error);
-      showResult(`Failed to add knowledge: ${error.message}`, false);
-    } finally {
-      loadingPopup.style.display = 'none';
+      console.error('Error loading knowledge for edit:', error);
+      showResult(`Failed to load knowledge: ${error.message}`, false);
     }
-  });
-}
+  };
+  
+  window.deleteKnowledge = (id) => {
+    showConfirm('Are you sure you want to delete this knowledge entry?', async () => {
+      loadingPopup.style.display = 'flex';
+      try {
+        const { error } = await supabase.from('knowledge').delete().eq('id', id);
+        if (error) throw error;
+        
+        showResult('Knowledge entry deleted successfully!', true);
+        fetchKnowledge();
+      } catch (error) {
+        console.error('Error deleting knowledge:', error);
+        showResult(`Failed to delete knowledge: ${error.message}`, false);
+      } finally {
+        loadingPopup.style.display = 'none';
+      }
+    });
+  };
 
-window.editKnowledge = async (id) => {
-  try {
-    const { data, error } = await supabase.from('knowledge').select('*').eq('id', id).single();
-    if (error || !data) throw new Error('Knowledge entry not found');
-    
-    const item = data;
-    const modal = document.getElementById('editKnowledgeModal');
-    const form = document.getElementById('editKnowledgeForm');
-    
-    form.editKnowledgeId.value = item.id;
-    form.editCategory.value = item.category;
-    form.editQuestion.value = item.question;
-    form.editAnswer.value = item.answer;
-    form.editKeywords.value = item.keywords ? item.keywords.join(', ') : '';
-    form.editPriority.value = item.priority || 0;
-    form.editIsActive.value = item.is_active ? 'true' : 'false';
-    
-    modal.style.display = 'flex';
-  } catch (error) {
-    console.error('Error loading knowledge for edit:', error);
-    showResult(`Failed to load knowledge: ${error.message}`, false);
+  // Handle edit knowledge form submission
+  const editKnowledgeForm = document.getElementById('editKnowledgeForm');
+  if (editKnowledgeForm) {
+    editKnowledgeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(editKnowledgeForm);
+      const keywords = formData.get('editKeywords').split(',').map(k => k.trim()).filter(k => k);
+      const id = formData.get('editKnowledgeId');
+      
+      loadingPopup.style.display = 'flex';
+      
+      try {
+        const { error } = await supabase.from('knowledge').update({
+          category: formData.get('editCategory'),
+          question: formData.get('editQuestion'),
+          answer: formData.get('editAnswer'),
+          keywords: keywords,
+          priority: parseInt(formData.get('editPriority')) || 0,
+          is_active: formData.get('editIsActive') === 'true'
+        }).eq('id', id);
+        
+        if (error) throw error;
+        
+        document.getElementById('editKnowledgeModal').style.display = 'none';
+        editKnowledgeForm.reset();
+        showResult('Knowledge entry updated successfully!', true);
+        fetchKnowledge();
+      } catch (error) {
+        console.error('Error updating knowledge:', error);
+        showResult(`Failed to update knowledge: ${error.message}`, false);
+      } finally {
+        loadingPopup.style.display = 'none';
+      }
+    });
   }
-};
 
-window.deleteKnowledge = (id) => {
-  showConfirm('Are you sure you want to delete this knowledge entry?', async () => {
-    loadingPopup.style.display = 'flex';
-    try {
-      const { error } = await supabase.from('knowledge').delete().eq('id', id);
-      if (error) throw error;
-      
-      showResult('Knowledge entry deleted successfully!', true);
-      fetchKnowledge();
-    } catch (error) {
-      console.error('Error deleting knowledge:', error);
-      showResult(`Failed to delete knowledge: ${error.message}`, false);
-    } finally {
-      loadingPopup.style.display = 'none';
-    }
-  });
-};
-
-// Handle edit form submission
-const editKnowledgeForm = document.getElementById('editKnowledgeForm');
-if (editKnowledgeForm) {
-  editKnowledgeForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData(editKnowledgeForm);
-    const keywords = formData.get('editKeywords').split(',').map(k => k.trim()).filter(k => k);
-    const id = formData.get('editKnowledgeId');
-    
-    loadingPopup.style.display = 'flex';
-    
-    try {
-      const { error } = await supabase.from('knowledge').update({
-        category: formData.get('editCategory'),
-        question: formData.get('editQuestion'),
-        answer: formData.get('editAnswer'),
-        keywords: keywords,
-        priority: parseInt(formData.get('editPriority')) || 0,
-        is_active: formData.get('editIsActive') === 'true'
-      }).eq('id', id);
-      
-      if (error) throw error;
-      
+  // Cancel edit knowledge button
+  const cancelKnowledgeEdit = document.getElementById('cancelKnowledgeEdit');
+  if (cancelKnowledgeEdit) {
+    cancelKnowledgeEdit.addEventListener('click', () => {
       document.getElementById('editKnowledgeModal').style.display = 'none';
       editKnowledgeForm.reset();
-      showResult('Knowledge entry updated successfully!', true);
-      fetchKnowledge();
-    } catch (error) {
-      console.error('Error updating knowledge:', error);
-      showResult(`Failed to update knowledge: ${error.message}`, false);
-    } finally {
-      loadingPopup.style.display = 'none';
-    }
-  });
-}
+    });
+  }
   
+  // ========== END KNOWLEDGE BASE MANAGEMENT ==========
+
   async function fetchChatRequests() {
     try {
       const { data: messages, error: msgError } = await supabase
@@ -652,7 +661,6 @@ if (editKnowledgeForm) {
       loadingPopup.style.display = 'none';
     }
   });
-
 // custom_requests
 window.toggleDetails = (cardId) => {
   const detailsDiv = document.getElementById(`details-${cardId}`);
