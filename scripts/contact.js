@@ -261,12 +261,36 @@ async function subscribeToMessages() {
       }, payload => {
         const msg = payload.new;
         if (msg.user_id === user.id && msg.id && !displayedMessageIds.has(msg.id)) {
-          // Only add if not already displayed
-          displayedMessageIds.add(msg.id);
-          const content = msg.file_url
-            ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
-            : msg.content;
-          addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender, msg.id);
+          // If human reply, show typing indicator briefly
+          if (!msg.is_auto && msg.sender === 'support') {
+            // Remove any existing AI typing
+            const aiTyping = chatMessages.querySelector('.typing-indicator');
+            if (aiTyping) aiTyping.remove();
+
+            const humanTypingDiv = document.createElement('div');
+            humanTypingDiv.classList.add('msg', 'support-msg', 'typing-indicator');
+            humanTypingDiv.innerHTML = `<span class="msg-content">Human agent is typing...</span>`;
+            chatMessages.appendChild(humanTypingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Auto-remove after 3s (adjust as needed) or on next message
+            setTimeout(() => {
+              if (humanTypingDiv.parentNode) humanTypingDiv.remove();
+            }, 3000);
+          }
+
+          // Add the actual message (will replace/remove typing if present)
+          setTimeout(() => {  // Slight delay for smooth UX
+            displayedMessageIds.add(msg.id);
+            const content = msg.file_url
+              ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
+              : msg.content;
+            addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender, msg.id);
+
+            // Remove typing if still there
+            const typingIndicator = chatMessages.querySelector('.typing-indicator');
+            if (typingIndicator) typingIndicator.remove();
+          }, 500);  // 0.5s delay for "typing" feel
         }
       })
       .subscribe(status => {
