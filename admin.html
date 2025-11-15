@@ -13,6 +13,7 @@
     <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
     <nav id="nav-menu">
       <a href="javascript:void(0)" onclick="showSection('templates')">Manage Templates</a>
+      <a href="javascript:void(0)" onclick="showSection('knowledge')">Knowledge Base</a>
       <a href="javascript:void(0)" onclick="showSection('email')">Send Email</a>
       <a href="javascript:void(0)" onclick="showSection('chat')">Chat Requests</a>
       <a href="javascript:void(0)" onclick="showSection('custom')">Custom Requests</a>
@@ -40,11 +41,13 @@
     <section id="admin-container" class="admin-container" style="display: none;">
       <div class="admin-tabs">
         <button id="btnTemplates" class="tab-button active">Manage Templates</button>
+        <button id="btnKnowledge" class="tab-button">Knowledge Base</button>
         <button id="btnSendEmail" class="tab-button">Send Email</button>
         <button id="btnChat" class="tab-button">Chat Requests</button>
         <button id="btnCustomRequests" class="tab-button">Custom Requests</button>
         <button id="logout-btn" class="btn btn-logout">Logout</button>
       </div>
+      
       <!-- Template Management Section -->
       <div id="sectionTemplates" class="admin-section active">
         <h2>Manage Templates</h2>
@@ -121,6 +124,58 @@
           <div id="templateList" class="template-grid"></div>
         </div>
       </div>
+
+      <!-- Knowledge Base Section -->
+      <div id="sectionKnowledge" class="admin-section">
+        <h2>Knowledge Base Management</h2>
+        <div class="template-upload">
+          <h3>Add New Knowledge Entry</h3>
+          <form id="addKnowledgeForm" class="template-upload">
+            <div class="form-group">
+              <label for="category">Category</label>
+              <select name="category" id="knowledgeCategory" required aria-label="Knowledge Category">
+                <option value="" disabled selected>Select Category</option>
+                <option value="General">General</option>
+                <option value="Templates">Templates</option>
+                <option value="Pricing">Pricing</option>
+                <option value="Support">Support</option>
+                <option value="Technical">Technical</option>
+                <option value="Billing">Billing</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="question">Question</label>
+              <input type="text" name="question" id="question" placeholder="What is the question?" required aria-label="Question" />
+            </div>
+            <div class="form-group">
+              <label for="answer">Answer</label>
+              <textarea name="answer" id="answer" placeholder="Provide the answer" required aria-label="Answer" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="keywords">Keywords (comma-separated)</label>
+              <input type="text" name="keywords" id="keywords" placeholder="e.g., price, cost, payment" aria-label="Keywords" />
+            </div>
+            <div class="form-group">
+              <label for="priority">Priority (0-100)</label>
+              <input type="number" name="priority" id="priority" placeholder="0" min="0" max="100" value="0" aria-label="Priority" />
+            </div>
+            <div class="form-group">
+              <label for="is_active">Active</label>
+              <select name="is_active" id="is_active" required aria-label="Is Active">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <button type="submit" class="btn">Add Knowledge Entry</button>
+          </form>
+        </div>
+        <div class="template-list">
+          <h3>Existing Knowledge Entries</h3>
+          <div id="knowledgeList"></div>
+        </div>
+      </div>
+      
       <!-- Email Sending Section -->
       <div id="sectionSendEmail" class="admin-section">
         <h2>Send Custom Email</h2>
@@ -150,6 +205,7 @@
           <button type="submit" class="btn">Send Email</button>
         </form>
       </div>
+      
       <!-- Chat Requests Section -->
       <div id="sectionChat" class="admin-section">
         <h2>Chat Requests</h2>
@@ -171,11 +227,13 @@
           <div id="chatResult" class="result"></div>
         </div>
       </div>
+      
       <!-- Custom Requests Section -->
       <div id="sectionCustomRequests" class="admin-section">
         <h2>Custom Requests</h2>
         <div id="customRequestList" class="custom-request-grid"></div>
       </div>
+      
       <!-- Edit Template Modal -->
       <div id="editTemplateModal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -247,6 +305,55 @@
           </form>
         </div>
       </div>
+
+      <!-- Edit Knowledge Modal -->
+      <div id="editKnowledgeModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <h2>Edit Knowledge Entry</h2>
+          <form id="editKnowledgeForm" class="edit-template-form">
+            <input type="hidden" id="editKnowledgeId" name="editKnowledgeId" />
+            <div class="form-group">
+              <label for="editCategory">Category</label>
+              <select name="editCategory" id="editCategory" required aria-label="Knowledge Category">
+                <option value="" disabled selected>Select Category</option>
+                <option value="General">General</option>
+                <option value="Templates">Templates</option>
+                <option value="Pricing">Pricing</option>
+                <option value="Support">Support</option>
+                <option value="Technical">Technical</option>
+                <option value="Billing">Billing</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editQuestion">Question</label>
+              <input type="text" name="editQuestion" id="editQuestion" placeholder="What is the question?" required aria-label="Question" />
+            </div>
+            <div class="form-group">
+              <label for="editAnswer">Answer</label>
+              <textarea name="editAnswer" id="editAnswer" placeholder="Provide the answer" required aria-label="Answer" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="editKeywords">Keywords (comma-separated)</label>
+              <input type="text" name="editKeywords" id="editKeywords" placeholder="e.g., price, cost, payment" aria-label="Keywords" />
+            </div>
+            <div class="form-group">
+              <label for="editPriority">Priority (0-100)</label>
+              <input type="number" name="editPriority" id="editPriority" placeholder="0" min="0" max="100" value="0" aria-label="Priority" />
+            </div>
+            <div class="form-group">
+              <label for="editIsActive">Active</label>
+              <select name="editIsActive" id="editIsActive" required aria-label="Is Active">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+            <button type="submit" class="btn">Save Changes</button>
+            <button type="button" id="cancelKnowledgeEdit" class="btn btn-cancel">Cancel</button>
+          </form>
+        </div>
+      </div>
+      
       <!-- Confirmation Modal -->
       <div id="confirmModal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -255,6 +362,7 @@
           <button id="confirmNo" class="btn btn-cancel">No</button>
         </div>
       </div>
+      
       <!-- Loading Popup -->
       <div id="loading-popup" class="loading-popup" style="display: none;">
         <div class="loading-content">
@@ -271,5 +379,11 @@
   <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/admin.js"></script>
   <script type="module" src="scripts/main.js"></script>
-</body>
-</html>
+  <script>
+    // Add cancel handler for knowledge edit modal
+    document.addEventListener('DOMContentLoaded', () => {
+      const cancelKnowledgeEdit = document.getElementById('cancelKnowledgeEdit');
+      if (cancelKnowledgeEdit) {
+        cancelKnowledgeEdit.addEventListener('click', () => {
+          document.getElementById('editKnowledgeModal').style.display = 'none';
+          document.getElementById('editKnowledgeForm').r
