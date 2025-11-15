@@ -112,6 +112,7 @@ nav a:hover {
   nav.show {
     display: flex;
     right: 0;
+    position: absolute;
   }
 
   nav a {
@@ -129,12 +130,10 @@ nav a:hover {
 
   .hamburger {
     display: block;
-    position: absolute;
   }
 
   .close-btn {
     display: block;
-    position: absolute;
   }
 }
 
