@@ -34,29 +34,14 @@ main {
 }
 
 .login-container {
-  max-width: 400px;
+  max-width: 500px; /* Bigger on desktop */
   width: 90%;
-  padding: 32px;
+  padding: 40px;
   background: #1e1e1e;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   text-align: center;
   border: 1px solid #4fc3f7;
-}
-
-/* Hide Header & Footer on Login */
-.login-section[style*="display: block"],
-.login-section[style*="display: flex"] {
-  position: fixed !important;
-}
-
-.login-section[style*="display: block"] ~ main,
-.login-section[style*="display: flex"] ~ main,
-.login-section[style*="display: block"] ~ footer,
-.login-section[style*="display: flex"] ~ footer,
-header.login-hidden,
-footer.login-hidden {
-  display: none !important;
 }
 
 /* Headings */
@@ -165,7 +150,7 @@ footer.login-hidden {
 }
 
 .template-upload input:focus, .template-upload select:focus, .template-upload textarea:focus,
-email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus,
+.email-form input:focus, .email-form select:focus, .login-form input:focus, .chat-reply-form textarea:focus,
 #editTemplateForm input:focus, #editTemplateForm select:focus, #editTemplateForm textarea:focus {
   outline: none;
   border-color: #03a9f4;
@@ -719,19 +704,20 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
     padding: 0;
   }
 
-  .admin-container, .login-container {
+  .admin-container {
     padding: 16px;
     margin: 16px auto;
   }
 
   .login-section .login-container {
+    max-width: 350px; /* Smaller on mobile */
     padding: 24px;
     margin: 20px;
     width: 90%;
   }
 
   .login-section h2 {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3, #editTemplateModal h2 {
@@ -859,4 +845,4 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
     font-size: 12px;
     max-width: 120px;
   }
-  }
+}
