@@ -42,7 +42,7 @@ main {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   text-align: center;
   border: 1px solid #4fc3f7;
-  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* Headings */
@@ -137,7 +137,7 @@ main {
 }
 
 .template-upload input, .template-upload select, .template-upload textarea,
-.email-form input, .email-form select, .login-form input, .chat-reply-form textarea,
+email-form input, .email-form select, .login-form input, .chat-reply-form textarea,
 #editTemplateForm input, #editTemplateForm select, #editTemplateForm textarea {
   padding: 12px;
   background: #2a2a2a;
@@ -722,8 +722,8 @@ main {
   .login-section .login-container {
     max-width: 350px; /* Smaller on mobile */
     padding: 24px;
+    margin: 0;
     width: 90%;
-    margin: 0 auto;
   }
 
   .login-section h2 {
