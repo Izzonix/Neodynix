@@ -6,10 +6,34 @@ const fileInput = document.getElementById('fileInput');
 const filePreview = document.getElementById('filePreview');
 const sendChat = document.getElementById('sendChat');
 const attachFile = document.getElementById('attachFile');
+const loadingIndicator = document.getElementById('loadingIndicator');
 let user = null;
 let selectedTopic = '';
 let knowledgeBase = [];
 const displayedMessageIds = new Set(); // Track displayed message IDs to prevent duplicates
+let notificationPermission = 'default'; // Track notification permission
+let hasHumanIntervened = false; // Track if human admin has responded
+
+// Request notification permission
+async function requestNotificationPermission() {
+  if ('Notification' in window) {
+    if (notificationPermission === 'default') {
+      const perm = await Notification.requestPermission();
+      notificationPermission = perm;
+    }
+  }
+}
+
+// Show browser notification for human support messages
+function showNotification(title, body, icon = 'images/attach-icon.png') {
+  if (notificationPermission === 'granted') {
+    new Notification(title, {
+      body: body.substring(0, 100) + (body.length > 100 ? '...' : ''),
+      icon: icon,
+      tag: 'chat-notification'
+    });
+  }
+}
 
 // Fetch knowledge base from Supabase
 async function loadKnowledgeBase() {
@@ -181,6 +205,9 @@ async function startChat() {
       user = newUser;
     }
 
+    // Request notification permission after user setup
+    await requestNotificationPermission();
+
     // Enable chat after successful user setup
     document.querySelector('.chat-widget').classList.add('active');
 
@@ -209,12 +236,21 @@ async function startChat() {
 
 async function loadMessages(userId) {
   try {
-    const { data, error } = await supabase.from('messages').select().eq('user_id', userId).order('created_at');
+    // Show loading indicator
+    loadingIndicator.style.display = 'block';
+    chatMessages.innerHTML = '';
+
+    const { data, error } = await supabase
+      .from('messages')
+      .select('id, content, sender, is_auto, created_at, file_url')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true });
+    
     if (error) {
       console.error('Error loading messages:', error.message);
       return;
     }
-    chatMessages.innerHTML = '';
+    
     displayedMessageIds.clear(); // Clear tracked IDs on load
     data.forEach(msg => {
       // Track ID to prevent future duplicates
@@ -231,8 +267,15 @@ async function loadMessages(userId) {
       }
     });
     chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Hide loading indicator
+    loadingIndicator.style.display = 'none';
+
+    // Check for human intervention in loaded messages
+    hasHumanIntervened = data.some(msg => msg.sender === 'support' && !msg.is_auto);
   } catch (err) {
     console.error('Error in loadMessages:', err);
+    loadingIndicator.innerHTML = 'Failed to load messages. Please refresh.';
   }
 }
 
@@ -264,6 +307,11 @@ async function subscribeToMessages() {
       }, payload => {
         const msg = payload.new;
         if (msg.user_id === user.id && msg.id && !displayedMessageIds.has(msg.id)) {
+          // Check for human intervention
+          if (msg.sender === 'support' && !msg.is_auto) {
+            hasHumanIntervened = true;
+          }
+
           // If human reply, show typing indicator briefly
           if (!msg.is_auto && msg.sender === 'support') {
             // Remove any existing AI typing
@@ -280,6 +328,9 @@ async function subscribeToMessages() {
             setTimeout(() => {
               if (humanTypingDiv.parentNode) humanTypingDiv.remove();
             }, 3000);
+
+            // Show browser notification for human messages
+            showNotification('New Message from Support', msg.content);
           }
 
           // Add the actual message (will replace/remove typing if present)
@@ -317,6 +368,8 @@ window.onload = async () => {
       if (data) {
         user = data;
         selectedTopic = data.topic || '';
+        // Request notification permission if user exists
+        await requestNotificationPermission();
         // Enable chat if user exists
         document.querySelector('.chat-widget').classList.add('active');
         await loadMessages(userId);
@@ -356,31 +409,37 @@ sendChat.addEventListener('click', async () => {
       
       if (error) throw error;
 
-      // Show typing indicator
-      const typingDiv = document.createElement('div');
-      typingDiv.classList.add('msg', 'auto-msg', 'typing-indicator');
-      typingDiv.innerHTML = `<span class="msg-content">AI is typing...</span>`;
-      chatMessages.appendChild(typingDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Only generate AI response if no human has intervened
+      if (!hasHumanIntervened) {
+        // Show typing indicator
+        const typingDiv = document.createElement('div');
+        typingDiv.classList.add('msg', 'auto-msg', 'typing-indicator');
+        typingDiv.innerHTML = `<span class="msg-content">AI is typing...</span>`;
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      // Get AI response
-      const aiResponse = await getAIResponse(text, selectedTopic);
-      
-      // Remove typing indicator
-      typingDiv.remove();
+        // Get AI response
+        const aiResponse = await getAIResponse(text, selectedTopic);
+        
+        // Remove typing indicator
+        typingDiv.remove();
 
-      // Save AI response
-      const { data: aiMsgData, error: aiError } = await supabase.from('messages').insert({
-        user_id: user.id,
-        content: aiResponse,
-        sender: 'support',
-        is_auto: true
-      }).select().single();
+        // Save AI response
+        const { data: aiMsgData, error: aiError } = await supabase.from('messages').insert({
+          user_id: user.id,
+          content: aiResponse,
+          sender: 'support',
+          is_auto: true
+        }).select().single();
 
-      if (aiError) throw aiError;
+        if (aiError) throw aiError;
 
-      addLocalMessage(aiResponse, 'auto', aiMsgData.id);
-      selectedTopic = '';
+        addLocalMessage(aiResponse, 'auto', aiMsgData.id);
+        selectedTopic = '';
+      } else {
+        // If human has intervened, just notify that message is sent to support
+        addLocalMessage('Your message has been sent to the support team. A human agent will respond shortly.', 'auto');
+      }
 
     } catch (err) {
       console.error('Error sending message:', err);
