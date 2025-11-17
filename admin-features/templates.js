@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------
    TEMPLATES – upload, list, edit, delete
    -------------------------------------------------------------- */
-import { supabase } from '../supabase-config.js';
+import { supabase } from './supabase-config.js';
 
 const uploadForm = document.getElementById('uploadForm');
 const templateList = document.getElementById('templateList');
