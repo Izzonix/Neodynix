@@ -110,3 +110,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkAuth();
 });
+// Hide/show header & footer based on login state
+function updateLoginVisibility() {
+  const loginVisible = loginSection.style.display !== 'none';
+  const header = document.querySelector('header');
+  const footer = document.querySelector('footer');
+  
+  if (loginVisible) {
+    if (header) header.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+  } else {
+    if (header) header.style.display = 'block';
+    if (footer) footer.style.display = 'block';
+  }
+}
+
+// Call on load and after auth changes
+checkAuth();
+updateLoginVisibility();
+
+// Update after login success
+loginForm.addEventListener('submit', async (e) => {
+  // ... existing code ...
+  if (!error) {
+    // ... existing ...
+    updateLoginVisibility(); // Add this
+  }
+});
+
+// Update after logout
+logoutBtn.addEventListener('click', async () => {
+  // ... existing ...
+  updateLoginVisibility(); // Add this
+});
+
+window.logout = async () => {
+  // ... existing ...
+  updateLoginVisibility(); // Add this
+};
