@@ -5,6 +5,10 @@ body {
   color: #f0f0f0;
 }
 
+body.login-visible header,
+body.login-visible footer {
+  display: none !important;
+}
 /* Header */
 .top-header {
   display: flex;
