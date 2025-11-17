@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
-   CHAT – list, reply, delete + Show/Hide
+   CHAT – list, reply, delete + Show/Hide (Matching Custom Requests)
    -------------------------------------------------------------- */
 import { supabase } from '../supabase-config.js';
 
@@ -37,46 +37,48 @@ window.fetchChatRequests = async () => {
 
       const card = document.createElement('div');
       card.className = 'chat-request-card';
+      card.id = `card-${uid}`;
       card.innerHTML = `
-        <h3>${u.name} (${u.email})</h3>
-        <button class="btn" onclick="toggleChatDetails('${uid}')">Show Messages</button>
-        <div id="details-${uid}" style="display:none; margin-top:16px;">
-          <ul style="list-style:none; padding:0;">
+        <h3>${u.name}</h3>
+        <p><strong>Email:</strong> ${u.email}</p>
+        <button id="toggle-${uid}" class="btn" onclick="toggleChatDetails('${uid}')">Show Details</button>
+        <div id="details-${uid}" style="display:none;">
+          <p><strong>Messages:</strong></p>
+          <ul>
             ${u.msgs.map(m => {
-              const txt = m.file ? `${m.content} <a href="${m.file}" target="_blank">[File]</a>` : m.content;
-              return `<li style="margin:10px 0; padding:12px; background:#1e1e1e; border-radius:8px;">
-                <small style="color:#888;">${new Date(m.ts).toLocaleString()}</small><br>
-                <strong>${m.replied ? 'Replied' : 'Pending'}</strong>: ${txt}
-                ${!m.auto ? `<button class="btn" style="margin-top:8px; font-size:12px;" onclick="replyToChat('${m.id}','${u.name}','${u.email}')" ${m.replied?'disabled':''}>Reply</button>` : ''}
+              const txt = m.file ? `<a href="${m.file}" target="_blank">${m.content} [File]</a>` : m.content;
+              return `<li>
+                <p><strong>${m.replied ? 'Replied' : 'Pending'}</strong> • ${new Date(m.ts).toLocaleString()}</p>
+                <p>${txt}</p>
+                ${!m.auto ? `<button class="btn" onclick="replyToChat('${m.id}','${u.name}','${u.email}')" ${m.replied ? 'disabled' : ''}>Reply</button>` : ''}
               </li>`;
             }).join('')}
           </ul>
-          <button class="btn btn-delete" onclick="deleteChat('${uid}')">Delete Entire Chat</button>
+          <button class="btn btn-delete" onclick="deleteChat('${uid}')">Delete Chat</button>
         </div>`;
       listDiv.appendChild(card);
     });
   } catch (e) {
     console.error(e);
     resultDiv.className = 'result error';
-    resultDiv.textContent = 'Failed to load chats.';
+    resultDiv.textContent = 'Load failed.';
   }
 };
 
 window.toggleChatDetails = id => {
-  const details = document.getElementById(`details-${id}`);
-  const btn = details.previousElementSibling;
-  if (!details.style.display || details.style.display === 'none') {
-    details.style.display = 'block';
-    btn.textContent = 'Hide Messages';
-    btn.classList.replace('btn', 'btn-cancel');
+  const det = document.getElementById(`details-${id}`);
+  const btn = document.getElementById(`toggle-${id}`);
+  if (det.style.display === 'none' || !det.style.display) {
+    det.style.display = 'block';
+    btn.textContent = 'Hide Details';
+    btn.className = 'btn btn-cancel';
   } else {
-    details.style.display = 'none';
-    btn.textContent = 'Show Messages';
-    btn.classList.replace('btn-cancel', 'btn');
+    det.style.display = 'none';
+    btn.textContent = 'Show Details';
+    btn.className = 'btn';
   }
 };
 
-/* Reply & Delete functions remain the same */
 window.replyToChat = (msgId, name, email) => {
   document.getElementById('replyUserId').value = msgId;
   document.getElementById('replyUserInfo').textContent = `Replying to: ${name} (${email})`;
