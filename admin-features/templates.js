@@ -1,7 +1,8 @@
 /* --------------------------------------------------------------
    TEMPLATES – upload, list, edit, delete
+   Location: scripts/admin-features/templates.js
    -------------------------------------------------------------- */
-import { supabase } from './scripts/supabase-config.js';
+import { supabase } from '../supabase-config.js';
 
 const uploadForm = document.getElementById('uploadForm');
 const templateList = document.getElementById('templateList');
@@ -17,15 +18,21 @@ const validCategories = [
 
 /* ---------- FETCH ---------- */
 window.fetchTemplates = async () => {
+  console.log('Fetching templates...');
   try {
-    templateList.innerHTML = '';
+    templateList.innerHTML = '<p>Loading templates...</p>';
     const { data, error } = await supabase.from('templates').select('*');
     if (error) throw error;
+    
+    console.log('Templates fetched:', data);
     templates = data || [];
+    templateList.innerHTML = '';
+    
     if (!templates.length) {
       templateList.innerHTML = '<p>No templates available.</p>';
       return;
     }
+    
     templates.forEach(t => {
       const card = document.createElement('div');
       card.className = 'template-card';
@@ -43,8 +50,10 @@ window.fetchTemplates = async () => {
         </div>`;
       templateList.appendChild(card);
     });
+    console.log('Templates rendered successfully');
   } catch (e) {
-    console.error(e);
+    console.error('Error fetching templates:', e);
+    templateList.innerHTML = '<p class="error">Failed to load templates. Check console for details.</p>';
     window.showResult('Failed to load templates.', false);
   }
 };
