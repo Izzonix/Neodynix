@@ -57,6 +57,15 @@ main {
   box-sizing: border-box;
   min-height: 550px;
   border: 1px solid rgba(128, 222, 234, 0.2);
+  /* Initially blurred and non-interactive until form is submitted */
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+.chat-widget.active {
+  /* Remove blur and re-enable interactions after successful form submission */
+  filter: none;
+  pointer-events: auto;
 }
 
 .chat-header {
