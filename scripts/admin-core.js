@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (session) {
       loginSection.style.display = 'none';
       adminContainer.style.display = 'block';
-      // Initial fetches will be called from features
+      // Load initial section (Templates) and fetch data
+      showSection('templates');
     } else {
       loginSection.style.display = 'block';
       adminContainer.style.display = 'none';
@@ -51,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       loginSection.style.display = 'none';
       adminContainer.style.display = 'block';
-      // Features will handle initial fetches
+      // Load initial section after login
+      showSection('templates');
       updateLoginVisibility(); // Update after successful login
     }
   });
@@ -125,5 +127,4 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnCustomRequests')?.addEventListener('click', () => showSection('custom'));
 
   checkAuth();
-  updateLoginVisibility(); // Initial call
 });
