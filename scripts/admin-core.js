@@ -13,18 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const loadingPopup = document.getElementById('loading-popup');
   const result = document.getElementById('result');
 
-  // Hide/show header & footer based on login state
+  // Hide/show header & footer based on login state (using body class to avoid JS interference with main.js)
   function updateLoginVisibility() {
     const loginVisible = loginSection.style.display !== 'none';
-    const header = document.querySelector('header');
-    const footer = document.querySelector('footer');
+    const body = document.body;
     
     if (loginVisible) {
-      if (header) header.style.display = 'none';
-      if (footer) footer.style.display = 'none';
+      body.classList.add('login-visible');
     } else {
-      if (header) header.style.display = 'block';
-      if (footer) footer.style.display = 'block';
+      body.classList.remove('login-visible');
     }
   }
 
