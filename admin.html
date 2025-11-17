@@ -375,16 +375,15 @@
   <footer>
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
-  
-  <!-- Load dependencies in correct order -->
   <script type="module" src="scripts/supabase-config.js"></script>
-  <script type="module" src="scripts/main.js"></script>
-  <script type="module" src="scripts/admin-core.js"></script>
+<script type="module" src="scripts/admin-core.js"></script>
 
-  <!-- Feature modules - load after core -->
-  <script type="module" src="scripts/admin-features/templates.js"></script>
-  <script type="module" src="scripts/admin-features/knowledge.js"></script>
-  <script type="module" src="scripts/admin-features/chat.js"></script>
-  <script type="module" src="scripts/admin-features/custom-requests.js"></script>
-  <script type="module" src="scripts/admin-features/email.js"></script>
+<!-- Feature modules – order does NOT matter -->
+<script type="module" src="scripts/admin-features/templates.js"></script>
+<script type="module" src="scripts/admin-features/knowledge.js"></script>
+<script type="module" src="scripts/admin-features/chat.js"></script>
+<script type="module" src="scripts/admin-features/custom-requests.js"></script>
+<script type="module" src="scripts/admin-features/email.js"></script>
+
+<script type="module" src="scripts/main.js"></script>
         </body>
