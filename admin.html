@@ -51,6 +51,11 @@
       <!-- Template Management Section -->
       <div id="sectionTemplates" class="admin-section active">
         <h2>Manage Templates</h2>
+        <!-- search bar -->
+<div class="search-container" style="margin: 20px 0; text-align: center;">
+  <input type="text" id="templateSearch" placeholder="Search templates by name..." 
+         style="padding: 14px; width: 100%; max-width: 520px; background: #2a2a2a; border: 2px solid #4fc3f7; border-radius: 10px; color: white; font-size: 15px;" />
+</div>
         <div class="template-upload">
           <h3>Add New Template</h3>
           <form id="uploadForm" class="template-upload">
@@ -208,24 +213,24 @@
       
       <!-- Chat Requests Section -->
       <div id="sectionChat" class="admin-section">
-        <h2>Chat Requests</h2>
-        <div class="chat-requests">
-          <h3>Pending Requests</h3>
-          <div id="chatRequestList" class="chat-request-grid"></div>
-        </div>
-        <div class="chat-reply">
-          <h3>Reply to Customer</h3>
-          <form id="chatReplyForm" class="chat-reply-form">
-            <input type="hidden" name="replyUserId" id="replyUserId" />
-            <p id="replyUserInfo"></p>
-            <div class="form-group">
-              <label for="replyMessage">Reply Message</label>
-              <textarea name="replyMessage" id="replyMessage" placeholder="Type your reply..." required aria-label="Reply Message"></textarea>
-            </div>
-            <button type="submit" class="btn">Send Reply</button>
-          </form>
-          <div id="chatResult" class="result"></div>
-        </div>
+  <h2>Chat Requests</h2>
+  <div class="chat-requests">
+    <h3>Pending Requests</h3>
+    <div id="chatRequestList" class="chat-request-grid"></div>
+  </div>
+  <div class="chat-reply">
+    <h3>Reply to Customer</h3>
+    <form id="chatReplyForm" class="chat-reply-form">
+      <input type="hidden" name="replyUserId" id="replyUserId" />
+      <p id="replyUserInfo" style="font-weight: bold; color: #4fc3f7; margin-bottom: 12px;"></p>
+      <div class="form-group">
+        <label for="replyMessage">Reply Message</label>
+        <textarea name="replyMessage" id="replyMessage" placeholder="Type your reply..." required></textarea>
+      </div>
+      <button type="submit" class="btn">Send Reply</button>
+    </form>
+    <div id="chatResult" class="result"></div>
+  </div>
       </div>
       
       <!-- Custom Requests Section -->
