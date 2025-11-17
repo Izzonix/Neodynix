@@ -13,6 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const loadingPopup = document.getElementById('loading-popup');
   const result = document.getElementById('result');
 
+  // Hide/show header & footer based on login state
+  function updateLoginVisibility() {
+    const loginVisible = loginSection.style.display !== 'none';
+    const header = document.querySelector('header');
+    const footer = document.querySelector('footer');
+    
+    if (loginVisible) {
+      if (header) header.style.display = 'none';
+      if (footer) footer.style.display = 'none';
+    } else {
+      if (header) header.style.display = 'block';
+      if (footer) footer.style.display = 'block';
+    }
+  }
+
   async function checkAuth() {
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
@@ -23,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loginSection.style.display = 'block';
       adminContainer.style.display = 'none';
     }
+    updateLoginVisibility(); // Update visibility after auth check
   }
 
   loginForm.addEventListener('submit', async (e) => {
@@ -39,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loginSection.style.display = 'none';
       adminContainer.style.display = 'block';
       // Features will handle initial fetches
+      updateLoginVisibility(); // Update after successful login
     }
   });
 
@@ -48,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadingPopup.style.display = 'none';
     loginSection.style.display = 'block';
     adminContainer.style.display = 'none';
+    updateLoginVisibility(); // Update after logout
   });
 
   window.logout = async () => {
@@ -56,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadingPopup.style.display = 'none';
     loginSection.style.display = 'block';
     adminContainer.style.display = 'none';
+    updateLoginVisibility(); // Update after logout
   };
 
   function showConfirm(message, callback) {
@@ -109,42 +128,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnCustomRequests')?.addEventListener('click', () => showSection('custom'));
 
   checkAuth();
+  updateLoginVisibility(); // Initial call
 });
-// Hide/show header & footer based on login state
-function updateLoginVisibility() {
-  const loginVisible = loginSection.style.display !== 'none';
-  const header = document.querySelector('header');
-  const footer = document.querySelector('footer');
-  
-  if (loginVisible) {
-    if (header) header.style.display = 'none';
-    if (footer) footer.style.display = 'none';
-  } else {
-    if (header) header.style.display = 'block';
-    if (footer) footer.style.display = 'block';
-  }
-}
-
-// Call on load and after auth changes
-checkAuth();
-updateLoginVisibility();
-
-// Update after login success
-loginForm.addEventListener('submit', async (e) => {
-  // ... existing code ...
-  if (!error) {
-    // ... existing ...
-    updateLoginVisibility(); // Add this
-  }
-});
-
-// Update after logout
-logoutBtn.addEventListener('click', async () => {
-  // ... existing ...
-  updateLoginVisibility(); // Add this
-});
-
-window.logout = async () => {
-  // ... existing ...
-  updateLoginVisibility(); // Add this
-};
