@@ -11,9 +11,7 @@ let selectedTopic = '';
 let knowledgeBase = [];
 const displayedMessageIds = new Set(); // Track displayed message IDs to prevent duplicates
 let notificationPermission = 'default'; // Track notification permission
-let hasMoreMessages = true; // For pagination
-let currentPage = 0;
-const MESSAGES_PER_PAGE = 50;
+let isHumanActive = false; // Flag to track if a human agent has responded in this session
 
 // Request notification permission
 async function requestNotificationPermission() {
@@ -212,6 +210,9 @@ async function startChat() {
     // Enable chat after successful user setup
     document.querySelector('.chat-widget').classList.add('active');
 
+    // Reset human active flag for new session
+    isHumanActive = false;
+
     const autoReplySent = localStorage.getItem('autoReplySent');
     if (!autoReplySent) {
       const autoReplyMessage = `Hello ${name}, thank you for contacting us about ${topic}. I'm your AI assistant and I'm here to help! Please ask me anything about our services.`;
@@ -235,60 +236,38 @@ async function startChat() {
   }
 }
 
-async function loadMessages(userId, page = 0, direction = 'desc') {
+async function loadMessages(userId) {
   try {
-    const from = page * MESSAGES_PER_PAGE;
-    const { data, error, count } = await supabase
+    // Limit to last 100 messages to improve load time
+    const { data, error } = await supabase
       .from('messages')
-      .select('*', { count: 'exact' })
+      .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: direction === 'asc' })
-      .range(from, from + MESSAGES_PER_PAGE - 1);
-    
+      .order('created_at', { ascending: true })
+      .limit(100);
     if (error) {
       console.error('Error loading messages:', error.message);
       return;
     }
-
-    if (direction === 'asc') {
-      // Prepend older messages to maintain order
-      data.forEach(msg => {
-        if (msg.id && !displayedMessageIds.has(msg.id)) {
-          displayedMessageIds.add(msg.id);
-          const div = document.createElement('div');
-          div.classList.add('msg', msg.is_auto ? 'auto-msg' : msg.sender === 'support' ? 'support-msg' : 'user-msg');
-          const content = msg.file_url
-            ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
-            : msg.content;
-          div.innerHTML = `<span class="msg-content">${content}</span>
-                           <span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
-          chatMessages.insertBefore(div, chatMessages.firstChild);
-        }
-      });
-    } else {
-      // Initial load: append newest first
-      chatMessages.innerHTML = '';
-      displayedMessageIds.clear();
-      data.forEach(msg => {
-        if (msg.id && !displayedMessageIds.has(msg.id)) {
-          displayedMessageIds.add(msg.id);
-          const div = document.createElement('div');
-          div.classList.add('msg', msg.is_auto ? 'auto-msg' : msg.sender === 'support' ? 'support-msg' : 'user-msg');
-          const content = msg.file_url
-            ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
-            : msg.content;
-          div.innerHTML = `<span class="msg-content">${content}</span>
-                           <span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
-          chatMessages.appendChild(div);
-        }
-      });
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    // Update pagination state
-    hasMoreMessages = (count > (page + 1) * MESSAGES_PER_PAGE);
-    currentPage = page;
-
+    chatMessages.innerHTML = '';
+    displayedMessageIds.clear(); // Clear tracked IDs on load
+    // Check for human messages to set flag
+    isHumanActive = data.some(msg => msg.sender === 'support' && !msg.is_auto);
+    data.forEach(msg => {
+      // Track ID to prevent future duplicates
+      if (msg.id && !displayedMessageIds.has(msg.id)) {
+        displayedMessageIds.add(msg.id);
+        const div = document.createElement('div');
+        div.classList.add('msg', msg.is_auto ? 'auto-msg' : msg.sender === 'support' ? 'support-msg' : 'user-msg');
+        const content = msg.file_url
+          ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
+          : msg.content;
+        div.innerHTML = `<span class="msg-content">${content}</span>
+                         <span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+        chatMessages.appendChild(div);
+      }
+    });
+    chatMessages.scrollTop = chatMessages.scrollHeight;
   } catch (err) {
     console.error('Error in loadMessages:', err);
   }
@@ -322,13 +301,9 @@ async function subscribeToMessages() {
       }, payload => {
         const msg = payload.new;
         if (msg.user_id === user.id && msg.id && !displayedMessageIds.has(msg.id)) {
-          // Only display incoming messages; do not trigger AI response for admin messages
-          // Admin messages: sender === 'support' && !is_auto
-          // AI responses: sender === 'support' && is_auto
-          // These are just displayed via realtime, no auto AI reply
-
-          // If human reply (admin), show typing indicator briefly
+          // If human/admin reply, update flag and show notification, but no AI response
           if (!msg.is_auto && msg.sender === 'support') {
+            isHumanActive = true;
             // Remove any existing AI typing
             const aiTyping = chatMessages.querySelector('.typing-indicator');
             if (aiTyping) aiTyping.remove();
@@ -339,25 +314,27 @@ async function subscribeToMessages() {
             chatMessages.appendChild(humanTypingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Auto-remove after 3s (adjust as needed) or on next message
+            // Auto-remove after 2s (reduced for faster UX)
             setTimeout(() => {
               if (humanTypingDiv.parentNode) humanTypingDiv.remove();
-            }, 3000);
+            }, 2000);
 
             // Show browser notification for human messages
             showNotification('New Message from Support', msg.content);
           }
 
-          // Add the actual message immediately (no delay for faster loading)
-          displayedMessageIds.add(msg.id);
-          const content = msg.file_url
-            ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
-            : msg.content;
-          addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender, msg.id);
+          // Add the actual message (will replace/remove typing if present)
+          setTimeout(() => {  // Reduced delay for faster display
+            displayedMessageIds.add(msg.id);
+            const content = msg.file_url
+              ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
+              : msg.content;
+            addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender, msg.id);
 
-          // Remove typing if still there
-          const typingIndicator = chatMessages.querySelector('.typing-indicator');
-          if (typingIndicator) typingIndicator.remove();
+            // Remove typing if still there
+            const typingIndicator = chatMessages.querySelector('.typing-indicator');
+            if (typingIndicator) typingIndicator.remove();
+          }, 100);  // Reduced to 0.1s delay for quicker response
         }
       })
       .subscribe(status => {
@@ -370,15 +347,9 @@ async function subscribeToMessages() {
   }
 }
 
-// Load more older messages on scroll up
-chatMessages.addEventListener('scroll', () => {
-  if (chatMessages.scrollTop === 0 && hasMoreMessages && currentPage > 0) {
-    loadMessages(user.id, currentPage - 1, 'asc');
-  }
-});
-
 window.onload = async () => {
-  await loadKnowledgeBase();
+  // Load knowledge base in background to avoid blocking
+  loadKnowledgeBase().catch(err => console.error('Error loading knowledge base on startup:', err));
   
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
@@ -429,30 +400,44 @@ sendChat.addEventListener('click', async () => {
       
       if (error) throw error;
 
-      // Show typing indicator
-      const typingDiv = document.createElement('div');
-      typingDiv.classList.add('msg', 'auto-msg', 'typing-indicator');
-      typingDiv.innerHTML = `<span class="msg-content">AI is typing...</span>`;
-      chatMessages.appendChild(typingDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      // Only trigger AI if no human has responded in this session
+      if (!isHumanActive) {
+        // Show typing indicator
+        const typingDiv = document.createElement('div');
+        typingDiv.classList.add('msg', 'auto-msg', 'typing-indicator');
+        typingDiv.innerHTML = `<span class="msg-content">AI is typing...</span>`;
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      // Get AI response (only triggered by user messages, not admin)
-      const aiResponse = await getAIResponse(text, selectedTopic);
-      
-      // Remove typing indicator
-      typingDiv.remove();
+        // Get AI response
+        const aiResponse = await getAIResponse(text, selectedTopic);
+        
+        // Remove typing indicator
+        typingDiv.remove();
 
-      // Save AI response
-      const { data: aiMsgData, error: aiError } = await supabase.from('messages').insert({
-        user_id: user.id,
-        content: aiResponse,
-        sender: 'support',
-        is_auto: true
-      }).select().single();
+        // Save AI response
+        const { data: aiMsgData, error: aiError } = await supabase.from('messages').insert({
+          user_id: user.id,
+          content: aiResponse,
+          sender: 'support',
+          is_auto: true
+        }).select().single();
 
-      if (aiError) throw aiError;
+        if (aiError) throw aiError;
 
-      addLocalMessage(aiResponse, 'auto', aiMsgData.id);
+        addLocalMessage(aiResponse, 'auto', aiMsgData.id);
+      } else {
+        // If human active, just inform user
+        const humanActiveMsg = "Your message has been sent. A human agent will respond shortly since one is already assisting you.";
+        addLocalMessage(humanActiveMsg, 'auto');
+        // Optionally insert to DB
+        await supabase.from('messages').insert({
+          user_id: user.id,
+          content: humanActiveMsg,
+          sender: 'support',
+          is_auto: true
+        });
+      }
       selectedTopic = '';
 
     } catch (err) {
