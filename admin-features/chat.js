@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------
    CHAT – list, reply, delete
    -------------------------------------------------------------- */
-import { supabase } from '../supabase-config.js';
+import { supabase } from './supabase-config.js';
 
 const replyForm   = document.getElementById('chatReplyForm');
 const listDiv     = document.getElementById('chatRequestList');
