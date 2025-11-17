@@ -19,42 +19,52 @@ main {
   padding: 0;
 }
 
-/* Login Section */
+/* Login Section - Isolated Full Screen */
 .login-section {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 64px);
-  width: 100%;
+  min-height: 100vh; /* Full viewport */
+  width: 100vw; /* Full width */
+  background: #0d1117; /* Match body bg */
+  position: fixed; /* Overlay everything */
+  top: 0;
+  left: 0;
+  z-index: 100; /* Above everything */
 }
 
 .login-container {
   max-width: 400px;
   width: 90%;
-  padding: 24px;
+  padding: 32px;
   background: #1e1e1e;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   text-align: center;
+  border: 1px solid #4fc3f7;
 }
 
-/* Admin Container */
-.admin-container {
-  max-width: 960px;
-  width: 90%;
-  margin: 24px auto;
-  padding: 24px;
-  background: #1e1e1e;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+/* Hide Header & Footer on Login */
+.login-section[style*="display: block"],
+.login-section[style*="display: flex"] {
+  position: fixed !important;
+}
+
+.login-section[style*="display: block"] ~ main,
+.login-section[style*="display: flex"] ~ main,
+.login-section[style*="display: block"] ~ footer,
+.login-section[style*="display: flex"] ~ footer,
+header.login-hidden,
+footer.login-hidden {
+  display: none !important;
 }
 
 /* Headings */
 .login-section h2 {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 600;
   color: #4fc3f7;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .admin-section h2, .template-upload h3, .chat-requests h3, .chat-reply h3 {
@@ -325,6 +335,41 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
   max-width: 500px;
   margin-left: auto;
   margin-right: auto;
+  transition: all 0.3s ease; /* Smooth toggle */
+}
+
+.chat-request-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+.chat-request-card ul li {
+  font-size: 13px;
+  color: #cccccc;
+  margin-bottom: 10px;
+  padding: 8px;
+  background: #1e1e1e;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-request-card ul li a {
+  color: #4fc3f7;
+  text-decoration: none;
+}
+
+.chat-request-card ul li a:hover {
+  text-decoration: underline;
+}
+
+.chat-request-card ul li button {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .custom-request-card ul {
@@ -349,6 +394,14 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
 
 .custom-request-card ul li a:hover {
   text-decoration: underline;
+}
+
+/* Toggle Button for Chat (Matches Custom) */
+.chat-request-card button[onclick*="toggle"],
+.custom-request-card button[onclick*="toggle"] {
+  width: auto;
+  padding: 8px 16px;
+  margin: 12px 0;
 }
 
 /* Buttons */
@@ -404,46 +457,37 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
   box-shadow: 0 2px 6px rgba(230, 0, 0, 0.3);
 }
 
-/* Beautiful Full-Screen Loading Spinner */
+/* Loading Popup */
 .loading-popup {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.92);
-  backdrop-filter: blur(6px);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
-  transition: opacity 0.4s ease;
+  z-index: 1000;
 }
 
 .loading-content {
   background: #1e1e1e;
-  padding: 40px 60px;
-  border-radius: 16px;
+  padding: 24px;
+  border-radius: 12px;
   text-align: center;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
-  border: 2px solid #4fc3f7;
-}
-
-.loading-content p {
-  font-size: 20px;
-  font-weight: 600;
-  color: #4fc3f7;
-  margin-bottom: 20px;
-  letter-spacing: 1px;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .spinner {
-  width: 60px;
-  height: 60px;
-  border: 6px solid #2a2a2a;
-  border-top: 6px solid #4fc3f7;
+  border: 3px solid #4fc3f7;
+  border-top: 3px solid #03a9f4;
   border-radius: 50%;
+  width: 28px;
+  height: 28px;
   animation: spin 1s linear infinite;
-  margin: 0 auto;
+  margin: 0 auto 12px;
 }
 
 @keyframes spin {
@@ -636,6 +680,35 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
   resize: vertical;
 }
 
+/* Template Search Bar */
+.search-container {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.search-container input {
+  padding: 14px;
+  width: 100%;
+  max-width: 520px;
+  background: #2a2a2a;
+  border: 2px solid #4fc3f7;
+  border-radius: 10px;
+  color: white;
+  font-size: 15px;
+  box-sizing: border-box; /* Prevents overflow */
+}
+
+/* Admin Container */
+.admin-container {
+  max-width: 960px;
+  width: 90%;
+  margin: 24px auto;
+  padding: 24px;
+  background: #1e1e1e;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
 /* Mobile Styles */
 @media (max-width: 600px) {
   body {
@@ -649,6 +722,12 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
   .admin-container, .login-container {
     padding: 16px;
     margin: 16px auto;
+  }
+
+  .login-section .login-container {
+    padding: 24px;
+    margin: 20px;
+    width: 90%;
   }
 
   .login-section h2 {
@@ -686,6 +765,14 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
     font-size: 12px;
   }
 
+  .search-container input {
+    width: 95%;
+    max-width: none;
+    padding: 12px;
+    font-size: 14px;
+    margin: 0 2.5%;
+  }
+
   .file-input-label, .btn {
     padding: 10px;
     font-size: 12px;
@@ -699,6 +786,17 @@ email-form input:focus, .email-form select:focus, .login-form input:focus, .chat
   .template-card, .chat-request-card, .custom-request-card {
     padding: 12px;
     max-width: 100%;
+  }
+
+  .chat-request-card ul li {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .chat-request-card button[onclick*="toggle"],
+  .custom-request-card button[onclick*="toggle"] {
+    padding: 10px;
+    width: 100%;
   }
 
   .template-card h3, .chat-request-card h3, .custom-request-card h3 {
