@@ -18,8 +18,14 @@ let hasHumanIntervened = false; // Track if human admin has responded
 async function requestNotificationPermission() {
   if ('Notification' in window) {
     if (notificationPermission === 'default') {
-      const perm = await Notification.requestPermission();
-      notificationPermission = perm;
+      try {
+        const perm = await Notification.requestPermission();
+        notificationPermission = perm;
+        console.log('Notification permission:', perm);
+      } catch (err) {
+        console.error('Notification permission request failed:', err);
+        notificationPermission = 'denied';
+      }
     }
   }
 }
