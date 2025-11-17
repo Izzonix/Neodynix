@@ -1,7 +1,8 @@
 /* --------------------------------------------------------------
    CUSTOM REQUESTS – list, toggle details, delete file
    -------------------------------------------------------------- */
-import { supabase } from './scripts/supabase-config.js';
+import { supabase } from '../supabase-config.js';
+
 const listDiv = document.getElementById('customRequestList');
 
 window.fetchCustomRequests = async () => {
