@@ -75,25 +75,27 @@ window.toggleDetails = id => {
 };
 
 window.deleteFile = async (reqId, url, type) => {
-  window.showConfirm('Delete this file?', async () => {
-    const li = document.querySelector(`[data-file-url="${url.replace(/"/g,'\\"')}"]`);
-    if (li) li.style.opacity='0.5';
-    window.loadingPopup.style.display='flex';
-    try {
-      const path = url.split('/').slice(-2).join('/');
-      await supabase.storage.from('custom_requests').remove([path]);
+  window.showConfirm('Delete this file permanently?', async () => {
+    const li = document.querySelector(`li[data-file-url="${url}"]`);
+    if (li) li.style.opacity = '0.4';
 
-      const { data:r, error:f } = await supabase.from('custom_requests').select('files').eq('id',reqId).single();
-      if (f) throw f;
-      const newFiles = r.files.filter(f=>!(f.url===url && f.type===type));
-      await supabase.from('custom_requests').update({ files:newFiles }).eq('id',reqId);
+    window.loadingPopup.style.display = 'flex';
+    try {
+      const fileName = url.split('/').pop();
+      await supabase.storage.from('custom_requests').remove([fileName]);
+
+      const { data: r } = await supabase.from('custom_requests').select('files').eq('id', reqId).single();
+      const newFiles = r.files.filter(f => f.url !== url);
+      await supabase.from('custom_requests').update({ files: newFiles }).eq('id', reqId);
 
       if (li) li.remove();
       window.showResult('File deleted.', true);
     } catch (e) {
       console.error(e);
-      window.showResult(`Delete failed: ${e.message}`, false);
-      if (li) li.style.opacity='1';
-    } finally { window.loadingPopup.style.display='none'; }
+      window.showResult('Delete failed.', false);
+      if (li) li.style.opacity = '1';
+    } finally {
+      window.loadingPopup.style.display = 'none';
+    }
   });
 };
