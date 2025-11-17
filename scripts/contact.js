@@ -181,6 +181,9 @@ async function startChat() {
       user = newUser;
     }
 
+    // Enable chat after successful user setup
+    document.querySelector('.chat-widget').classList.add('active');
+
     const autoReplySent = localStorage.getItem('autoReplySent');
     if (!autoReplySent) {
       const autoReplyMessage = `Hello ${name}, thank you for contacting us about ${topic}. I'm your AI assistant and I'm here to help! Please ask me anything about our services.`;
@@ -314,6 +317,8 @@ window.onload = async () => {
       if (data) {
         user = data;
         selectedTopic = data.topic || '';
+        // Enable chat if user exists
+        document.querySelector('.chat-widget').classList.add('active');
         await loadMessages(userId);
         subscribeToMessages();
       } else {
