@@ -6,30 +6,14 @@ const fileInput = document.getElementById('fileInput');
 const filePreview = document.getElementById('filePreview');
 const sendChat = document.getElementById('sendChat');
 const attachFile = document.getElementById('attachFile');
-
 let user = null;
 let selectedTopic = '';
 let knowledgeBase = [];
-const displayedMessageIds = new Set();
-let notificationPermission = 'default';
-let hasHumanIntervened = false;
-let isKnowledgeLoaded = false;
-
-// Show loading message in chat
-function showLoadingMessage(message = 'Loading...') {
-  const loadingDiv = document.createElement('div');
-  loadingDiv.className = 'msg auto-msg loading-message';
-  loadingDiv.innerHTML = `<span class="msg-content">${message}</span>`;
-  chatMessages.appendChild(loadingDiv);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return loadingDiv;
-}
-
-// Remove loading message
-function removeLoadingMessage() {
-  const loading = chatMessages.querySelector('.loading-message');
-  if (loading) loading.remove();
-}
+const displayedMessageIds = new Set(); // Track displayed message IDs to prevent duplicates
+let notificationPermission = 'default'; // Track notification permission
+let hasMoreMessages = true; // For pagination
+let currentPage = 0;
+const MESSAGES_PER_PAGE = 50;
 
 // Request notification permission
 async function requestNotificationPermission() {
@@ -41,7 +25,7 @@ async function requestNotificationPermission() {
   }
 }
 
-// Show browser notification
+// Show browser notification for human support messages
 function showNotification(title, body, icon = 'images/attach-icon.png') {
   if (notificationPermission === 'granted') {
     new Notification(title, {
@@ -52,49 +36,29 @@ function showNotification(title, body, icon = 'images/attach-icon.png') {
   }
 }
 
-// Fetch knowledge base from Supabase with retry
-async function loadKnowledgeBase(retries = 3) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      console.log(`Loading knowledge base (attempt ${i + 1}/${retries})...`);
-      const { data, error } = await supabase
-        .from('knowledge')
-        .select('*')
-        .eq('is_active', true)
-        .order('priority', { ascending: false });
-      
-      if (error) throw error;
-      
-      knowledgeBase = data || [];
-      isKnowledgeLoaded = true;
-      console.log('Knowledge base loaded:', knowledgeBase.length, 'entries');
-      return true;
-    } catch (err) {
-      console.error(`Error loading knowledge base (attempt ${i + 1}):`, err);
-      if (i === retries - 1) {
-        console.error('Failed to load knowledge base after', retries, 'attempts');
-        return false;
-      }
-      // Wait 1 second before retry
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+// Fetch knowledge base from Supabase
+async function loadKnowledgeBase() {
+  try {
+    const { data, error } = await supabase
+      .from('knowledge')
+      .select('*')
+      .order('category');
+    
+    if (error) throw error;
+    knowledgeBase = data || [];
+    console.log('Knowledge base loaded:', knowledgeBase.length, 'entries');
+  } catch (err) {
+    console.error('Error loading knowledge base:', err);
   }
-  return false;
 }
 
 // Generate AI response using Cloudflare Workers AI
 async function getAIResponse(userMessage, topic) {
   try {
-    // Wait for knowledge to load with timeout
-    let waitTime = 0;
-    while (!isKnowledgeLoaded && waitTime < 5000) {
+    // Wait for knowledge to load if not ready
+    while (knowledgeBase.length === 0) {
       console.log('Waiting for knowledge base...');
       await new Promise(resolve => setTimeout(resolve, 100));
-      waitTime += 100;
-    }
-
-    if (!isKnowledgeLoaded) {
-      console.warn('Knowledge base not loaded, proceeding with empty knowledge');
     }
 
     // Filter relevant knowledge based on topic
@@ -120,7 +84,7 @@ async function getAIResponse(userMessage, topic) {
     });
 
     if (!response.ok) {
-      throw new Error(`Worker error: ${response.status} ${response.statusText}`);
+      throw new Error(`Worker error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -156,7 +120,6 @@ async function showStartChatPopup() {
       width: 90%;
       max-width: 400px;
       box-sizing: border-box;
-      border: 1px solid #80deea;
     `;
 
     popup.innerHTML = `
@@ -168,11 +131,9 @@ async function showStartChatPopup() {
         style="padding: 12px; width: 100%; box-sizing: border-box; border-radius: 8px; margin-bottom: 15px;
         border: 1px solid #80deea; background: #263238; color: #eceff1; font-size: clamp(0.9rem, 2.5vw, 1rem);" required>
         <option value="" disabled selected>Select a topic</option>
-        <option value="General">General</option>
         <option value="Templates">Templates</option>
         <option value="Pricing">Pricing</option>
         <option value="Support">Support</option>
-        <option value="Technical">Technical</option>
         <option value="Other">Other</option>
       </select>
       <input type="text" id="nameInput" placeholder="Enter your name"
@@ -180,52 +141,29 @@ async function showStartChatPopup() {
         border: 1px solid #80deea; background: #263238; color: #eceff1; font-size: clamp(0.9rem, 2.5vw, 1rem);" required>
       <button id="submitInfo"
         style="padding: 12px 24px; background: #4fc3f7; border: none; border-radius: 8px; color: #121212;
-        cursor: pointer; font-size: clamp(0.9rem, 2.5vw, 1rem); transition: background 0.3s, transform 0.2s; width: 100%;">
+        cursor: pointer; font-size: clamp(0.9rem, 2.5vw, 1rem); transition: background 0.3s, transform 0.2s;">
         Start Chat
       </button>
-      <p id="popupError" style="color: #ef5350; margin-top: 10px; font-size: 0.9rem; display: none;"></p>
     `;
 
     document.body.appendChild(popup);
 
-    const submitBtn = document.getElementById('submitInfo');
-    const errorMsg = document.getElementById('popupError');
-
-    submitBtn.addEventListener('click', () => {
+    document.getElementById('submitInfo').addEventListener('click', () => {
       const email = document.getElementById('emailInput').value.trim();
       const topic = document.getElementById('topicSelect').value;
       const name = document.getElementById('nameInput').value.trim();
 
-      errorMsg.style.display = 'none';
-
-      // Validate email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        errorMsg.textContent = 'Please enter a valid email address.';
-        errorMsg.style.display = 'block';
-        return;
+      if (email && topic && name) {
+        popup.remove();
+        resolve({ email, topic, name });
+      } else {
+        alert('Please fill in all fields.');
       }
-
-      if (!topic) {
-        errorMsg.textContent = 'Please select a topic.';
-        errorMsg.style.display = 'block';
-        return;
-      }
-
-      if (name.length < 2) {
-        errorMsg.textContent = 'Please enter your name (at least 2 characters).';
-        errorMsg.style.display = 'block';
-        return;
-      }
-
-      popup.remove();
-      resolve({ email, topic, name });
     });
   });
 }
 
 async function startChat() {
-  let loadingMsg = null;
   try {
     const userInfo = await showStartChatPopup();
     if (!userInfo) return;
@@ -233,145 +171,87 @@ async function startChat() {
     const { email, topic, name } = userInfo;
     selectedTopic = topic;
 
-    // Show loading in chat
-    loadingMsg = showLoadingMessage('Setting up your chat...');
-
-    // Generate user ID from email
-    const userId = Array.from(new TextEncoder().encode(email.toLowerCase()))
+    const userId = Array.from(new TextEncoder().encode(email))
       .map(b => b.toString(16).padStart(2, '0'))
-      .join('')
-      .substring(0, 36); // Ensure it's a valid UUID length
-    
-    console.log('Generated user ID:', userId);
+      .join('');
     localStorage.setItem('chat_user_id', userId);
 
-    // Check if user exists
-    const { data: existingUser, error: fetchError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      throw new Error(`Database error: ${fetchError.message}`);
+    const { data, error } = await supabase.from('users').select().eq('id', userId).single();
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error fetching user:', error.message, error.code);
+      alert(`Error fetching user data: ${error.message}`);
+      return;
     }
 
-    if (existingUser) {
-      console.log('Existing user found:', existingUser);
-      user = existingUser;
-      
-      // Update user info if changed
+    if (data) {
+      user = data;
       if (user.name !== name || user.topic !== topic) {
-        const { error: updateError } = await supabase
-          .from('users')
-          .update({ name, topic, email })
-          .eq('id', userId);
-        
+        const { error: updateError } = await supabase.from('users').update({ name, topic }).eq('id', user.id);
         if (updateError) {
-          console.error('Error updating user:', updateError);
-          // Don't throw - continue with old data
-        } else {
-          user.name = name;
-          user.topic = topic;
-          user.email = email;
+          console.error('Error updating user:', updateError.message);
+          alert(`Error updating user data: ${updateError.message}`);
+          return;
         }
       }
     } else {
-      console.log('Creating new user');
-      const { data: newUser, error: insertError } = await supabase
-        .from('users')
-        .insert({
-          id: userId,
-          name,
-          email,
-          topic
-        })
-        .select()
-        .single();
+      const { data: newUser, error: insertError } = await supabase.from('users').insert({
+        id: userId, name, email, topic
+      }).select().single();
 
       if (insertError) {
-        throw new Error(`Failed to create user: ${insertError.message}`);
+        console.error('Error inserting user:', insertError.message);
+        alert(`Error saving user data: ${insertError.message}`);
+        return;
       }
-      
       user = newUser;
-      console.log('New user created:', user);
     }
 
-    // Request notification permission
+    // Request notification permission after user setup
     await requestNotificationPermission();
 
-    // Enable chat
+    // Enable chat after successful user setup
     document.querySelector('.chat-widget').classList.add('active');
-    
-    // Remove loading message
-    if (loadingMsg) removeLoadingMessage();
 
-    // Send auto-reply for new conversations
-    const autoReplySent = localStorage.getItem(`autoReplySent_${userId}`);
+    const autoReplySent = localStorage.getItem('autoReplySent');
     if (!autoReplySent) {
       const autoReplyMessage = `Hello ${name}, thank you for contacting us about ${topic}. I'm your AI assistant and I'm here to help! Please ask me anything about our services.`;
-      
-      const { error: replyError } = await supabase
-        .from('messages')
-        .insert({
-          user_id: user.id,
-          content: autoReplyMessage,
-          sender: 'support',
-          is_auto: true
-        });
-      
-      if (replyError) {
-        console.error('Error sending auto-reply:', replyError);
+      const { error } = await supabase.from('messages').insert({
+        user_id: user.id, content: autoReplyMessage, sender: 'support', is_auto: true
+      });
+      if (error) {
+        console.error('Error sending first auto-reply:', error.message);
       } else {
-        localStorage.setItem(`autoReplySent_${userId}`, 'true');
+        localStorage.setItem('autoReplySent', 'true');
         addLocalMessage(autoReplyMessage, 'auto');
       }
     }
 
-    // Load existing messages
     await loadMessages(user.id);
-    
-    // Subscribe to real-time updates
     subscribeToMessages();
 
-    console.log('Chat started successfully');
-
   } catch (err) {
-    console.error('Error in startChat:', err);
-    if (loadingMsg) removeLoadingMessage();
-    
-    // Show error in chat
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'msg auto-msg';
-    errorDiv.style.background = '#ef535033';
-    errorDiv.style.border = '1px solid #ef5350';
-    errorDiv.innerHTML = `
-      <span class="msg-content" style="color: #ef5350;">
-        <strong>Failed to start chat</strong><br>
-        ${err.message || 'Unknown error'}<br>
-        <small>Please refresh the page and try again.</small>
-      </span>
-    `;
-    chatMessages.appendChild(errorDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    console.error('Unexpected error in startChat:', err);
+    alert('Unexpected error starting chat. Please try again.');
   }
 }
 
-async function loadMessages(userId) {
+async function loadMessages(userId, page = 0, direction = 'desc') {
   try {
-    const { data, error } = await supabase
+    const from = page * MESSAGES_PER_PAGE;
+    const { data, error, count } = await supabase
       .from('messages')
-      .select('id, content, sender, is_auto, created_at, file_url')
+      .select('*', { count: 'exact' })
       .eq('user_id', userId)
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: direction === 'asc' })
+      .range(from, from + MESSAGES_PER_PAGE - 1);
     
     if (error) {
-      throw new Error(`Failed to load messages: ${error.message}`);
+      console.error('Error loading messages:', error.message);
+      return;
     }
-    
-    displayedMessageIds.clear();
-    
-    if (data && data.length > 0) {
+
+    if (direction === 'asc') {
+      // Prepend older messages to maintain order
       data.forEach(msg => {
         if (msg.id && !displayedMessageIds.has(msg.id)) {
           displayedMessageIds.add(msg.id);
@@ -380,46 +260,60 @@ async function loadMessages(userId) {
           const content = msg.file_url
             ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
             : msg.content;
-          div.innerHTML = `
-            <span class="msg-content">${content}</span>
-            <span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-          `;
+          div.innerHTML = `<span class="msg-content">${content}</span>
+                           <span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+          chatMessages.insertBefore(div, chatMessages.firstChild);
+        }
+      });
+    } else {
+      // Initial load: append newest first
+      chatMessages.innerHTML = '';
+      displayedMessageIds.clear();
+      data.forEach(msg => {
+        if (msg.id && !displayedMessageIds.has(msg.id)) {
+          displayedMessageIds.add(msg.id);
+          const div = document.createElement('div');
+          div.classList.add('msg', msg.is_auto ? 'auto-msg' : msg.sender === 'support' ? 'support-msg' : 'user-msg');
+          const content = msg.file_url
+            ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
+            : msg.content;
+          div.innerHTML = `<span class="msg-content">${content}</span>
+                           <span class="msg-timestamp">${new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
           chatMessages.appendChild(div);
         }
       });
       chatMessages.scrollTop = chatMessages.scrollHeight;
-
-      // Check for human intervention
-      hasHumanIntervened = data.some(msg => msg.sender === 'support' && !msg.is_auto);
     }
+
+    // Update pagination state
+    hasMoreMessages = (count > (page + 1) * MESSAGES_PER_PAGE);
+    currentPage = page;
+
   } catch (err) {
-    console.error('Error loading messages:', err);
-    throw err;
+    console.error('Error in loadMessages:', err);
   }
 }
 
 function addLocalMessage(content, sender = 'user', messageId = null) {
+  // Only add if not already displayed (for local adds during load)
   if (messageId && displayedMessageIds.has(messageId)) {
-    return;
+    return; // Skip duplicate
   }
   if (messageId) {
     displayedMessageIds.add(messageId);
   }
   const div = document.createElement('div');
   div.classList.add('msg', sender === 'support' ? 'support-msg' : sender === 'auto' ? 'auto-msg' : 'user-msg');
-  div.innerHTML = `
-    <span class="msg-content">${content}</span>
-    <span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-  `;
+  div.innerHTML = `<span class="msg-content">${content}</span>
+                   <span class="msg-timestamp">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 async function subscribeToMessages() {
   if (!user) return;
-  
   try {
-    const channel = supabase.channel(`chat-${user.id}`)
+    supabase.channel('chat')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -428,108 +322,113 @@ async function subscribeToMessages() {
       }, payload => {
         const msg = payload.new;
         if (msg.user_id === user.id && msg.id && !displayedMessageIds.has(msg.id)) {
-          // Check for human intervention
-          if (msg.sender === 'support' && !msg.is_auto) {
-            hasHumanIntervened = true;
+          // Only display incoming messages; do not trigger AI response for admin messages
+          // Admin messages: sender === 'support' && !is_auto
+          // AI responses: sender === 'support' && is_auto
+          // These are just displayed via realtime, no auto AI reply
+
+          // If human reply (admin), show typing indicator briefly
+          if (!msg.is_auto && msg.sender === 'support') {
+            // Remove any existing AI typing
+            const aiTyping = chatMessages.querySelector('.typing-indicator');
+            if (aiTyping) aiTyping.remove();
+
+            const humanTypingDiv = document.createElement('div');
+            humanTypingDiv.classList.add('msg', 'support-msg', 'typing-indicator');
+            humanTypingDiv.innerHTML = `<span class="msg-content">Human agent is typing...</span>`;
+            chatMessages.appendChild(humanTypingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Auto-remove after 3s (adjust as needed) or on next message
+            setTimeout(() => {
+              if (humanTypingDiv.parentNode) humanTypingDiv.remove();
+            }, 3000);
+
+            // Show browser notification for human messages
             showNotification('New Message from Support', msg.content);
           }
 
-          // Add message with slight delay for smooth UX
-          setTimeout(() => {
-            displayedMessageIds.add(msg.id);
-            const content = msg.file_url
-              ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
-              : msg.content;
-            addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender, msg.id);
-          }, 300);
+          // Add the actual message immediately (no delay for faster loading)
+          displayedMessageIds.add(msg.id);
+          const content = msg.file_url
+            ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
+            : msg.content;
+          addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender, msg.id);
+
+          // Remove typing if still there
+          const typingIndicator = chatMessages.querySelector('.typing-indicator');
+          if (typingIndicator) typingIndicator.remove();
         }
       })
       .subscribe(status => {
-        console.log('Subscription status:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('Real-time subscription active for messages');
+        }
       });
-    
-    console.log('Subscribed to real-time messages');
   } catch (err) {
     console.error('Error subscribing to messages:', err);
   }
 }
 
-// Initialize on page load
-window.addEventListener('DOMContentLoaded', async () => {
-  console.log('Initializing chat...');
-  
-  // Load knowledge base in background
-  loadKnowledgeBase().catch(err => {
-    console.error('Failed to load knowledge base:', err);
-  });
+// Load more older messages on scroll up
+chatMessages.addEventListener('scroll', () => {
+  if (chatMessages.scrollTop === 0 && hasMoreMessages && currentPage > 0) {
+    loadMessages(user.id, currentPage - 1, 'asc');
+  }
+});
+
+window.onload = async () => {
+  await loadKnowledgeBase();
   
   const userId = localStorage.getItem('chat_user_id');
-  
   if (userId) {
     try {
-      const loadingMsg = showLoadingMessage('Reconnecting...');
-      
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-      
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-      
+      const { data, error } = await supabase.from('users').select().eq('id', userId).single();
+      if (error) throw error;
       if (data) {
         user = data;
         selectedTopic = data.topic || '';
+        // Request notification permission if user exists
         await requestNotificationPermission();
+        // Enable chat if user exists
         document.querySelector('.chat-widget').classList.add('active');
-        removeLoadingMessage();
         await loadMessages(userId);
         subscribeToMessages();
       } else {
-        // User not found, clear storage and start fresh
-        localStorage.removeItem('chat_user_id');
-        localStorage.removeItem(`autoReplySent_${userId}`);
-        removeLoadingMessage();
         startChat();
       }
     } catch (err) {
-      console.error('Error reconnecting:', err);
+      console.error('Unexpected error in onload:', err);
       localStorage.clear();
-      removeLoadingMessage();
       startChat();
     }
   } else {
     startChat();
   }
-});
+};
 
-// Send message on button click
+sendChat.title = 'Send Message';
+attachFile.title = 'Attach File';
+
 sendChat.addEventListener('click', async () => {
-  const text = chatInput.value.trim();
-  if (!text || !user) return;
-  
-  sendChat.disabled = true;
-  const content = text;
-  addLocalMessage(content);
-  chatInput.value = '';
-  
-  try {
-    // Save user message
-    const { error } = await supabase
-      .from('messages')
-      .insert({
+  let text = chatInput.value.trim();
+  if (text && user) {
+    sendChat.disabled = true;
+    let content = selectedTopic ? `[Topic: ${selectedTopic}] ${text}` : text;
+    addLocalMessage(content);
+    chatInput.value = '';
+    
+    try {
+      // Save user message
+      const { data: userMsgData, error } = await supabase.from('messages').insert({
         user_id: user.id,
         content,
         sender: 'user',
         is_auto: false
-      });
-    
-    if (error) throw error;
+      }).select().single();
+      
+      if (error) throw error;
 
-    // Only generate AI response if no human has intervened
-    if (!hasHumanIntervened) {
       // Show typing indicator
       const typingDiv = document.createElement('div');
       typingDiv.classList.add('msg', 'auto-msg', 'typing-indicator');
@@ -537,99 +436,114 @@ sendChat.addEventListener('click', async () => {
       chatMessages.appendChild(typingDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
 
-      // Get AI response
+      // Get AI response (only triggered by user messages, not admin)
       const aiResponse = await getAIResponse(text, selectedTopic);
       
       // Remove typing indicator
       typingDiv.remove();
 
       // Save AI response
-      const { error: aiError } = await supabase
-        .from('messages')
-        .insert({
-          user_id: user.id,
-          content: aiResponse,
-          sender: 'support',
-          is_auto: true
-        });
+      const { data: aiMsgData, error: aiError } = await supabase.from('messages').insert({
+        user_id: user.id,
+        content: aiResponse,
+        sender: 'support',
+        is_auto: true
+      }).select().single();
 
       if (aiError) throw aiError;
+
+      addLocalMessage(aiResponse, 'auto', aiMsgData.id);
+      selectedTopic = '';
+
+    } catch (err) {
+      console.error('Error sending message:', err);
+      // Remove typing indicator if exists
+      const typingIndicator = chatMessages.querySelector('.typing-indicator');
+      if (typingIndicator) typingIndicator.remove();
+    } finally {
+      sendChat.disabled = false;
     }
-
-  } catch (err) {
-    console.error('Error sending message:', err);
-    addLocalMessage('Failed to send message. Please try again.', 'auto');
-  } finally {
-    sendChat.disabled = false;
   }
 });
 
-// Send on Enter key
-chatInput.addEventListener('keypress', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendChat.click();
-  }
-});
-
-// Attach file button
 attachFile.addEventListener('click', () => {
   fileInput.click();
 });
 
-//Handle file selection
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (file) {
+    filePreview.innerHTML = `
+      <div class="file-preview-item" style="display: flex; align-items: center; gap: 10px;">
+        <span>${file.name}</span>
+        <button class="delete-file" title="Remove File">✖</button>
+        <button class="send-file"
+          style="padding: 5px 10px; background: #4fc3f7; border: none; border-radius: 5px; color: #000; cursor: pointer;"
+          title="Send File">Send File</button>
+        <span class="loading-spinner"
+          style="display: none; width: 20px; height: 20px; border: 3px solid #f3f3f3;
+          border-top: 3px solid #4fc3f7; border-radius: 50%; animation: spin 1s linear infinite;"></span>
+      </div>
+      <style>
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      </style>
+    `;
 
-  const sendFileButton = filePreview.querySelector('.send-file');
-  sendFileButton.addEventListener('click', async () => {
-    if (!user) return;
-    
-    sendFileButton.disabled = true;
-    filePreview.style.pointerEvents = 'none';
-    sendChat.disabled = true;
-    const spinner = filePreview.querySelector('.loading-spinner');
-    spinner.style.display = 'inline-block';
+    const deleteButton = filePreview.querySelector('.delete-file');
+    deleteButton.addEventListener('click', () => {
+      fileInput.value = '';
+      filePreview.innerHTML = '';
+    });
 
-                                  try {
-      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
-      
-      const { data, error: uploadError } = await supabase.storage
-        .from('chat-files')
-        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+    const sendFileButton = filePreview.querySelector('.send-file');
+    sendFileButton.addEventListener('click', async () => {
+      if (!user) return;
+      sendFileButton.disabled = true;
+      filePreview.style.pointerEvents = 'none';
+      sendChat.disabled = true;
+      const spinner = filePreview.querySelector('.loading-spinner');
+      spinner.style.display = 'inline-block';
 
-      if (uploadError) throw uploadError;
+      try {
+        const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+        const filePath = `${user.id}/${Date.now()}_${sanitizedFileName}`;
+        const { data, error: uploadError } = await supabase.storage
+          .from('chat-files')
+          .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('chat-files')
-        .getPublicUrl(data.path);
-      
-      const content = `📎 Sent file: <a href="${publicUrl}" target="_blank">${file.name}</a>`;
+        if (uploadError) throw uploadError;
 
-      addLocalMessage(content);
+        const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
+        let content = `📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
+        if (selectedTopic) {
+          content = `[Topic: ${selectedTopic}] ${content}`;
+          selectedTopic = '';
+        }
 
-      const { error } = await supabase
-        .from('messages')
-        .insert({
+        addLocalMessage(content);
+
+        const { data: fileMsgData, error } = await supabase.from('messages').insert({
           user_id: user.id,
           content,
           sender: 'user',
           is_auto: false,
-          file_url: publicUrl
-        });
+          file_url: url
+        }).select().single();
 
-      if (error) throw error;
+        if (error) throw error;
 
-      fileInput.value = '';
-      filePreview.innerHTML = '';
+        fileInput.value = '';
+        filePreview.innerHTML = '';
 
-    } catch (err) {
-      console.error('Error uploading file:', err);
-      alert(`Error uploading file: ${err.message}`);
-    } finally {
-      sendFileButton.disabled = false;
-      filePreview.style.pointerEvents = 'auto';
-      sendChat.disabled = false;
-      spinner.style.display = 'none';
-    }
-  });
+      } catch (err) {
+        console.error('Error uploading file:', err);
+        alert('Error uploading file. Please try again.');
+      } finally {
+        sendFileButton.disabled = false;
+        filePreview.style.pointerEvents = 'auto';
+        sendChat.disabled = false;
+        spinner.style.display = 'none';
+      }
+    });
+  }
 });
