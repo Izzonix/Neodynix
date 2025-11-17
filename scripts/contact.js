@@ -18,14 +18,8 @@ let hasHumanIntervened = false; // Track if human admin has responded
 async function requestNotificationPermission() {
   if ('Notification' in window) {
     if (notificationPermission === 'default') {
-      try {
-        const perm = await Notification.requestPermission();
-        notificationPermission = perm;
-        console.log('Notification permission:', perm);
-      } catch (err) {
-        console.error('Error requesting notification permission:', err);
-        notificationPermission = 'denied';
-      }
+      const perm = await Notification.requestPermission();
+      notificationPermission = perm;
     }
   }
 }
@@ -180,7 +174,6 @@ async function startChat() {
       .map(b => b.toString(16).padStart(2, '0'))
       .join('');
     localStorage.setItem('chat_user_id', userId);
-    console.log('Generated userId:', userId);
 
     const { data, error } = await supabase.from('users').select().eq('id', userId).single();
     if (error && error.code !== 'PGRST116') {
@@ -189,10 +182,8 @@ async function startChat() {
       return;
     }
 
-    let isNewUser = false;
     if (data) {
       user = data;
-      console.log('User fetched:', user);
       if (user.name !== name || user.topic !== topic) {
         const { error: updateError } = await supabase.from('users').update({ name, topic }).eq('id', user.id);
         if (updateError) {
@@ -200,7 +191,6 @@ async function startChat() {
           alert(`Error updating user data: ${updateError.message}`);
           return;
         }
-        console.log('User updated');
       }
     } else {
       const { data: newUser, error: insertError } = await supabase.from('users').insert({
@@ -213,12 +203,10 @@ async function startChat() {
         return;
       }
       user = newUser;
-      isNewUser = true;
-      console.log('New user created:', user);
     }
 
-    // Request notification permission after user setup - non-blocking
-    requestNotificationPermission().catch(e => console.error('Notification permission error:', e));
+    // Request notification permission after user setup
+    await requestNotificationPermission();
 
     // Enable chat after successful user setup
     document.querySelector('.chat-widget').classList.add('active');
@@ -226,36 +214,23 @@ async function startChat() {
     const autoReplySent = localStorage.getItem('autoReplySent');
     if (!autoReplySent) {
       const autoReplyMessage = `Hello ${name}, thank you for contacting us about ${topic}. I'm your AI assistant and I'm here to help! Please ask me anything about our services.`;
-      try {
-        const { error } = await supabase.from('messages').insert({
-          user_id: user.id, content: autoReplyMessage, sender: 'support', is_auto: true
-        });
-        if (error) {
-          console.error('Error sending first auto-reply:', error.message);
-        } else {
-          localStorage.setItem('autoReplySent', 'true');
-          addLocalMessage(autoReplyMessage, 'auto');
-          console.log('Auto-reply sent');
-        }
-      } catch (e) {
-        console.error('Unexpected error with auto-reply:', e);
+      const { error } = await supabase.from('messages').insert({
+        user_id: user.id, content: autoReplyMessage, sender: 'support', is_auto: true
+      });
+      if (error) {
+        console.error('Error sending first auto-reply:', error.message);
+      } else {
+        localStorage.setItem('autoReplySent', 'true');
+        addLocalMessage(autoReplyMessage, 'auto');
       }
     }
 
-    // Load messages with error handling
-    try {
-      await loadMessages(user.id);
-    } catch (e) {
-      console.error('Error loading messages in startChat:', e);
-      addLocalMessage('Welcome! Unable to load chat history at this time.', 'auto');
-    }
-
-    // Subscribe to messages
+    await loadMessages(user.id);
     subscribeToMessages();
 
   } catch (err) {
     console.error('Unexpected error in startChat:', err);
-    alert('Unexpected error starting chat. Please try again. Check console for details.');
+    alert('Unexpected error starting chat. Please try again.');
   }
 }
 
@@ -272,11 +247,10 @@ async function loadMessages(userId) {
       .order('created_at', { ascending: true });
     
     if (error) {
-      console.error('Supabase error loading messages:', error.message);
-      throw new Error(`Failed to load messages: ${error.message}`);
+      console.error('Error loading messages:', error.message);
+      return;
     }
     
-    console.log('Messages loaded:', data ? data.length : 0);
     displayedMessageIds.clear(); // Clear tracked IDs on load
     data.forEach(msg => {
       // Track ID to prevent future duplicates
@@ -298,13 +272,10 @@ async function loadMessages(userId) {
     loadingIndicator.style.display = 'none';
 
     // Check for human intervention in loaded messages
-    hasHumanIntervened = data ? data.some(msg => msg.sender === 'support' && !msg.is_auto) : false;
-    console.log('Human intervened:', hasHumanIntervened);
+    hasHumanIntervened = data.some(msg => msg.sender === 'support' && !msg.is_auto);
   } catch (err) {
     console.error('Error in loadMessages:', err);
-    loadingIndicator.style.display = 'none';
-    loadingIndicator.innerHTML = 'Failed to load messages.';
-    throw err; // Re-throw to be caught by caller
+    loadingIndicator.innerHTML = 'Failed to load messages. Please refresh.';
   }
 }
 
@@ -392,32 +363,23 @@ window.onload = async () => {
   const userId = localStorage.getItem('chat_user_id');
   if (userId) {
     try {
-      console.log('Resuming with userId:', userId);
       const { data, error } = await supabase.from('users').select().eq('id', userId).single();
       if (error) throw error;
       if (data) {
         user = data;
         selectedTopic = data.topic || '';
-        console.log('Resumed user:', user);
-        // Request notification permission if user exists - non-blocking
-        requestNotificationPermission().catch(e => console.error('Notification permission error:', e));
+        // Request notification permission if user exists
+        await requestNotificationPermission();
         // Enable chat if user exists
         document.querySelector('.chat-widget').classList.add('active');
-        // Load messages with error handling
-        try {
-          await loadMessages(userId);
-        } catch (e) {
-          console.error('Error loading messages in onload:', e);
-          addLocalMessage('Welcome back! Unable to load chat history at this time.', 'auto');
-        }
+        await loadMessages(userId);
         subscribeToMessages();
       } else {
-        localStorage.removeItem('chat_user_id');
         startChat();
       }
     } catch (err) {
       console.error('Unexpected error in onload:', err);
-      localStorage.removeItem('chat_user_id');
+      localStorage.clear();
       startChat();
     }
   } else {
@@ -446,7 +408,6 @@ sendChat.addEventListener('click', async () => {
       }).select().single();
       
       if (error) throw error;
-      console.log('User message saved:', userMsgData);
 
       // Only generate AI response if no human has intervened
       if (!hasHumanIntervened) {
@@ -475,7 +436,6 @@ sendChat.addEventListener('click', async () => {
 
         addLocalMessage(aiResponse, 'auto', aiMsgData.id);
         selectedTopic = '';
-        console.log('AI response saved:', aiMsgData);
       } else {
         // If human has intervened, just notify that message is sent to support
         addLocalMessage('Your message has been sent to the support team. A human agent will respond shortly.', 'auto');
@@ -537,4 +497,39 @@ fileInput.addEventListener('change', () => {
           .from('chat-files')
           .upload(filePath, file, { cacheControl: '3600', upsert: false });
 
-        i
+        if (uploadError) throw uploadError;
+
+        const url = supabase.storage.from('chat-files').getPublicUrl(data.path).data.publicUrl;
+        let content = `📎 Sent file: <a href="${url}" target="_blank">${file.name}</a>`;
+        if (selectedTopic) {
+          content = `[Topic: ${selectedTopic}] ${content}`;
+          selectedTopic = '';
+        }
+
+        addLocalMessage(content);
+
+        const { data: fileMsgData, error } = await supabase.from('messages').insert({
+          user_id: user.id,
+          content,
+          sender: 'user',
+          is_auto: false,
+          file_url: url
+        }).select().single();
+
+        if (error) throw error;
+
+        fileInput.value = '';
+        filePreview.innerHTML = '';
+
+      } catch (err) {
+        console.error('Error uploading file:', err);
+        alert('Error uploading file. Please try again.');
+      } finally {
+        sendFileButton.disabled = false;
+        filePreview.style.pointerEvents = 'auto';
+        sendChat.disabled = false;
+        spinner.style.display = 'none';
+      }
+    });
+  }
+});
