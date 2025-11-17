@@ -1,7 +1,7 @@
 /* --------------------------------------------------------------
    KNOWLEDGE – add, list, edit, delete
    -------------------------------------------------------------- */
-import { supabase } from './supabase-config.js';
+import { supabase } from '../supabase-config.js';
 
 let knowledgeEntries = [];
 
