@@ -38,6 +38,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const createDocBtn = document.getElementById('createDocBtn');
   let socialMediaList = [];
 
+  const fileLimits = {
+    logo: { maxSize: 5 * 1024 * 1024, maxCount: 1 },
+    media: { maxSize: 10 * 1024 * 1024, maxCount: 10 },
+    others: { maxSize: 5 * 1024 * 1024, maxCount: 4 },
+    categoryDocument: { maxSize: 10 * 1024 * 1024, maxCount: 1 }
+  };
+
+  function showError(message) {
+    const errorEl = document.getElementById('errorMessage');
+    if (!errorEl) return;
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      errorEl.style.display = 'none';
+    }, 5000);
+  }
+
   function toggleCategoryDocument() {
     const category = categorySelect.value;
     if (category) {
@@ -86,8 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
         templateSelect.innerHTML = '<option value="">No templates available</option>';
       }
     } catch (error) {
-      console.error('Error fetching templates:', error.message);
       templateSelect.innerHTML = '<option value="">Error loading templates</option>';
+      showError('Failed to load templates. Please refresh and try again.');
     }
   }
 
@@ -125,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const ratePerMonth = (data.rate_per_month || 0) / 100;
       const ratePerPage = (data.rate_per_page || 0) / 100;
-      const totalPrice = basePrice * Math.pow(1 + ratePerMonth, duration - 12) * Math.pow(1 + ratePerPage, pages - 5);
+      const totalPrice = basePrice * Math.pow(1 + ratePerMonth, Math.max(0, duration - 12)) * Math.pow(1 + ratePerPage, Math.max(0, pages - 5));
 
       priceOutput.textContent = totalPrice.toFixed(2);
       currencyOutput.textContent = currency;
@@ -133,12 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
       mobileCurrencyOutput.textContent = currency;
       toggleMobilePricePopup();
     } catch (error) {
-      console.error('Price fetch error:', error.message);
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
       mobilePriceOutput.textContent = '0';
       mobileCurrencyOutput.textContent = '';
       mobilePricePopup.style.display = 'none';
+      showError('Failed to calculate price. Please select a template and country.');
     }
   }
 
@@ -170,12 +188,54 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateFileLabel(input, labelElement) {
-    if (input.files.length === 0) {
+    const files = Array.from(input.files);
+    const limit = fileLimits[input.id];
+    if (!limit) {
+      if (input.files.length === 0) {
+        labelElement.textContent = input.multiple ? 'No files chosen' : 'No file chosen';
+      } else if (input.files.length === 1) {
+        labelElement.textContent = input.files[0].name;
+      } else {
+        labelElement.textContent = `${input.files.length} files chosen`;
+      }
+      toggleCreateDocBtn();
+      return;
+    }
+
+    // Check file count
+    if (files.length > limit.maxCount) {
+      showError(`Maximum ${limit.maxCount} file(s) allowed for ${input.id}.`);
+      input.value = '';
+      return;
+    }
+
+    // Check file sizes
+    for (let file of files) {
+      if (file.size > limit.maxSize) {
+        showError(`File "${file.name}" is too large. Maximum size is ${(limit.maxSize / (1024 * 1024)).toFixed(1)}MB.`);
+        input.value = '';
+        return;
+      }
+    }
+
+    // Media-specific checks
+    if (input.id === 'media') {
+      const images = files.filter(f => f.type.startsWith('image/'));
+      const videos = files.length - images.length;
+      if (images.length < 5 || images.length > 10 || videos > 3) {
+        showError('Media files must include 5-10 images and a maximum of 3 videos.');
+        input.value = '';
+        return;
+      }
+    }
+
+    // If all checks pass, update label
+    if (files.length === 0) {
       labelElement.textContent = input.multiple ? 'No files chosen' : 'No file chosen';
-    } else if (input.files.length === 1) {
-      labelElement.textContent = input.files[0].name;
+    } else if (files.length === 1) {
+      labelElement.textContent = files[0].name;
     } else {
-      labelElement.textContent = `${input.files.length} files chosen`;
+      labelElement.textContent = `${files.length} files chosen`;
     }
     toggleCreateDocBtn();
   }
@@ -235,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // FIXED: Create Document Button
   createDocBtn.addEventListener('click', () => {
     const category = categorySelect.value;
-    if (!category) return alert('Select a category');
+    if (!category) return showError('Please select a category first.');
     window.location.href = `create-doc.html?category=${encodeURIComponent(category)}`;
   });
 
@@ -276,18 +336,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const platform = socialMediaPlatform.value;
     const url = socialMediaLink.value.trim();
     if (platform && url) {
+      const urlRegex = /^https?:\/\/.+/;
+      if (!urlRegex.test(url)) {
+        showError('Please enter a valid URL (starting with http:// or https://).');
+        return;
+      }
       socialMediaList.push({ platform, url });
       updateSocialMediaLinks();
       socialMediaPlatform.value = '';
       socialMediaLink.value = '';
       toggleSocialMediaLink();
+    } else {
+      showError('Please select a platform and enter a URL.');
     }
   });
 
   customForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    showConfirm('Submit form details?', async (confirmed) => {
+    showConfirm('Are you sure you want to submit the form details?', async (confirmed) => {
       if (!confirmed) return;
+
+      // Validate extra pages
+      const pages = parseInt(pagesInput.value) || 5;
+      if (pages > 5) {
+        for (let i = 1; i <= pages - 5; i++) {
+          const pageName = customForm.querySelector(`#extraPage${i}`)?.value?.trim();
+          if (!pageName) {
+            showError('Please provide names for all extra pages.');
+            return;
+          }
+        }
+      }
 
       loadingPopup.style.display = 'flex';
       customForm.querySelector('button[type="submit"]').disabled = true;
@@ -308,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pages > 5) {
           for (let i = 1; i <= pages - 5; i++) {
             const pageName = formData.get(`extraPage${i}`);
-            if (pageName) extraPageNames.push(pageName);
+            if (pageName && pageName.trim()) extraPageNames.push(pageName.trim());
           }
         }
 
@@ -334,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           const ratePerMonth = (data.rate_per_month || 0) / 100;
           const ratePerPage = (data.rate_per_page || 0) / 100;
-          price = basePrice * Math.pow(1 + ratePerMonth, duration - 12) * Math.pow(1 + ratePerPage, pages - 5);
+          price = basePrice * Math.pow(1 + ratePerMonth, Math.max(0, duration - 12)) * Math.pow(1 + ratePerPage, Math.max(0, pages - 5));
         }
 
         let logoUrl = null;
@@ -343,28 +422,41 @@ document.addEventListener('DOMContentLoaded', () => {
           const { data, error } = await supabase.storage
             .from('custom_requests')
             .upload(fileName, logoFile, { cacheControl: '3600', upsert: false, contentType: logoFile.type });
-          if (error) throw new Error(`Logo upload failed: ${error.message}`);
+          if (error) throw new Error(`Logo upload failed`);
           logoUrl = `${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`;
+          // Clear preview after upload
+          logoInput.value = '';
+          updateFileLabel(logoInput, logoName);
         }
 
         const mediaUrls = [];
-        for (const file of mediaFiles) {
-          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const { data, error } = await supabase.storage
-            .from('custom_requests')
-            .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
-          if (error) throw new Error(`Media upload failed: ${error.message}`);
-          mediaUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`);
+        if (mediaFiles.length > 0) {
+          for (const file of mediaFiles) {
+            const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+            const { data, error } = await supabase.storage
+              .from('custom_requests')
+              .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+            if (error) throw new Error(`Media upload failed`);
+            mediaUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`);
+          }
+          // Clear preview after upload
+          mediaInput.value = '';
+          updateFileLabel(mediaInput, mediaName);
         }
 
         const otherUrls = [];
-        for (const file of otherFiles) {
-          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const { data, error } = await supabase.storage
-            .from('custom_requests')
-            .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
-          if (error) throw new Error(`Other file upload failed: ${error.message}`);
-          otherUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`);
+        if (otherFiles.length > 0) {
+          for (const file of otherFiles) {
+            const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+            const { data, error } = await supabase.storage
+              .from('custom_requests')
+              .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+            if (error) throw new Error(`Other file upload failed`);
+            otherUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`);
+          }
+          // Clear preview after upload
+          othersInput.value = '';
+          updateFileLabel(othersInput, othersName);
         }
 
         let categoryDocUrl = null;
@@ -373,8 +465,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const { data, error } = await supabase.storage
             .from('custom_requests')
             .upload(fileName, categoryDocumentFile, { cacheControl: '3600', upsert: false, contentType: categoryDocumentFile.type });
-          if (error) throw new Error(`Document upload failed: ${error.message}`);
+          if (error) throw new Error(`Document upload failed`);
           categoryDocUrl = `${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`;
+          // Clear preview after upload
+          categoryDocumentInput.value = '';
+          updateFileLabel(categoryDocumentInput, categoryDocumentName);
         }
 
         // Updated: Create typed files array as JSON objects
@@ -412,9 +507,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const { error } = await supabase.from('custom_requests').insert([dataToInsert]);
-        if (error) throw new Error(`Database insert failed: ${error.message}`);
+        if (error) throw new Error('Database save failed');
 
-        showConfirm('Form submitted successfully!', () => {
+        showConfirm('Form submitted successfully! We will contact you soon.', () => {
           customForm.reset();
           toggleCategoryDocument();
           toggleDomainNameField();
@@ -431,7 +526,15 @@ document.addEventListener('DOMContentLoaded', () => {
           updateFileLabel(categoryDocumentInput, categoryDocumentName);
         });
       } catch (error) {
-        showConfirm(`Submission failed: ${error.message}`, () => {});
+        let userMessage = 'Submission failed. Please check your inputs and try again.';
+        if (error.message.includes('upload')) {
+          userMessage = 'File upload failed. Please try smaller files or fewer items.';
+        } else if (error.message.includes('save') || error.message.includes('Database')) {
+          userMessage = 'Unable to save details. Please try submitting again.';
+        } else if (error.message.includes('Template not found')) {
+          userMessage = 'Selected template is unavailable. Please choose another.';
+        }
+        showError(userMessage);
       } finally {
         loadingPopup.style.display = 'none';
         customForm.querySelector('button[type="submit"]').disabled = false;
