@@ -1,6 +1,7 @@
 import { supabase, supabaseUrl } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // DOM Element Selectors
   const categorySelect = document.getElementById('category');
   const templateSelect = document.getElementById('templateSelect');
   const countrySelect = document.getElementById('country');
@@ -9,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobilePriceOutput = document.getElementById('mobile-price');
   const mobileCurrencyOutput = document.getElementById('mobile-currency');
   const customForm = document.getElementById('customForm');
-  const loadingPopup = document.getElementById('loading-popup');
+  const loadingPopup = document.getElementById('loading-popup'); // Full-page spinner
   const themeChoiceRadios = document.getElementsByName('themeChoice');
   const colorPickerContainer = document.getElementById('colorPickerContainer');
   const domainChoiceRadios = document.getElementsByName('domainChoice');
@@ -36,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const categoryDocumentContainer = document.getElementById('categoryDocumentContainer');
   const createDocBtnContainer = document.getElementById('createDocBtnContainer');
   const createDocBtn = document.getElementById('createDocBtn');
+  const submitButton = customForm.querySelector('button[type="submit"]');
+
   let socialMediaList = [];
 
   const fileLimits = {
@@ -45,19 +48,23 @@ document.addEventListener('DOMContentLoaded', () => {
     categoryDocument: { maxSize: 10 * 1024 * 1024, maxCount: 1 }
   };
 
+  /**
+   * Displays an error message and auto-hides it.
+   * @param {string} message - The error message content.
+   */
   function showError(message) {
-  const errorEl = document.getElementById('errorMessage');
-  if (!errorEl) return;
-  errorEl.textContent = message;
-  errorEl.style.display = 'block';
-  errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const errorEl = document.getElementById('errorMessage');
+    if (!errorEl) return;
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-  // Auto-hide after 10 seconds
-  clearTimeout(errorEl.hideTimeout);
-  errorEl.hideTimeout = setTimeout(() => {
-    errorEl.style.display = 'none';
-  }, 10000);
-      }
+    // Auto-hide after 10 seconds
+    clearTimeout(errorEl.hideTimeout);
+    errorEl.hideTimeout = setTimeout(() => {
+      errorEl.style.display = 'none';
+    }, 10000);
+  }
 
   function toggleCategoryDocument() {
     const category = categorySelect.value;
@@ -72,16 +79,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function toggleCreateDocBtn() {
     const hasFile = categoryDocumentInput.files.length > 0;
+    // Show the "Create Document Now" button only if a category is selected and no file is chosen
     createDocBtnContainer.style.display = categorySelect.value && !hasFile ? 'block' : 'none';
   }
 
   function toggleMobilePricePopup() {
     const priceBox = document.querySelector('.price-box');
     const rect = priceBox.getBoundingClientRect();
+    // Check if the price box is visible in the viewport
     const isVisible = rect.top >= 0 && rect.bottom <= window.innerHeight;
+    // Show the mobile price popup if the price is calculated and the main price box is NOT visible
     mobilePricePopup.style.display = priceOutput.textContent !== '0' && !isVisible ? 'block' : 'none';
   }
 
+  /**
+   * Fetches templates from Supabase based on the selected category.
+   */
   async function fetchTemplates() {
     const category = categorySelect.value;
     templateSelect.innerHTML = '<option value="">-- Select Template --</option>';
@@ -112,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /**
+   * Calculates and updates the estimated price based on selections.
+   */
   async function updatePrice() {
     const templateId = templateSelect.value;
     const country = countrySelect.value;
@@ -144,9 +160,16 @@ document.addEventListener('DOMContentLoaded', () => {
         default: basePrice = data.price_usd || 0; currency = 'USD';
       }
 
+      // Rates are stored as a percentage multiplier (e.g., 5 for 5%)
       const ratePerMonth = (data.rate_per_month || 0) / 100;
       const ratePerPage = (data.rate_per_page || 0) / 100;
-      const totalPrice = basePrice * Math.pow(1 + ratePerMonth, Math.max(0, duration - 12)) * Math.pow(1 + ratePerPage, Math.max(0, pages - 5));
+
+      // Compound calculation for price adjustment
+      // The base price includes 12 months and 5 pages. Adjustments apply after that.
+      const durationMultiplier = Math.pow(1 + ratePerMonth, Math.max(0, duration - 12));
+      const pagesMultiplier = Math.pow(1 + ratePerPage, Math.max(0, pages - 5));
+
+      const totalPrice = basePrice * durationMultiplier * pagesMultiplier;
 
       priceOutput.textContent = totalPrice.toFixed(2);
       currencyOutput.textContent = currency;
@@ -159,7 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
       mobilePriceOutput.textContent = '0';
       mobileCurrencyOutput.textContent = '';
       mobilePricePopup.style.display = 'none';
-      showError('Failed to calculate price. Please select a template and country.');
+      // Only show error for failed fetch, not for initial state
+      if (templateId) {
+        showError('Failed to calculate price. Please select a template and country.');
+      }
     }
   }
 
@@ -190,49 +216,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /**
+   * Updates the displayed file name(s) and performs file size/count validation.
+   * @param {HTMLInputElement} input - The file input element.
+   * @param {HTMLElement} labelElement - The element displaying the file name(s).
+   */
   function updateFileLabel(input, labelElement) {
     const files = Array.from(input.files);
     const limit = fileLimits[input.id];
-    if (!limit) {
-      if (input.files.length === 0) {
-        labelElement.textContent = input.multiple ? 'No files chosen' : 'No file chosen';
-      } else if (input.files.length === 1) {
-        labelElement.textContent = input.files[0].name;
-      } else {
-        labelElement.textContent = `${input.files.length} files chosen`;
-      }
-      toggleCreateDocBtn();
-      return;
-    }
 
-    // Check file count
-    if (files.length > limit.maxCount) {
-      showError(`Maximum ${limit.maxCount} file(s) allowed for ${input.id}.`);
-      input.value = '';
-      return;
-    }
-
-    // Check file sizes
-    for (let file of files) {
-      if (file.size > limit.maxSize) {
-        showError(`File "${file.name}" is too large. Maximum size is ${(limit.maxSize / (1024 * 1024)).toFixed(1)}MB.`);
+    // --- Validation Checks ---
+    if (limit) {
+      // Check file count
+      if (files.length > limit.maxCount) {
+        showError(`Maximum ${limit.maxCount} file(s) allowed for ${input.id}.`);
         input.value = '';
-        return;
+        files.length = 0; // Clear the files array for logic below
+      }
+
+      // Check file sizes
+      for (let file of files) {
+        if (file.size > limit.maxSize) {
+          showError(`File "${file.name}" is too large. Maximum size is ${(limit.maxSize / (1024 * 1024)).toFixed(1)}MB.`);
+          input.value = '';
+          files.length = 0; // Clear the files array
+          break;
+        }
+      }
+
+      // Media-specific checks
+      if (input.id === 'media' && files.length > 0) {
+        const images = files.filter(f => f.type.startsWith('image/'));
+        const videos = files.filter(f => f.type.startsWith('video/'));
+        if (images.length < 5 || images.length > 10 || videos.length > 3) {
+          showError(`Media files must include 5-10 images and a maximum of 3 videos. Found ${images.length} images and ${videos.length} videos.`);
+          input.value = '';
+          files.length = 0; // Clear the files array
+        }
       }
     }
 
-    // Media-specific checks
-    if (input.id === 'media') {
-      const images = files.filter(f => f.type.startsWith('image/'));
-      const videos = files.length - images.length;
-      if (images.length < 5 || images.length > 10 || videos > 3) {
-        showError('Media files must include 5-10 images and a maximum of 3 videos.');
-        input.value = '';
-        return;
-      }
-    }
-
-    // If all checks pass, update label
+    // --- Update Label ---
     if (files.length === 0) {
       labelElement.textContent = input.multiple ? 'No files chosen' : 'No file chosen';
     } else if (files.length === 1) {
@@ -240,7 +264,11 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       labelElement.textContent = `${files.length} files chosen`;
     }
-    toggleCreateDocBtn();
+
+    // If it's the category document input, toggle the Create Doc button
+    if (input.id === 'categoryDocument') {
+      toggleCreateDocBtn();
+    }
   }
 
   function toggleColorPicker() {
@@ -256,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
     socialMediaLinks.innerHTML = '';
     socialMediaList.forEach((link, index) => {
       const li = document.createElement('li');
-      li.textContent = `${link.platform}: ${link.url}`;
+      li.innerHTML = `<strong>${link.platform}:</strong> ${link.url}`;
       const removeBtn = document.createElement('button');
       removeBtn.textContent = 'Remove';
       removeBtn.className = 'btn btn-cancel';
@@ -269,6 +297,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /**
+   * Displays a confirmation modal.
+   * @param {string} message - The confirmation message.
+   * @param {function(boolean): void} callback - Callback function called with true/false based on user choice.
+   */
   function showConfirm(message, callback) {
     const confirmModal = document.getElementById('confirmModal');
     const confirmMessage = document.getElementById('confirmMessage');
@@ -276,33 +309,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmNo = document.getElementById('confirmNo');
 
     confirmMessage.textContent = message;
-    confirmModal.style.display = 'block';
+    confirmModal.style.display = 'flex'; // Use flex to center the content
 
-    const yesHandler = () => {
+    // Ensure previous listeners are removed before adding new ones
+    confirmYes.onclick = null;
+    confirmNo.onclick = null;
+
+    confirmYes.onclick = () => {
       callback(true);
       confirmModal.style.display = 'none';
-      confirmYes.removeEventListener('click', yesHandler);
-      confirmNo.removeEventListener('click', noHandler);
     };
-    const noHandler = () => {
+    confirmNo.onclick = () => {
       callback(false);
       confirmModal.style.display = 'none';
-      confirmYes.removeEventListener('click', yesHandler);
-      confirmNo.removeEventListener('click', noHandler);
     };
-
-    confirmYes.addEventListener('click', yesHandler);
-    confirmNo.addEventListener('click', noHandler);
   }
 
-  // FIXED: Create Document Button
+  // --- Initial Setup and Event Listeners ---
+
+  // Handle Create Document Button (sends user to a separate doc creation page)
   createDocBtn.addEventListener('click', () => {
     const category = categorySelect.value;
     if (!category) return showError('Please select a category first.');
+    // Redirect to the document creation page with the category pre-selected
     window.location.href = `create-doc.html?category=${encodeURIComponent(category)}`;
   });
 
-  // Event Listeners
+  // Dynamic Content & Price Updates
   categorySelect.addEventListener('change', () => {
     toggleCategoryDocument();
     fetchTemplates();
@@ -323,17 +356,20 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePrice();
   });
 
+  // UI Toggles
   window.addEventListener('scroll', toggleMobilePricePopup);
   window.addEventListener('resize', toggleMobilePricePopup);
 
   domainChoiceRadios.forEach(radio => radio.addEventListener('change', toggleDomainNameField));
   themeChoiceRadios.forEach(radio => radio.addEventListener('change', toggleColorPicker));
 
+  // File Upload Handlers
   logoInput.addEventListener('change', () => updateFileLabel(logoInput, logoName));
   mediaInput.addEventListener('change', () => updateFileLabel(mediaInput, mediaName));
   othersInput.addEventListener('change', () => updateFileLabel(othersInput, othersName));
   categoryDocumentInput.addEventListener('change', () => updateFileLabel(categoryDocumentInput, categoryDocumentName));
 
+  // Social Media Link Management
   socialMediaPlatform.addEventListener('change', toggleSocialMediaLink);
   addSocialMediaLink.addEventListener('click', () => {
     const platform = socialMediaPlatform.value;
@@ -354,12 +390,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /**
+   * Main form submission handler.
+   */
   customForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Show initial confirmation
     showConfirm('Are you sure you want to submit the form details?', async (confirmed) => {
       if (!confirmed) return;
 
-      // Validate extra pages
+      // --- Pre-Submission Validation ---
       const pages = parseInt(pagesInput.value) || 5;
       if (pages > 5) {
         for (let i = 1; i <= pages - 5; i++) {
@@ -371,8 +412,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      loadingPopup.style.display = 'flex';
-      customForm.querySelector('button[type="submit"]').disabled = true;
+      // --- Start Loading & Disable Button ---
+      loadingPopup.style.display = 'flex'; // Show the full-page spinner
+      submitButton.disabled = true;
 
       try {
         const formData = new FormData(customForm);
@@ -383,17 +425,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const category = formData.get('category');
         const templateId = formData.get('template');
         const country = formData.get('country');
-        const duration = parseInt(formData.get('duration')) || 12;
-        const pages = parseInt(formData.get('pages')) || 5;
+        const duration = parseInt(formData.get('duration'));
+        const pages = parseInt(formData.get('pages'));
 
-        const extraPageNames = [];
-        if (pages > 5) {
-          for (let i = 1; i <= pages - 5; i++) {
-            const pageName = formData.get(`extraPage${i}`);
-            if (pageName && pageName.trim()) extraPageNames.push(pageName.trim());
-          }
-        }
-
+        // Recalculate Price and fetch Template Name for database record
         let price = 0;
         let currency = '';
         let templateName = '';
@@ -419,127 +454,93 @@ document.addEventListener('DOMContentLoaded', () => {
           price = basePrice * Math.pow(1 + ratePerMonth, Math.max(0, duration - 12)) * Math.pow(1 + ratePerPage, Math.max(0, pages - 5));
         }
 
-        let logoUrl = null;
-        if (logoFile) {
-          const fileName = `${Date.now()}-${logoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+        // --- File Upload Logic ---
+
+        // Helper function for uploading a single file
+        const uploadFile = async (file, type) => {
+          if (!file) return null;
+          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
           const { data, error } = await supabase.storage
             .from('custom_requests')
-            .upload(fileName, logoFile, { cacheControl: '3600', upsert: false, contentType: logoFile.type });
-          if (error) throw new Error(`Logo upload failed`);
-          logoUrl = `${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`;
-          // Clear preview after upload
-          logoInput.value = '';
-          updateFileLabel(logoInput, logoName);
-        }
+            .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+          if (error) throw new Error(`${type} upload failed: ${error.message}`);
+          return { url: `${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`, type: type };
+        };
 
-        const mediaUrls = [];
-        if (mediaFiles.length > 0) {
-          for (const file of mediaFiles) {
-            const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-            const { data, error } = await supabase.storage
-              .from('custom_requests')
-              .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
-            if (error) throw new Error(`Media upload failed`);
-            mediaUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`);
+        // Upload single files
+        const logoData = await uploadFile(logoFile, 'logo');
+        const categoryDocData = await uploadFile(categoryDocumentFile, 'category_doc');
+
+        // Upload multiple media files
+        const mediaData = await Promise.all(mediaFiles.map(file => uploadFile(file, 'media')));
+        const otherData = await Promise.all(otherFiles.map(file => uploadFile(file, 'other')));
+
+        // Combine all file data into one array, filtering out nulls
+        const allFilesData = [logoData, categoryDocData, ...mediaData, ...otherData].filter(Boolean);
+
+        // Clear file inputs after successful upload to prevent double-submission
+        logoInput.value = '';
+        mediaInput.value = '';
+        othersInput.value = '';
+        categoryDocumentInput.value = '';
+        updateFileLabel(logoInput, logoName);
+        updateFileLabel(mediaInput, mediaName);
+        updateFileLabel(othersInput, othersName);
+        updateFileLabel(categoryDocumentInput, categoryDocumentName);
+
+// Collect extra page names
+        const extraPageNames = [];
+        if (pages > 5) {
+          for (let i = 1; i <= pages - 5; i++) {
+            const pageName = formData.get(`extraPage${i}`);
+            if (pageName && pageName.trim()) extraPageNames.push(pageName.trim());
           }
-          // Clear preview after upload
-          mediaInput.value = '';
-          updateFileLabel(mediaInput, mediaName);
-        }
-
-        const otherUrls = [];
-        if (otherFiles.length > 0) {
-          for (const file of otherFiles) {
-            const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-            const { data, error } = await supabase.storage
-              .from('custom_requests')
-              .upload(fileName, file, { cacheControl: '3600', upsert: false, contentType: file.type });
-            if (error) throw new Error(`Other file upload failed`);
-            otherUrls.push(`${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`);
-          }
-          // Clear preview after upload
-          othersInput.value = '';
-          updateFileLabel(othersInput, othersName);
-        }
-
-        let categoryDocUrl = null;
-        if (categoryDocumentFile) {
-          const fileName = `${Date.now()}-${categoryDocumentFile.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-          const { data, error } = await supabase.storage
-            .from('custom_requests')
-            .upload(fileName, categoryDocumentFile, { cacheControl: '3600', upsert: false, contentType: categoryDocumentFile.type });
-          if (error) throw new Error(`Document upload failed`);
-          categoryDocUrl = `${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`;
-          // Clear preview after upload
-          categoryDocumentInput.value = '';
-          updateFileLabel(categoryDocumentInput, categoryDocumentName);
-        }
-
-        // Updated: Create typed files array as JSON objects
-        const typedFiles = [];
-        if (logoUrl) {
-          typedFiles.push({ url: logoUrl, type: 'logo' });
-        }
-        mediaUrls.forEach(url => typedFiles.push({ url, type: 'media' }));
-        otherUrls.forEach(url => typedFiles.push({ url, type: 'other' }));
-        if (categoryDocUrl) {
-          typedFiles.push({ url: categoryDocUrl, type: 'category_doc' });
-        }
-
+// --- Database Insertion ---
         const dataToInsert = {
           name: `${formData.get('firstName')} ${formData.get('lastName')}`,
           email: formData.get('email'),
           phone: formData.get('phone'),
-          category: formData.get('category'),
+          category: category,
           template: templateName,
           price: price.toFixed(2),
           currency: currency,
-          message: formData.get('purpose') || '',
-          files: typedFiles,  // Now an array of {url, type} objects
-          social_media: socialMediaList.map(link => `${link.platform}: ${link.url}`),
+          message: formData.get('purpose') || '', // Using 'purpose' for the message field
+          files: allFilesData, // Array of {url, type} objects
+          social_media: socialMediaList.map(link => `${link.platform}: ${link.url}`).join('; '), // Stored as a delimited string
           target_audience: formData.get('targetAudience'),
-          country: formData.get('country'),
+          country: country,
           domain_choice: formData.get('domainChoice'),
-          domain_name: formData.get('domainName'),
-          duration: parseInt(formData.get('duration')),
-          pages: parseInt(formData.get('pages')),
+          domain_name: formData.get('domainName') || null,
+          duration: duration,
+          pages: pages,
           extra_pages: extraPageNames.join(', '),
           theme_color: formData.get('themeChoice') === 'custom' ? formData.get('customColor') : 'default',
-          category_document: categoryDocUrl,  // Keep separate for legacy, but use files for distinction
           created_at: new Date().toISOString()
         };
-        const { error } = await supabase.from('custom_requests').insert([dataToInsert]);
-        if (error) throw new Error('Database save failed');
+          const { error: dbError } = await supabase.from('custom_requests').insert([dataToInsert]);
+        if (dbError) throw new Error('Database save failed: ' + dbError.message);
 
-        // NEW SUCCESS SCREEN – replaces the old reset logic
-        showConfirm('Thank you! Your request has been received successfully.', () => {
-          // Hide the form and mobile price popup completely
-          document.getElementById('formContainer').style.display = 'none';
-          document.getElementById('mobile-price-popup').style.display = 'none';
+        // --- Success Action: Redirect ---
+        window.location.href = 'submission-success.html';
 
-          // Show the beautiful full-screen success message
-          document.getElementById('successScreen').style.display = 'flex';
-
-          // Scroll to top so the user immediately sees the success screen
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
       } catch (error) {
         let userMessage = 'Submission failed. Please check your inputs and try again.';
         if (error.message.includes('upload')) {
-          userMessage = 'File upload failed. Please try smaller files or fewer items.';
+          userMessage = `File upload failed. Details: ${error.message}`;
         } else if (error.message.includes('save') || error.message.includes('Database')) {
-          userMessage = 'Unable to save details. Please try submitting again.';
+          userMessage = 'Unable to save details to the database. Please try submitting again.';
         } else if (error.message.includes('Template not found')) {
           userMessage = 'Selected template is unavailable. Please choose another.';
         }
         showError(userMessage);
-      } finally {
+        } finally {
+        // --- End Loading & Re-enable Button ---
         loadingPopup.style.display = 'none';
-        customForm.querySelector('button[type="submit"]').disabled = false;
+        submitButton.disabled = false;
       }
     });
   });
-
+  // --- Initialize UI State ---
   toggleCategoryDocument();
   toggleDomainNameField();
   toggleExtraPagesField();
