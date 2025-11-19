@@ -7,22 +7,6 @@
   <link rel="stylesheet" href="styles/followup.css" />
 </head>
 <body>
-<!-- Full Success Screen (shown after successful submission) -->
-  <div id="successScreen" class="success-screen" style="display: none;">
-    <div class="success-content">
-      <h2>Thank You!</h2>
-      <p>Your request has been received successfully.</p>
-      <p>We are now building your customized website preview.</ped>
-      <p>You will receive an <strong>email shortly</strong> with:</p>
-      <ul>
-        <li>A live preview link of your website</li>
-        <li>Payment details & secure invoice</li>
-      </ul>
-      <p><strong>Please check your inbox (and spam/junk folder)</strong> in the next 5–15 minutes.</p>
-      <a href="/" class="btn" style="margin-top: 30px; display: inline-block;">Back to Home</a>
-    </div>
-  </div>
-  
   <main>
     <section class="form-section">
       <h1>Customize Your Website</h1>
@@ -214,12 +198,6 @@
       <div id="errorMessage" class="error-message" style="display: none;"></div>
       <p class="contact-link">Having trouble filling out the form? <a href="contact.html">Contact us</a> for assistance.</p>
 
-      <div id="loading-popup" style="display: none;">
-        <div class="loading-content">
-          <div class="spinner"></div>
-          <p>Submitting...</p>
-        </div>
-      </div>
       <!-- Confirmation Modal -->
       <div id="confirmModal" class="modal" style="display: none;">
         <div class="modal-content">
@@ -233,8 +211,15 @@
   <div id="mobile-price-popup" class="mobile-price-popup" style="display: none;">
     <p>Estimated Price: <span id="mobile-price">0</span> <span id="mobile-currency"></span></p>
   </div>
+  <!-- Full-Screen Loading Spinner (moved to body level to cover everything) -->
+  <div id="loading-popup" style="display: none;">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <p>Submitting...</p>
+    </div>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module" src="scripts/supabase-config.js"></script>
   <script type="module" src="scripts/followup.js"></script>
 </body>
-            </html>
+          </html>
