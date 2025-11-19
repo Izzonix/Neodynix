@@ -489,63 +489,81 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFileLabel(categoryDocumentInput, categoryDocumentName);
 
 // Collect extra page names
-        const extraPageNames = [];
-        if (pages > 5) {
-          for (let i = 1; i <= pages - 5; i++) {
-            const pageName = formData.get(`extraPage${i}`);
-            if (pageName && pageName.trim()) extraPageNames.push(pageName.trim());
-          }
+const extraPageNames = [];
+if (pages > 5) {
+  for (let i = 1; i <= pages - 5; i++) {
+    const pageName = formData.get(`extraPage${i}`);
+    if (pageName && pageName.trim()) extraPageNames.push(pageName.trim());
+  }
+}
+
 // --- Database Insertion ---
-        const dataToInsert = {
-          name: `${formData.get('firstName')} ${formData.get('lastName')}`,
-          email: formData.get('email'),
-          phone: formData.get('phone'),
-          category: category,
-          template: templateName,
-          price: price.toFixed(2),
-          currency: currency,
-          message: formData.get('purpose') || '', // Using 'purpose' for the message field
-          files: allFilesData, // Array of {url, type} objects
-          social_media: socialMediaList.map(link => `${link.platform}: ${link.url}`).join('; '), // Stored as a delimited string
-          target_audience: formData.get('targetAudience'),
-          country: country,
-          domain_choice: formData.get('domainChoice'),
-          domain_name: formData.get('domainName') || null,
-          duration: duration,
-          pages: pages,
-          extra_pages: extraPageNames.join(', '),
-          theme_color: formData.get('themeChoice') === 'custom' ? formData.get('customColor') : 'default',
-          created_at: new Date().toISOString()
-        };
-          const { error: dbError } = await supabase.from('custom_requests').insert([dataToInsert]);
-        if (dbError) throw new Error('Database save failed: ' + dbError.message);
+const dataToInsert = {
+  name: `${formData.get('firstName')} ${formData.get('lastName')}`,
+  email: formData.get('email'),
+  phone: formData.get('phone'),
+  category: category,
+  template: templateName,
+  price: price.toFixed(2),
+  currency: currency,
+  message: formData.get('purpose') || '', // Using 'purpose' for the message field
+  files: allFilesData, // Array of {url, type} objects
 
-        // --- Success Action: Redirect ---
-        window.location.href = 'submission-success.html';
+  social_media: socialMediaList
+    .map(link => `${link.platform}: ${link.url}`)
+    .join('; '), // Stored as a delimited string
 
-      } catch (error) {
-        let userMessage = 'Submission failed. Please check your inputs and try again.';
-        if (error.message.includes('upload')) {
-          userMessage = `File upload failed. Details: ${error.message}`;
-        } else if (error.message.includes('save') || error.message.includes('Database')) {
-          userMessage = 'Unable to save details to the database. Please try submitting again.';
-        } else if (error.message.includes('Template not found')) {
-          userMessage = 'Selected template is unavailable. Please choose another.';
-        }
-        showError(userMessage);
-        } finally {
-        // --- End Loading & Re-enable Button ---
-        loadingPopup.style.display = 'none';
-        submitButton.disabled = false;
-      }
-    });
-  });
-  // --- Initialize UI State ---
-  toggleCategoryDocument();
-  toggleDomainNameField();
-  toggleExtraPagesField();
-  toggleColorPicker();
-  toggleSocialMediaLink();
-  fetchTemplates();
-  updatePrice();
-});
+  target_audience: formData.get('targetAudience'),
+  country: country,
+  domain_choice: formData.get('domainChoice'),
+  domain_name: formData.get('domainName') || null,
+  duration: duration,
+  pages: pages,
+  extra_pages: extraPageNames.join(', '),
+  theme_color:
+    formData.get('themeChoice') === 'custom'
+      ? formData.get('customColor')
+      : 'default',
+  created_at: new Date().toISOString()
+};
+
+const { error: dbError } = await supabase
+  .from('custom_requests')
+  .insert([dataToInsert]);
+
+if (dbError) throw new Error('Database save failed: ' + dbError.message);
+
+// --- Success Action: Redirect ---
+window.location.href = 'submission-success.html';
+
+} catch (error) {
+  let userMessage = 'Submission failed. Please check your inputs and try again.';
+
+  if (error.message.includes('upload')) {
+    userMessage = `File upload failed. Details: ${error.message}`;
+  } else if (
+    error.message.includes('save') ||
+    error.message.includes('Database')
+  ) {
+    userMessage =
+      'Unable to save details to the database. Please try submitting again.';
+  } else if (error.message.includes('Template not found')) {
+    userMessage = 'Selected template is unavailable. Please choose another.';
+  }
+
+  showError(userMessage);
+
+} finally {
+  // --- End Loading & Re-enable Button ---
+  loadingPopup.style.display = 'none';
+  submitButton.disabled = false;
+}
+
+// --- Initialize UI State ---
+toggleCategoryDocument();
+toggleDomainNameField();
+toggleExtraPagesField();
+toggleColorPicker();
+toggleSocialMediaLink();
+fetchTemplates();
+updatePrice();
