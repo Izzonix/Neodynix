@@ -39,6 +39,11 @@ body {
     animation: slideUp 0.7s ease-out;
 }
 
+/* Protect against mobile overflow */
+.success-content * {
+    max-width: 100%;
+}
+
 @keyframes slideUp {
     from { transform: translateY(25px); opacity: 0; }
     to   { transform: translateY(0); opacity: 1; }
@@ -149,10 +154,10 @@ h2 {
     font-size: clamp(0.85rem, 2.5vw, 1rem);
     color: #777;
 }
-
 @media (max-width: 600px) {
+
     .success-content {
-        padding: 30px 20px;
+        padding: 28px 18px;
         border-radius: 12px;
     }
 
@@ -166,7 +171,26 @@ h2 {
         height: 38px;
     }
 
+    /* Fix: button fills container perfectly */
     .btn-contact {
         width: 100%;
+        display: block;
+        padding: 15px;
+        box-sizing: border-box;
     }
-          }
+}
+
+/* Extra fix for VERY small screens */
+@media (max-width: 360px) {
+    .success-content {
+        padding: 20px 14px;
+    }
+
+    h2 {
+        font-size: 1.7rem;
+    }
+
+    .btn-contact {
+        font-size: 1rem;
+    }
+}
