@@ -1,0 +1,217 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #121212; /* Dark background */
+    color: #fff;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* ====================== SUCCESS SCREEN CONTAINER ====================== */
+
+.success-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #121212 0%, #1a1a2e 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    padding: 20px;
+}
+
+.success-content {
+    background: #1e1e1e;
+    padding: 60px 40px;
+    border-radius: 24px;
+    max-width: 650px;
+    border: 2px solid #4fc3f7; /* Primary theme color border */
+    box-shadow: 0 25px 70px rgba(79, 195, 247, 0.25);
+}
+
+h1 {
+    font-size: 2.8rem;
+    color: #4fc3f7;
+    margin-bottom: 25px;
+    font-weight: 700;
+}
+
+.main-message {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+    margin: 10px 0 30px;
+}
+
+.footer-message {
+    font-size: 1.1rem;
+    color: #999;
+    margin: 30px 0;
+}
+
+/* --- Info Box --- */
+
+.info-box {
+    background: #292929;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 5px solid #03a9f4;
+    text-align: left;
+    margin: 30px 0;
+}
+
+.info-box p {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+.info-box ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.info-box ul li {
+    margin: 10px 0;
+    padding-left: 25px;
+    position: relative;
+    font-size: 1rem;
+    color: #ccc;
+}
+
+/* Custom list marker (a light bullet) */
+.info-box ul li::before {
+    content: '•';
+    color: #4fc3f7;
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+/* ====================== BUTTONS ====================== */
+
+.btn {
+    display: block;
+    padding: 14px 28px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-decoration: none;
+    margin: 15px auto;
+    width: 100%;
+    max-width: 320px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.contact-btn {
+    background: #4fc3f7;
+    color: #000;
+}
+
+.contact-btn:hover {
+    background: #03a9f4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(3,169,244,0.4);
+}
+
+.home-btn {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #555;
+}
+
+.home-btn:hover {
+    background: #292929;
+    border-color: #4fc3f7;
+}
+
+/* ====================== CHECKMARK ANIMATION ====================== */
+/* Source: https://codepen.io/hani-k/pen/QxOQdy */
+
+.icon-container {
+    margin-bottom: 25px;
+    display: inline-block;
+}
+
+.checkmark {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 3;
+    stroke: #fff;
+    stroke-miterlimit: 10;
+    margin: 1em auto;
+    box-shadow: inset 0px 0px 0px #4fc3f7;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+}
+
+.checkmark__circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    stroke: #4fc3f7;
+    fill: none;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark__check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scale {
+    0%, 100% {
+        transform: none;
+    }
+    50% {
+        transform: scale3d(1.1, 1.1, 1);
+    }
+}
+
+@keyframes fill {
+    100% {
+        box-shadow: inset 0px 0px 0px 30px #4fc3f7;
+    }
+}
+
+/* ====================== RESPONSIVE ====================== */
+
+@media (max-width: 600px) {
+    .success-content {
+        padding: 40px 25px;
+    }
+    h1 {
+        font-size: 2.2rem;
+    }
+    .main-message {
+        font-size: 1.1rem;
+    }
+    .btn {
+        max-width: 100%;
+        font-size: 1rem;
+    }
+}
