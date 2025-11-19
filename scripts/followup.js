@@ -46,15 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   function showError(message) {
-    const errorEl = document.getElementById('errorMessage');
-    if (!errorEl) return;
-    errorEl.textContent = message;
-    errorEl.style.display = 'block';
-    errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => {
-      errorEl.style.display = 'none';
-    }, 5000);
-  }
+  const errorEl = document.getElementById('errorMessage');
+  if (!errorEl) return;
+  errorEl.textContent = message;
+  errorEl.style.display = 'block';
+  errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Auto-hide after 10 seconds
+  clearTimeout(errorEl.hideTimeout);
+  errorEl.hideTimeout = setTimeout(() => {
+    errorEl.style.display = 'none';
+  }, 10000);
+      }
 
   function toggleCategoryDocument() {
     const category = categorySelect.value;
@@ -505,25 +508,20 @@ document.addEventListener('DOMContentLoaded', () => {
           category_document: categoryDocUrl,  // Keep separate for legacy, but use files for distinction
           created_at: new Date().toISOString()
         };
-
         const { error } = await supabase.from('custom_requests').insert([dataToInsert]);
         if (error) throw new Error('Database save failed');
 
-        showConfirm('Form submitted successfully! We will contact you soon.', () => {
-          customForm.reset();
-          toggleCategoryDocument();
-          toggleDomainNameField();
-          toggleExtraPagesField();
-          toggleColorPicker();
-          toggleSocialMediaLink();
-          socialMediaList = [];
-          updateSocialMediaLinks();
-          fetchTemplates();
-          updatePrice();
-          updateFileLabel(logoInput, logoName);
-          updateFileLabel(mediaInput, mediaName);
-          updateFileLabel(othersInput, othersName);
-          updateFileLabel(categoryDocumentInput, categoryDocumentName);
+        // NEW SUCCESS SCREEN – replaces the old reset logic
+        showConfirm('Thank you! Your request has been received successfully.', () => {
+          // Hide the form and mobile price popup completely
+          document.getElementById('formContainer').style.display = 'none';
+          document.getElementById('mobile-price-popup').style.display = 'none';
+
+          // Show the beautiful full-screen success message
+          document.getElementById('successScreen').style.display = 'flex';
+
+          // Scroll to top so the user immediately sees the success screen
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         });
       } catch (error) {
         let userMessage = 'Submission failed. Please check your inputs and try again.';
