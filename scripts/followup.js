@@ -120,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         templateSelect.innerHTML = '<option value="">No templates available</option>';
       }
     } catch (error) {
+      console.error('Template fetch error:', error);
       templateSelect.innerHTML = '<option value="">Error loading templates</option>';
       showError('Failed to load templates. Please refresh and try again.');
     }
@@ -177,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mobileCurrencyOutput.textContent = currency;
       toggleMobilePricePopup();
     } catch (error) {
+      console.error('Price calculation error:', error);
       priceOutput.textContent = '0';
       currencyOutput.textContent = '';
       mobilePriceOutput.textContent = '0';
@@ -222,8 +224,9 @@ document.addEventListener('DOMContentLoaded', () => {
    * @param {HTMLElement} labelElement - The element displaying the file name(s).
    */
   function updateFileLabel(input, labelElement) {
-    const files = Array.from(input.files);
+    let files = Array.from(input.files);
     const limit = fileLimits[input.id];
+    let hasError = false;
 
     // --- Validation Checks ---
     if (limit) {
@@ -231,27 +234,32 @@ document.addEventListener('DOMContentLoaded', () => {
       if (files.length > limit.maxCount) {
         showError(`Maximum ${limit.maxCount} file(s) allowed for ${input.id}.`);
         input.value = '';
-        files.length = 0; // Clear the files array for logic below
+        files = []; // Clear by reassignment
+        hasError = true;
       }
 
-      // Check file sizes
-      for (let file of files) {
-        if (file.size > limit.maxSize) {
-          showError(`File "${file.name}" is too large. Maximum size is ${(limit.maxSize / (1024 * 1024)).toFixed(1)}MB.`);
-          input.value = '';
-          files.length = 0; // Clear the files array
-          break;
+      // Check file sizes (only if no previous error)
+      if (!hasError) {
+        for (let file of files) {
+          if (file.size > limit.maxSize) {
+            showError(`File "${file.name}" is too large. Maximum size is ${(limit.maxSize / (1024 * 1024)).toFixed(1)}MB.`);
+            input.value = '';
+            files = []; // Clear by reassignment
+            hasError = true;
+            break;
+          }
         }
       }
 
-      // Media-specific checks
-      if (input.id === 'media' && files.length > 0) {
+      // Media-specific checks (only if no previous error)
+      if (!hasError && input.id === 'media' && files.length > 0) {
         const images = files.filter(f => f.type.startsWith('image/'));
         const videos = files.filter(f => f.type.startsWith('video/'));
         if (images.length < 5 || images.length > 10 || videos.length > 3) {
           showError(`Media files must include 5-10 images and a maximum of 3 videos. Found ${images.length} images and ${videos.length} videos.`);
           input.value = '';
-          files.length = 0; // Clear the files array
+          files = []; // Clear by reassignment
+          hasError = true;
         }
       }
     }
@@ -396,9 +404,16 @@ document.addEventListener('DOMContentLoaded', () => {
   customForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    console.log('Form submission started');
+
     // Show initial confirmation
     showConfirm('Are you sure you want to submit the form details?', async (confirmed) => {
-      if (!confirmed) return;
+      if (!confirmed) {
+        console.log('User cancelled submission');
+        return;
+      }
+
+      console.log('User confirmed submission');
 
       // --- Pre-Submission Validation ---
       const pages = parseInt(pagesInput.value) || 5;
@@ -428,6 +443,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const duration = parseInt(formData.get('duration'));
         const pages = parseInt(formData.get('pages'));
 
+        console.log('Form data collected:', { category, templateId, country, duration, pages });
+
         // Recalculate Price and fetch Template Name for database record
         let price = 0;
         let currency = '';
@@ -454,6 +471,8 @@ document.addEventListener('DOMContentLoaded', () => {
           price = basePrice * Math.pow(1 + ratePerMonth, Math.max(0, duration - 12)) * Math.pow(1 + ratePerPage, Math.max(0, pages - 5));
         }
 
+        console.log('Price calculated:', price, currency);
+
         // --- File Upload Logic ---
 
         // Helper function for uploading a single file
@@ -467,6 +486,8 @@ document.addEventListener('DOMContentLoaded', () => {
           return { url: `${supabaseUrl}/storage/v1/object/public/custom_requests/${data.path}`, type: type };
         };
 
+        console.log('Starting file uploads...');
+
         // Upload single files
         const logoData = await uploadFile(logoFile, 'logo');
         const categoryDocData = await uploadFile(categoryDocumentFile, 'category_doc');
@@ -478,6 +499,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Combine all file data into one array, filtering out nulls
         const allFilesData = [logoData, categoryDocData, ...mediaData, ...otherData].filter(Boolean);
 
+        console.log('Files uploaded successfully:', allFilesData.length, 'files');
+
         // Clear file inputs after successful upload to prevent double-submission
         logoInput.value = '';
         mediaInput.value = '';
@@ -488,7 +511,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateFileLabel(othersInput, othersName);
         updateFileLabel(categoryDocumentInput, categoryDocumentName);
 
-
         // Collect extra page names
         const extraPageNames = [];
         if (pages > 5) {
@@ -496,37 +518,46 @@ document.addEventListener('DOMContentLoaded', () => {
             const pageName = formData.get(`extraPage${i}`);
             if (pageName && pageName.trim()) extraPageNames.push(pageName.trim());
           }
-                          }
+        }
 
-      // --- Database Insertion ---
+        // --- Database Insertion ---
         const dataToInsert = {
           name: `${formData.get('firstName')} ${formData.get('lastName')}`,
           email: formData.get('email'),
           phone: formData.get('phone'),
           category: category,
           template: templateName,
-          price: price.toFixed(2),
+          price: parseFloat(price.toFixed(2)),
           currency: currency,
-          message: formData.get('purpose') || '', // Using 'purpose' for the message field
+          message: formData.get('purpose') || '',
           files: allFilesData, // Array of {url, type} objects
-          social_media: socialMediaList.map(link => `${link.platform}: ${link.url}`).join('; '), // Stored as a delimited string
+          social_media: socialMediaList.length > 0 
+            ? socialMediaList.map(link => `${link.platform}: ${link.url}`)
+            : null, // Store as array of strings or null
           target_audience: formData.get('targetAudience'),
           country: country,
           domain_choice: formData.get('domainChoice'),
           domain_name: formData.get('domainName') || null,
           duration: duration,
           pages: pages,
-          extra_pages: extraPageNames.join(', '),
+          extra_pages: extraPageNames.length > 0 ? extraPageNames.join(', ') : null,
           theme_color: formData.get('themeChoice') === 'custom' ? formData.get('customColor') : 'default',
+          category_document: categoryDocData ? categoryDocData.url : null, // Add this separately
           created_at: new Date().toISOString()
         };
+
+        console.log('Data to insert:', dataToInsert);
+
         const { error: dbError } = await supabase.from('custom_requests').insert([dataToInsert]);
         if (dbError) throw new Error('Database save failed: ' + dbError.message);
+
+        console.log('Data saved successfully');
 
         // --- Success Action: Redirect ---
         window.location.href = 'submission-success.html';
 
       } catch (error) {
+        console.error('Full error details:', error);
         let userMessage = 'Submission failed. Please check your inputs and try again.';
         if (error.message.includes('upload')) {
           userMessage = `File upload failed. Details: ${error.message}`;
@@ -543,6 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
   // --- Initialize UI State ---
   toggleCategoryDocument();
   toggleDomainNameField();
