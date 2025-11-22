@@ -277,18 +277,19 @@ input[type="range"]::-moz-range-thumb {
 /* ====================== FULL-SCREEN LOADING SPINNER ====================== */
 .loading-popup {
   position: fixed;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.94);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 99999;
   transition: opacity 0.5s ease;
+  overflow: hidden;
 }
-
 .loading-content {
   background: #1e1e1e;
   padding: 50px 70px;
