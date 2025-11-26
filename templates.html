@@ -21,30 +21,30 @@
 
   <main>
     <section class="templates-gallery">
-      <h1>Explore Our Templates ✨</h1>
-      <p>Click or tap on a template image for a **Live Preview**, or select to get started.</p>
+      <h1>Explore Our Templates</h1>
+      <p>Tap on a template image to preview or select to get started.</p>
       
       <div class="search-bar">
         <input type="text" id="search-input" placeholder="Search Templates..." oninput="filterTemplates()" aria-label="Search Templates">
       </div>
       
       <div class="category-buttons">
-        <button class="active">All</button>
-        <button>Business</button>
-        <button>Portfolio</button>
-        <button>Education</button>
-        <button>E-commerce</button>
+        <button class="active" onclick="showCategory('All')">All</button>
+        <button onclick="showCategory('Business')">Business</button>
+        <button onclick="showCategory('Portfolio')">Portfolio</button>
+        <button onclick="showCategory('Education')">Education</button>
+        <button onclick="showCategory('E-commerce')">E-commerce</button>
         <button id="more-button" onclick="toggleMoreCategories()">More</button>
       </div>
       
       <div id="more-categories">
-        <button>Charity</button>
-        <button>Blog</button>
-        <button>Healthcare</button>
-        <button>Event</button>
-        <button>Church</button>
-        <button>Non-profit</button>
-        <button>Other</button>
+        <button onclick="showCategory('Charity')">Charity</button>
+        <button onclick="showCategory('Blog')">Blog</button>
+        <button onclick="showCategory('Healthcare')">Healthcare</button>
+        <button onclick="showCategory('Event')">Event</button>
+        <button onclick="showCategory('Church')">Church</button>
+        <button onclick="showCategory('Non-profit')">Non-profit</button>
+        <button onclick="showCategory('Other')">Other</button>
       </div>
       
       <div class="template-grid" id="template-container">
@@ -59,4 +59,4 @@
   <script type="module" src="scripts/main.js"></script>
   <script type="module" src="scripts/template.js"></script>
 </body>
-        </html>
+    </html>
