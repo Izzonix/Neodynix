@@ -1,7 +1,6 @@
 import { supabase } from './supabase-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Auto-fill request form if coming from template
   function autoFillForm() {
     const getParam = key => new URLSearchParams(window.location.search).get(key);
     const category = getParam('category');
@@ -17,125 +16,145 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const templateContainer = document.getElementById('template-container');
-  if (!templateContainer) return;
+  if (templateContainer) {
+    let allTemplates = [];
+    let displayedCount = 0;
+    const templatesPerLoad = 5;
+    let currentActiveCategory = 'All';
 
-  let allTemplates = [];
-  let displayedCount = 0;
-  const templatesPerLoad = 6;
+    async function fetchTemplates() {
+      try {
+        const { data, error } = await supabase.from('templates').select('*');
+        if (error) throw error;
 
-  async function fetchTemplates() {
-    try {
-      const { data, error } = await supabase.from('templates').select('*');
-      if (error) throw error;
+        allTemplates = data || [];
 
-      allTemplates = data || [];
-      templateContainer.innerHTML = '';
+        if (allTemplates.length === 0) {
+          templateContainer.innerHTML = `<p class="no-templates">🚀 No templates available yet. Please check back soon!</p>`;
+          return;
+        }
 
-      if (allTemplates.length === 0) {
-        templateContainer.innerHTML = `<p class="no-templates" style="text-align:center; color:#ccc; font-size:1.2rem;">No templates available yet. Please check back soon!</p>`;
-        return;
+        // Initial load
+        showCategory('All'); 
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+        templateContainer.innerHTML = `<p class="error">⚠️ Failed to load templates. Please try again later.</p>`;
+      }
+    }
+
+    function getFilteredTemplates() {
+      const searchInput = document.getElementById('search-input')?.value.toLowerCase() || '';
+      return allTemplates.filter(template => {
+        const templateCategory = (template.category || 'Other').trim().toLowerCase();
+        const templateName = template.name.toLowerCase();
+        const categoryMatch = currentActiveCategory === 'All' || templateCategory === currentActiveCategory.toLowerCase();
+        const searchMatch = templateName.includes(searchInput);
+        return categoryMatch && searchMatch;
+      });
+    }
+
+
+    function loadMoreTemplates() {
+      const filteredTemplates = getFilteredTemplates();
+      const templatesToShow = filteredTemplates
+        .slice(displayedCount, displayedCount + templatesPerLoad);
+
+      templatesToShow.forEach(template => {
+        const card = document.createElement('div');
+        card.className = 'template-card';
+        card.setAttribute('data-category', (template.category || 'Other').trim());
+        card.innerHTML = `
+          <div class="image-container">
+            <a href="${template.link}" target="_blank">
+              <img src="${template.image}" alt="${template.name} Template" />
+              <div class="preview-overlay">
+                <span class="preview-overlay-text">Tap to Preview</span>
+              </div>
+            </a>
+          </div>
+          <h3>${template.name}</h3>
+          <p>${template.description || ''}</p>
+          <a href="request.html?category=${encodeURIComponent(template.category || 'Other')}&template=${encodeURIComponent(template.name)}" class="btn">Choose Template</a>
+        `;
+        templateContainer.appendChild(card);
+      });
+
+      displayedCount += templatesToShow.length;
+      updateViewMoreButton();
+    }
+
+    function updateViewMoreButton() {
+      let viewMoreButton = document.getElementById('view-more-button');
+      const filteredTemplates = getFilteredTemplates();
+      const remainingTemplates = filteredTemplates.length - displayedCount;
+
+      if (!viewMoreButton) {
+        viewMoreButton = document.createElement('button');
+        viewMoreButton.id = 'view-more-button';
+        viewMoreButton.className = 'view-more';
+        viewMoreButton.textContent = 'View More';
+        viewMoreButton.addEventListener('click', () => {
+          loadMoreTemplates();
+        });
+        templateContainer.insertAdjacentElement('afterend', viewMoreButton);
       }
 
-      displayedCount = 0;
-      loadMoreTemplates();
-      updateViewMoreButton();
-    } catch (error) {
-      console.error('Error fetching templates:', error);
-      templateContainer.innerHTML = `<p class="error" style="text-align:center; color:#ff6b6b;">Failed to load templates. Please try again later.</p>`;
+      viewMoreButton.style.display = remainingTemplates > 0 ? 'block' : 'none';
     }
-  }
 
-  function loadMoreTemplates() {
-    const activeButton = document.querySelector('.category-buttons button.active, #more-categories button.active') || document.querySelector('.category-buttons button');
-    const currentCategory = activeButton ? activeButton.textContent.trim() : 'All';
+    fetchTemplates();
 
-    const templatesToShow = allTemplates
-      .filter(t => currentCategory === 'All' || (t.category || 'Other').trim().toLowerCase() === currentCategory.toLowerCase())
-      .slice(displayedCount, displayedCount + templatesPerLoad);
-
-    templatesToShow.forEach(template => {
-      const card = document.createElement('div');
-      card.className = 'template-card';
-      card.setAttribute('data-category', (template.category || 'Other').trim());
-
-      card.innerHTML = `
-        <div class="template-preview-wrapper">
-          <a href="${template.link}" target="_blank" class="preview-link" aria-label="Preview ${template.name}">
-            <img src="${template.image}" alt="${template.name} Template Preview" loading="lazy">
-            <div class="preview-overlay">
-              <div class="preview-text">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-                <span>Click to Preview</span>
-              </div>
-            </div>
-          </a>
-        </div>
-        <h3>${template.name}</h3>
-        <p>${template.description || 'Professional, responsive, and ready to use.'}</p>
-        <div class="template-actions">
-          <a href="request.html?category=${encodeURIComponent(template.category || 'Other')}&template=${encodeURIComponent(template.name)}" class="btn primary">Choose Template</a>
-        </div>
-      `;
-
-      templateContainer.appendChild(card);
+    const categoryButtons = document.querySelectorAll('.category-buttons button:not(#more-button), #more-categories button');
+    categoryButtons.forEach(button => {
+      // Re-assign click handler to use showCategory from JS
+      button.addEventListener('click', () => {
+        const category = button.textContent.trim();
+        categoryButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        window.showCategory(category); 
+      });
     });
 
-    displayedCount += templatesToShow.length;
-    updateViewMoreButton();
-  }
+    window.showCategory = function(category) {
+      currentActiveCategory = category.trim();
+      templateContainer.innerHTML = '';
+      displayedCount = 0;
 
-  function updateViewMoreButton() {
-    let viewMoreBtn = document.getElementById('view-more-button');
-    const activeBtn = document.querySelector('.category-buttons button.active, #more-categories button.active') || document.querySelector('.category-buttons button');
-    const currentCategory = activeBtn?.textContent.trim() || 'All';
+      // Update active state for buttons
+      categoryButtons.forEach(btn => {
+          if (btn.textContent.trim() === category) {
+              btn.classList.add('active');
+          } else {
+              btn.classList.remove('active');
+          }
+      });
 
-    const remaining = allTemplates.filter(t => 
-      currentCategory === 'All' || (t.category || 'Other').trim().toLowerCase() === currentCategory.toLowerCase()
-    ).length - displayedCount;
+      loadMoreTemplates();
+      
+      // If no templates are found after filtering
+      if (getFilteredTemplates().length === 0) {
+        templateContainer.innerHTML = `<p class="no-templates">No templates found for "${category}".</p>`;
+      }
+    };
 
-    if (!viewMoreBtn && remaining > 0) {
-      viewMoreBtn = document.createElement('button');
-      viewMoreBtn.id = 'view-more-button';
-      viewMoreBtn.textContent = 'Load More Templates';
-      viewMoreBtn.style.cssText = 'display:block; margin:40px auto; padding:14px 32px; background:#4fc3f7; color:#000; border:none; border-radius:8px; font-weight:bold; cursor:pointer;';
-      viewMoreBtn.onclick = loadMoreTemplates;
-      templateContainer.after(viewMoreBtn);
-    }
+    window.toggleMoreCategories = function() {
+      const moreCategories = document.getElementById('more-categories');
+      const moreButton = document.getElementById('more-button');
+      const isHidden = moreCategories.style.display === 'none' || moreCategories.style.display === '';
+      moreCategories.style.display = isHidden ? 'flex' : 'none';
+      moreButton.textContent = isHidden ? 'Hide' : 'More';
+    };
 
-    if (viewMoreBtn) viewMoreBtn.style.display = remaining > 0 ? 'block' : 'none';
-  }
-
-  // Category filtering
-  document.querySelectorAll('.category-buttons button, #more-categories button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.category-buttons button, #more-categories button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    window.filterTemplates = function() {
+      // Clear container and reload based on new search input
       templateContainer.innerHTML = '';
       displayedCount = 0;
       loadMoreTemplates();
-    });
-  });
 
-  // Expose functions to global scope for inline HTML calls
-  window.toggleMoreCategories = () => {
-    const more = document.getElementById('more-categories');
-    const btn = document.getElementById('more-button');
-    const visible = more.style.display === 'flex';
-    more.style.display = visible ? 'none' : 'flex';
-    btn.textContent = visible ? 'More' : 'Hide';
-  };
-
-  window.filterTemplates = () => {
-    const term = document.getElementById('search-input').value.toLowerCase();
-    document.querySelectorAll('.template-card').forEach(card => {
-      const title = card.querySelector('h3').textContent.toLowerCase();
-      card.style.display = title.includes(term) ? 'block' : 'none';
-    });
-  };
-
-  // Initial load
-  fetchTemplates();
+      // Display message if search yields no results
+      if (getFilteredTemplates().length === 0) {
+        templateContainer.innerHTML = `<p class="no-templates">No templates match your search criteria.</p>`;
+      }
+    };
+  }
 });
