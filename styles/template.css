@@ -1,5 +1,4 @@
-/* template.css – Enhanced but 100% faithful to your original dark + #4fc3f7 theme */
-
+/* General Styling */
 .templates-gallery {
   padding: 50px 15px;
   background: #161616;
@@ -12,29 +11,26 @@ h1 {
   color: #4fc3f7;
   margin-bottom: 15px;
   font-weight: 700;
-  text-shadow: 0 0 5px rgba(79, 195, 247, 0.3);
+  text-shadow: 0 0 8px rgba(79, 195, 247, 0.5); /* Enhanced shadow */
 }
 
 p {
   text-align: center;
   font-size: clamp(1rem, 3vw, 1.2rem);
-  color: #cccccc;
+  color: #a3e9ff; /* Brighter color for instruction text */
   margin-bottom: 30px;
 }
 
 /* Search Bar */
 .search-bar {
-  position: relative;
   text-align: center;
   margin-bottom: 35px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 #search-input {
   width: 100%;
-  padding: 14px 45px 14px 20px;
+  max-width: 600px;
+  padding: 14px;
   font-size: clamp(0.9rem, 2.5vw, 1rem);
   border: 2px solid #4fc3f7;
   border-radius: 8px;
@@ -46,19 +42,10 @@ p {
 #search-input:focus {
   outline: none;
   border-color: #03a9f4;
-  box-shadow: 0 0 10px rgba(3, 169, 244, 0.4);
+  box-shadow: 0 0 15px rgba(3, 169, 244, 0.6); /* Enhanced focus shadow */
 }
 
-.search-icon {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #4fc3f7;
-  pointer-events: none;
-}
-
-/* Category Buttons – unchanged style */
+/* Category Buttons */
 .category-buttons {
   margin-bottom: 35px;
   text-align: center;
@@ -68,8 +55,7 @@ p {
   flex-wrap: wrap;
 }
 
-.category-buttons button,
-#more-categories button {
+.category-buttons button, #more-categories button {
   padding: 12px 28px;
   background-color: #4fc3f71a;
   color: #4fc3f7;
@@ -78,7 +64,7 @@ p {
   cursor: pointer;
   font-weight: 600;
   font-size: clamp(0.9rem, 2.5vw, 1rem);
-  transition: all 0.3s;
+  transition: background-color 0.3s, color 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 
 .category-buttons button:hover,
@@ -87,14 +73,23 @@ p {
 #more-categories button.active {
   background-color: #4fc3f7;
   color: #000;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+  transform: translateY(-3px); /* Increased lift */
+  box-shadow: 0 4px 12px rgba(3, 169, 244, 0.5); /* Enhanced shadow */
 }
 
-#more-button { padding: 12px 20px; }
-#more-categories { display: none; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+#more-button {
+  padding: 12px 20px;
+}
 
-/* Template Grid */
+#more-categories {
+  display: none;
+  justify-content: center; /* Center additional buttons */
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 15px; /* Spacing for better flow */
+}
+
+/* Template Cards */
 .template-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -103,163 +98,142 @@ p {
   margin: 0 auto;
 }
 
-/* Card Entrance Animation */
 .template-card {
   background-color: #1e1e1e;
   padding: 20px;
   border-radius: 12px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); /* Deeper initial shadow */
   transition: transform 0.4s ease, box-shadow 0.4s ease;
-  opacity: 0;
-  transform: translateY(30px);
-  animation: fadeInUp 0.7s ease-out forwards;
-}
-
-.template-card:nth-child(1) { animation-delay: 0.1s; }
-.template-card:nth-child(2) { animation-delay: 0.2s; }
-.template-card:nth-child(3) { animation-delay: 0.3s; }
-.template-card:nth-child(4) { animation-delay: 0.4s; }
-.template-card:nth-child(5) { animation-delay: 0.5s; }
-.template-card:nth-child(6) { animation-delay: 0.6s; }
-
-.template-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 20px rgba(79, 195, 247, 0.2);
-}
-
-/* Image Wrapper – This is the magic part */
-.template-image-wrapper {
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  cursor: pointer;
+  border: 1px solid rgba(79, 195, 247, 0.1); /* Subtle border */
 }
 
-.template-image-wrapper img {
+.template-card:hover {
+  transform: translateY(-8px); /* More pronounced lift */
+  box-shadow: 0 12px 30px rgba(79, 195, 247, 0.2); /* "Wow" effect shadow */
+  border-color: #4fc3f7;
+}
+
+/* Image Wrapper for Animation */
+.template-card a {
+    display: block; /* Ensure the link wraps the image */
+    line-height: 0; /* Remove extra space below image */
+}
+
+.template-card img {
   width: 100%;
   max-height: 180px;
   object-fit: cover;
-  display: block;
-  transition: transform 0.5s ease;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  cursor: pointer; /* Explicitly show it's clickable */
+  filter: brightness(0.9);
 }
 
-.template-card:hover .template-image-wrapper img {
-  transform: scale(1.08);
-}
-
-/* Overlay on hover/tap – tells users to click */
-.template-image-wrapper::before {
-  content: "Click to Preview";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.85);
-  color: #4fc3f7;
-  padding: 10px 20px;
-  border-radius: 30px;
-  font-weight: bold;
-  font-size: 0.95rem;
-  opacity: 0;
-  transition: opacity 0.4s ease, transform 0.4s ease;
-  border: 2px solid #4fc3f7;
-  white-space: nowrap;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.template-image-wrapper::after {
-  content: "\f06e"; /* Font Awesome eye icon */
-  font-family: "Font Awesome 6 Free";
-  font-weight: 900;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  font-size: 2.8rem;
-  color: #4fc3f7;
-  opacity: 0;
-  transition: all 0.5s ease;
-  z-index: 2;
-  text-shadow: 0 0 15px rgba(79, 195, 247, 0.6);
-}
-
-.template-card:hover .template-image-wrapper::before,
-.template-card:hover .template-image-wrapper::after {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
+.template-card:hover img {
+  transform: scale(1.08) rotate(-1deg); /* Slight rotation + zoom "wow" effect */
+  opacity: 0.9;
+  filter: brightness(1);
 }
 
 .template-card h3 {
   font-size: clamp(1.2rem, 3vw, 1.4rem);
-  margin: 15px 0 10px;
+  margin-bottom: 10px;
   color: #ffffff;
   font-weight: 600;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
 
 .template-card p {
   font-size: clamp(0.85rem, 2.5vw, 0.95rem);
   color: #cccccc;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  text-align: center; /* Override the gallery paragraph text-align */
 }
 
+/* Choose Template Button Styling (More prominent) */
 .template-card .btn {
   display: inline-block;
-  padding: 12px 24px;
+  padding: 14px 30px;
   background-color: #4fc3f7;
   color: #000;
-  border-radius: 6px;
+  border-radius: 8px; /* Slightly larger border-radius */
   font-weight: bold;
   text-decoration: none;
-  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(79, 195, 247, 0.3);
+  transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 
 .template-card .btn:hover {
   background-color: #03a9f4;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(3, 169, 244, 0.3);
+  transform: translateY(-3px); /* Match card lift */
+  box-shadow: 0 6px 15px rgba(3, 169, 244, 0.5);
 }
 
-/* View More Button – same style as your original buttons */
-.view-more {
-  display: block;
-  margin: 50px auto;
-  padding: 14px 32px;
-  background-color: #4fc3f71a;
-  color: #4fc3f7;
-  border: 1px solid #4fc3f7;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.view-more:hover {
-  background-color: #4fc3f7;
-  color: #000;
-  transform: translateY(-2px);
-}
-
-/* Animations */
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Original Mobile Responsiveness – unchanged */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
-  .template-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
-  .template-card { padding: 15px; }
-  .template-image-wrapper img { max-height: 150px; }
-  #search-input { max-width: 90%; }
-  .category-buttons button, #more-categories button { padding: 10px 20px; font-size: 0.9rem; }
+  .templates-gallery {
+    padding: 35px 10px;
+  }
+
+  .template-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .template-card {
+    padding: 15px;
+  }
+
+  .template-card img {
+    max-height: 150px;
+  }
+
+  .template-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .template-card p {
+    font-size: 0.9rem;
+  }
+
+  #search-input {
+    max-width: 90%;
+  }
+
+  .category-buttons button, #more-categories button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+
+  #more-categories {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 480px) {
-  .template-grid { grid-template-columns: 1fr; }
-  h1 { font-size: 1.8rem; }
+  .template-grid {
+    grid-template-columns: 1fr;
   }
+
+  .template-card {
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+
+  .category-buttons, #more-categories {
+    gap: 8px;
+  }
+                   }
