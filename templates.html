@@ -1,27 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>All Templates - Neodynix</title>
-  <meta name="description" content="Explore our stunning collection of responsive website templates. Click any image to see a live preview!" />
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="styles/main.css" />
-  <link rel="stylesheet" href="styles/template.css" />
-
-  <!-- Font Awesome for icons (play icon & search) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- Favicon (optional - add your own) -->
-  <!-- <link rel="icon" href="favicon.ico" type="image/x-icon"> -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/template.css">
 </head>
 <body>
-
   <header class="top-header">
     <span class="logo">Neodynix Technologies</span>
-    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">Menu</button>
+    <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu">☰</button>
     <nav id="nav-menu">
       <a href="index.html">Home</a>
       <a href="templates.html">Templates</a>
@@ -32,33 +21,22 @@
 
   <main>
     <section class="templates-gallery">
-      <h1>Explore Our Templates</h1>
-      <p>
-        Click or tap on any <strong>template image</strong> to see a <strong>live preview</strong> • Choose your favorite below!
-      </p>
-
-      <!-- Search Bar -->
+      <h1>Explore Our Templates ✨</h1>
+      <p>Click or tap on a template image for a **Live Preview**, or select to get started.</p>
+      
       <div class="search-bar">
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Search templates by name..."
-          oninput="filterTemplates()"
-          aria-label="Search Templates"
-        />
-        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search-input" placeholder="Search Templates..." oninput="filterTemplates()" aria-label="Search Templates">
       </div>
-
-      <!-- Category Filters -->
+      
       <div class="category-buttons">
         <button class="active">All</button>
         <button>Business</button>
         <button>Portfolio</button>
         <button>Education</button>
         <button>E-commerce</button>
-        <button id="more-button" onclick="toggleMoreCategories()">More Down Arrow</button>
+        <button id="more-button" onclick="toggleMoreCategories()">More</button>
       </div>
-
+      
       <div id="more-categories">
         <button>Charity</button>
         <button>Blog</button>
@@ -68,11 +46,9 @@
         <button>Non-profit</button>
         <button>Other</button>
       </div>
-
-      <!-- Dynamic Template Grid -->
+      
       <div class="template-grid" id="template-container">
-        <!-- Templates loaded here via JavaScript -->
-      </div>
+        </div>
     </section>
   </main>
 
@@ -80,8 +56,7 @@
     <p>© 2025 Neodynix Technologies. All rights reserved.</p>
   </footer>
 
-  <!-- Scripts -->
   <script type="module" src="scripts/main.js"></script>
   <script type="module" src="scripts/template.js"></script>
 </body>
-          </html>
+        </html>
