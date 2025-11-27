@@ -99,10 +99,10 @@ nav a:hover {
 /* Mobile navigation menu */
 @media (max-width: 768px) {
   nav {
-    display: flex; /* Changed from none to flex to enable fixed positioning */
-    position: fixed; /* FIX: Use fixed position to prevent layout shift */
+    display: none;
+    position: fixed; /* KEY FIX: Use fixed position to overlay content */
     top: 0;
-    right: -250px; /* Hide off-screen by its own width */
+    right: -100%;
     width: 250px;
     height: 100vh;
     flex-direction: column;
@@ -111,11 +111,13 @@ nav a:hover {
     border-left: 2px solid #4fc3f7;
     box-shadow: -4px 0 12px rgba(0, 0, 0, 0.5);
     transition: right 0.3s ease-in-out;
-    z-index: 1001; /* Higher than header */
+    z-index: 1010; /* Higher than the header to ensure it's on top */
   }
 
   nav.show {
-    right: 0; /* Slide in */
+    display: flex;
+    right: 0;
+    /* Removed redundant/conflicting position: absolute here */
   }
 
   nav a {
