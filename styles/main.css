@@ -99,8 +99,8 @@ nav a:hover {
 /* Mobile navigation menu */
 @media (max-width: 768px) {
   nav {
-    display: flex; /* Always display but keep off-screen */
-    position: fixed; /* FIX: Use fixed to prevent document reflow */
+    display: flex; /* Changed from none to flex to enable fixed positioning */
+    position: fixed; /* FIX: Use fixed position to prevent layout shift */
     top: 0;
     right: -250px; /* Hide off-screen by its own width */
     width: 250px;
@@ -111,11 +111,11 @@ nav a:hover {
     border-left: 2px solid #4fc3f7;
     box-shadow: -4px 0 12px rgba(0, 0, 0, 0.5);
     transition: right 0.3s ease-in-out;
+    z-index: 1001; /* Higher than header */
   }
 
   nav.show {
     right: 0; /* Slide in */
-    /* Removed: position: absolute; */
   }
 
   nav a {
