@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (hamburger && navMenu) {
     hamburger.addEventListener('click', () => {
+      // We only toggle the 'show' class, CSS handles position and visibility
       navMenu.classList.add('show');
       hamburger.style.display = 'none';
       isMenuOpen = true;
