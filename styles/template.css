@@ -107,6 +107,10 @@ p {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   overflow: hidden;
+  
+  /* FIX: Enable Flexbox for column layout */
+  display: flex;
+  flex-direction: column;
 }
 
 .template-card:hover {
@@ -172,12 +176,16 @@ p {
 }
 
 .template-card p {
+  /* Allow description to take up necessary space */
+  flex-grow: 1; /* Allows the paragraph element to expand */
   font-size: clamp(0.85rem, 2.5vw, 0.95rem);
   color: #cccccc;
   margin-bottom: 15px;
 }
 
 .template-card .btn {
+  /* FIX: Use auto margin to push the button to the bottom */
+  margin-top: auto; 
   display: inline-block;
   padding: 12px 24px;
   background-color: #4fc3f7;
