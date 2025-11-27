@@ -99,8 +99,8 @@ nav a:hover {
 /* Mobile navigation menu */
 @media (max-width: 768px) {
   nav {
-    /* KEY FIX: Ensure position: fixed is set immediately for mobile display */
-    position: fixed;
+    display: none;
+    position: fixed; /* KEY FIX: Use fixed position to overlay content */
     top: 0;
     right: -100%;
     width: 250px;
@@ -112,20 +112,13 @@ nav a:hover {
     box-shadow: -4px 0 12px rgba(0, 0, 0, 0.5);
     transition: right 0.3s ease-in-out;
     z-index: 1010; /* Higher than the header to ensure it's on top */
-    /* Use 'visibility' to prevent content shifting when display is toggled */
-    visibility: hidden;
   }
 
   nav.show {
+    display: flex;
     right: 0;
-    visibility: visible; /* Show when 'show' class is applied */
+    /* Removed redundant/conflicting position: absolute here */
   }
-  
-  /* IMPORTANT: We change the display method in JS now to avoid document flow issues */
-  nav:not(.show) {
-    display: flex; /* Keep display as flex even when hidden, just move it off-screen */
-  }
-  /* End of KEY FIX */
 
   nav a {
     padding: 15px;
