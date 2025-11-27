@@ -99,10 +99,10 @@ nav a:hover {
 /* Mobile navigation menu */
 @media (max-width: 768px) {
   nav {
-    display: none;
-    position: fixed;
+    display: flex; /* Always display but keep off-screen */
+    position: fixed; /* FIX: Use fixed to prevent document reflow */
     top: 0;
-    right: -100%;
+    right: -250px; /* Hide off-screen by its own width */
     width: 250px;
     height: 100vh;
     flex-direction: column;
@@ -114,9 +114,8 @@ nav a:hover {
   }
 
   nav.show {
-    display: flex;
-    right: 0;
-    position: absolute;
+    right: 0; /* Slide in */
+    /* Removed: position: absolute; */
   }
 
   nav a {
@@ -203,4 +202,4 @@ footer p {
   footer {
     padding: 30px 15px;
   }
-    }
+  }
