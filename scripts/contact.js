@@ -407,7 +407,7 @@ sendChat.addEventListener('click', async () => {
         // Show persistent typing indicator with more detailed message
         typingDiv = document.createElement('div');
         typingDiv.classList.add('msg', 'auto-msg', 'typing-indicator');
-        typingDiv.innerHTML = `<span class="msg-content">AI is searching the knowledge base for the best answer<span class="dots"></span></span>`;
+        typingDiv.innerHTML = `<span class="msg-content">AI Assistant typing <span class="dots"></span></span>`;
         chatMessages.appendChild(typingDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
