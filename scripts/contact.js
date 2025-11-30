@@ -301,45 +301,45 @@ async function subscribeToMessages() {
       }, payload => {
         const msg = payload.new;
         if (msg.user_id === user.id && msg.id && !displayedMessageIds.has(msg.id)) {
-          // If human/admin reply, update flag and show notification, but no AI response
+          // If human/admin reply, update flag and show notification
           if (!msg.is_auto && msg.sender === 'support') {
             isHumanActive = true;
-            // Remove any existing AI typing
-            const aiTyping = chatMessages.querySelector('.typing-indicator');
-            if (aiTyping) aiTyping.remove();
-
-            const humanTypingDiv = document.createElement('div');
-            humanTypingDiv.classList.add('msg', 'support-msg', 'typing-indicator');
-            humanTypingDiv.innerHTML = `<span class="msg-content">Human agent is typing...</span>`;
-            chatMessages.appendChild(humanTypingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            // Auto-remove after 2s (reduced for faster UX)
-            setTimeout(() => {
-              if (humanTypingDiv.parentNode) humanTypingDiv.remove();
-            }, 2000);
+            // Remove any existing typing indicators
+            const allTyping = chatMessages.querySelectorAll('.typing-indicator');
+            allTyping.forEach(typing => typing.remove());
 
             // Show browser notification for human messages
             showNotification('New Message from Support', msg.content);
-          }
-
-          // Add the actual message (will replace/remove typing if present)
-          setTimeout(() => {  // Reduced delay for faster display
+            
+            // Immediately display the message without delay
             displayedMessageIds.add(msg.id);
             const content = msg.file_url
               ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
               : msg.content;
-            addLocalMessage(content, msg.is_auto ? 'auto' : msg.sender, msg.id);
-
-            // Remove typing if still there
-            const typingIndicator = chatMessages.querySelector('.typing-indicator');
-            if (typingIndicator) typingIndicator.remove();
-          }, 100);  // Reduced to 0.1s delay for quicker response
+            addLocalMessage(content, 'support', msg.id);
+          } 
+          // If it's an AI auto-reply
+          else if (msg.is_auto && msg.sender === 'support') {
+            // Remove AI typing indicator
+            const aiTyping = chatMessages.querySelectorAll('.typing-indicator');
+            aiTyping.forEach(typing => typing.remove());
+            
+            // Display AI message immediately
+            displayedMessageIds.add(msg.id);
+            const content = msg.file_url
+              ? `${msg.content} <a href="${msg.file_url}" target="_blank">View File</a>`
+              : msg.content;
+            addLocalMessage(content, 'auto', msg.id);
+          }
         }
       })
       .subscribe(status => {
         if (status === 'SUBSCRIBED') {
           console.log('Real-time subscription active for messages');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('Real-time subscription error - retrying...');
+          // Retry subscription after 5 seconds
+          setTimeout(() => subscribeToMessages(), 5000);
         }
       });
   } catch (err) {
@@ -389,6 +389,8 @@ sendChat.addEventListener('click', async () => {
     addLocalMessage(content);
     chatInput.value = '';
     
+    let typingDiv = null;
+    
     try {
       // Save user message
       const { data: userMsgData, error } = await supabase.from('messages').insert({
@@ -402,18 +404,20 @@ sendChat.addEventListener('click', async () => {
 
       // Only trigger AI if no human has responded in this session
       if (!isHumanActive) {
-        // Show typing indicator
-        const typingDiv = document.createElement('div');
+        // Show persistent typing indicator with more detailed message
+        typingDiv = document.createElement('div');
         typingDiv.classList.add('msg', 'auto-msg', 'typing-indicator');
-        typingDiv.innerHTML = `<span class="msg-content">AI is typing...</span>`;
+        typingDiv.innerHTML = `<span class="msg-content">AI is searching the knowledge base for the best answer<span class="dots"></span></span>`;
         chatMessages.appendChild(typingDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        // Get AI response
+        // Get AI response (may take time)
         const aiResponse = await getAIResponse(text, selectedTopic);
         
-        // Remove typing indicator
-        typingDiv.remove();
+        // Only remove typing indicator after successful response
+        if (typingDiv && typingDiv.parentNode) {
+          typingDiv.remove();
+        }
 
         // Save AI response
         const { data: aiMsgData, error: aiError } = await supabase.from('messages').insert({
@@ -442,9 +446,13 @@ sendChat.addEventListener('click', async () => {
 
     } catch (err) {
       console.error('Error sending message:', err);
-      // Remove typing indicator if exists
-      const typingIndicator = chatMessages.querySelector('.typing-indicator');
-      if (typingIndicator) typingIndicator.remove();
+      // Remove typing indicator on error
+      if (typingDiv && typingDiv.parentNode) {
+        typingDiv.remove();
+      }
+      // Show error message to user
+      const errorMsg = "Sorry, I'm having trouble responding right now. Please try again or wait for a human agent.";
+      addLocalMessage(errorMsg, 'auto');
     } finally {
       sendChat.disabled = false;
     }
