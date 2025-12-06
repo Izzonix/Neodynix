@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Test Page</title>
+</head>
+<body style="font-family: Arial; padding: 20px;">
+  <h2>🔍 Supabase Test Page</h2>
+  <p>Use this page to test your Supabase project connection, authentication, and database actions.</p>
+
+  <hr>
+
+  <h3>1️⃣ Test Connection</h3>
+  <button onclick="testConnection()">Test Connection</button>
+  <pre id="connectionResult"></pre>
+
+  <hr>
+
+  <h3>2️⃣ Authentication</h3>
+
+  <b>Email:</b><br>
+  <input type="email" id="email" placeholder="Enter email"><br><br>
+
+  <b>Password:</b><br>
+  <input type="password" id="password" placeholder="Enter password"><br><br>
+
+  <button onclick="signUp()">Sign Up</button>
+  <button onclick="login()">Login</button>
+  <pre id="authResult"></pre>
+
+  <hr>
+
+  <h3>3️⃣ Insert Test Message</h3>
+  <input type="text" id="messageInput" placeholder="Enter message">
+  <button onclick="insertMessage()">Insert</button>
+  <pre id="insertResult"></pre>
+
+  <hr>
+
+  <h3>4️⃣ Fetch All Messages</h3>
+  <button onclick="fetchMessages()">Fetch Messages</button>
+  <pre id="messagesResult"></pre>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabaseUrl = "https://spnxywyrjbwbwntblcjl.supabase.co";
+    const supabaseKey = "YOUR_NEW_ANON_KEY_HERE"; // regenerate this key!
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // 1️⃣ Test Connection
+    async function testConnection() {
+      try {
+        const { data, error } = await supabase.from("messages").select("*").limit(1);
+        document.getElementById("connectionResult").textContent =
+          error ? "❌ Error:\n" + error.message : "✅ Connected:\n" + JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("connectionResult").textContent = "❌ Exception:\n" + err;
+      }
+    }
+
+    // 2️⃣ Authentication
+    async function signUp() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      document.getElementById("authResult").textContent =
+        error ? "❌ Signup Error:\n" + error.message : "✅ Signup Success:\n" + JSON.stringify(data, null, 2);
+    }
+
+    async function login() {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      document.getElementById("authResult").textContent =
+        error ? "❌ Login Error:\n" + error.message : "✅ Login Success:\n" + JSON.stringify(data, null, 2);
+    }
+
+    // 3️⃣ Insert Test Message
+    async function insertMessage() {
+      const msg = document.getElementById("messageInput").value;
+
+      const { data, error } = await supabase.from("messages").insert([{ text: msg }]);
+      document.getElementById("insertResult").textContent =
+        error ? "❌ Insert Error:\n" + error.message : "✅ Inserted:\n" + JSON.stringify(data, null, 2);
+    }
+
+    // 4️⃣ Fetch Messages
+    async function fetchMessages() {
+      const { data, error } = await supabase.from("messages").select("*");
+      document.getElementById("messagesResult").textContent =
+        error ? "❌ Fetch Error:\n" + error.message : "✅ Messages:\n" + JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+  </html>
